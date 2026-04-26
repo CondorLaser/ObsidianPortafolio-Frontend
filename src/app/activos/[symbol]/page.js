@@ -2,9 +2,13 @@ import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
 import { SimpleChart } from "@/src/components/simple-chart";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function AssetDetailPage({ params }) {
   const { symbol } = await params;
+  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+  
+  if (!isAuthenticated) return redirectToSignIn()
 
   return (
     <DashboardShell

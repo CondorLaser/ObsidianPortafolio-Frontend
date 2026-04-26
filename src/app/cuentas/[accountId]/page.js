@@ -3,9 +3,13 @@ import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
 import { SimpleChart } from "@/src/components/simple-chart";
 import { positions } from "@/src/lib/mock-data";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function AccountDetailPage({ params }) {
   const { accountId } = await params;
+  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+
+  if (!isAuthenticated) return redirectToSignIn()
 
   return (
     <DashboardShell

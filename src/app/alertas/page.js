@@ -2,8 +2,13 @@ import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
 import { alerts } from "@/src/lib/mock-data";
+import { auth } from "@clerk/nextjs/server";
 
-export default function AlertsPage() {
+export default async function AlertsPage() {
+  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+
+  if (!isAuthenticated) return redirectToSignIn()
+
   return (
     <DashboardShell
       title="Alertas"

@@ -1,11 +1,19 @@
+'use client'
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 
+
+
 export default function HomePage() {
-  return (
-    <main className="min-h-screen px-4 py-10 lg:px-6">
+  const { isSignedIn, user, isLoaded } =  useUser()
+  console.log(isSignedIn, user, isLoaded)
+  console.log("Test de useUser()")
+
+  if (isSignedIn) return (
+    <main className="min-h-screen px-4 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section>
-          <p className="text-sm uppercase tracking-[0.35em] text-accent">Orion Portafolio</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
             Visualiza tus inversiones de forma clara, simple y accionable.
           </h1>
@@ -13,17 +21,18 @@ export default function HomePage() {
             Esta base en Next.js deja listo el frontend para construir dashboard, activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
-
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/portafolio"
-              className="rounded-2xl bg-accent px-5 py-3 font-semibold text-white transition hover:opacity-90"
+              // bg-teal-500 hover:bg-teal-600/90 text-white rounded-lg font-bold text-sm h-10 px-4 py-3 transition-colors duration-200
+              // rounded-2xl bg-accent px-5 py-3 font-semibold text-white transition hover:opacity-90
+              className="bg-panel-soft hover:bg-teal-600/50 text-white rounded-xl font-bold text-sm h-11 px-4 py-3 transition-colors duration-200"
             >
               Ir al portafolio
             </Link>
             <Link
               href="/perfil"
-              className="rounded-2xl border border-border-soft px-5 py-3 font-semibold text-white transition hover:bg-panel-soft"
+              className="rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft"
             >
               Ver perfil
             </Link>
@@ -50,5 +59,21 @@ export default function HomePage() {
         </section>
       </div>
     </main>
-  );
+  ); else return (
+    <main className="min-h-screen px-4 lg:px-6">
+      <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+        <section>
+          <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
+          <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
+            Visualiza tus inversiones de forma clara, simple y accionable.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg text-text-muted">
+            Esta base en Next.js deja listo el frontend para construir dashboard, activos,
+            cuentas, alertas y recomendaciones con una estructura facil de seguir.
+          </p>
+          
+        </section>
+      </div>
+    </main>
+  )  
 }

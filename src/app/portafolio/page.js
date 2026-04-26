@@ -3,8 +3,13 @@ import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
 import { SimpleChart } from "@/src/components/simple-chart";
 import { accountDistribution, portfolioSummary, positions } from "@/src/lib/mock-data";
+import { auth } from "@clerk/nextjs/server";
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const { isAuthenticated, redirectToSignIn, userId} = await auth()
+
+  if (!isAuthenticated) return redirectToSignIn()
+
   return (
     <DashboardShell
       title="Dashboard del Portafolio"
