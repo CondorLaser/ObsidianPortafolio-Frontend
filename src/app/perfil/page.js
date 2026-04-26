@@ -1,7 +1,12 @@
-import { DashboardShell } from "@/components/dashboard-shell";
-import { SectionCard } from "@/components/section-card";
+import { DashboardShell } from "@/src/components/dashboard-shell";
+import { SectionCard } from "@/src/components/section-card";
+import { auth } from "@clerk/nextjs/server";
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+
+  if (!isAuthenticated) return redirectToSignIn()
+
   return (
     <DashboardShell
       title="Perfil de usuario"
