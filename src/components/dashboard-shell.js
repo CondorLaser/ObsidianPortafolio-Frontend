@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/src/components/sidebar";
 
 export function DashboardShell({ title, description, children, actions }) {
   return (

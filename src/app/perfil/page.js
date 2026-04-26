@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/components/dashboard-shell";
-import { SectionCard } from "@/components/section-card";
+import { DashboardShell } from "@/src/components/dashboard-shell";
+import { SectionCard } from "@/src/components/section-card";
 
 export default function ProfilePage() {
   return (

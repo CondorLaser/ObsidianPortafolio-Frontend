@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#183250_0%,#08111f_55%)] px-4 py-10 lg:px-6">
+    <main className="min-h-screen px-4 py-10 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section>
           <p className="text-sm uppercase tracking-[0.35em] text-accent">Orion Portafolio</p>

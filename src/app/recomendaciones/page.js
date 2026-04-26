@@ -1,7 +1,7 @@
-import { DashboardShell } from "@/components/dashboard-shell";
-import { MetricCard } from "@/components/metric-card";
-import { SectionCard } from "@/components/section-card";
-import { recommendations } from "@/lib/mock-data";
+import { DashboardShell } from "@/src/components/dashboard-shell";
+import { MetricCard } from "@/src/components/metric-card";
+import { SectionCard } from "@/src/components/section-card";
+import { recommendations } from "@/src/lib/mock-data";
 
 export default function RecommendationsPage() {
   return (
