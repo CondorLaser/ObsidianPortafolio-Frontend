@@ -31,12 +31,12 @@ export default function RootLayout({ children }) {
               <div className="flex items-center gap-3 font-bold" >
                 <Show when="signed-out">
                   <SignInButton>
-                    <button className="bg-teal-500 hover:bg-teal-600/90 text-white rounded-lg font-bold text-sm h-10 px-4 transition-colors duration-200">
+                    <button className="bg-accent hover:bg-teal-600/90 text-white rounded-lg font-bold text-sm h-10 px-4 transition-colors duration-200">
                       Iniciar Sesión
                     </button>  
                   </SignInButton>  
                   <SignUpButton>
-                    <button className="bg-transparent hover:bg-stone-100/10 text-stone-300 border border-stone-300 rounded-lg font-semibold text-sm h-10 px-4 transition-colors duration-200">
+                    <button className="bg-transparent hover:bg-stone-100/20 text-stone-300 border border-stone-300 rounded-lg font-semibold text-sm h-10 px-4 transition-colors duration-200">
                       Registrarse
                     </button>
                   </SignUpButton>
