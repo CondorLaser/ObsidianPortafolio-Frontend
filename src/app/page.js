@@ -1,7 +1,7 @@
 'use client'
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-
+import Image from "next/image";
 
 
 export default function HomePage() {
@@ -73,6 +73,15 @@ export default function HomePage() {
           </p>
           
         </section>
+        <div>
+          <Image 
+            src="/assets/grafico_stock_1.jpg" 
+            height={500} 
+            width={500}
+            alt="Orion logo"
+            className="w-auto h-auto rounded-xl opacity-85"
+            />
+        </div>
       </div>
     </main>
   )  
