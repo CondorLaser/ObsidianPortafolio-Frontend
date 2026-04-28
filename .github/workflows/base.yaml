@@ -1,0 +1,26 @@
+name: CI Pipeline Base
+run-name: Push by @${{ github.actor }}
+on:
+    [push, pull_request]
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Hacer checkout del código
+              uses: actions/checkout@v4
+            
+            - name: Setear Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: "20"
+                cache: "npm"
+            
+            - name: Instalar dependencias
+              run: npm ci
+            
+            - name: Hacer build del proyecto
+              run: npm run build
+        
+
+
