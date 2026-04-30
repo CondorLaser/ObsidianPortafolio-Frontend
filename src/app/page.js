@@ -6,8 +6,6 @@ import Image from "next/image";
 
 export default function HomePage() {
   const { isSignedIn, user, isLoaded } =  useUser()
-  console.log(isSignedIn, user, isLoaded)
-  console.log("Test de useUser()")
 
   if (isSignedIn) return (
     <main className="min-h-screen px-4 lg:px-6">

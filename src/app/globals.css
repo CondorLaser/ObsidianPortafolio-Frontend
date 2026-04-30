@@ -12,6 +12,8 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --red-attention: rgba(231, 36, 36, 0.439);
+  --green-attention: rgba(16,185,129,0.14);
 }
 
 @theme inline {
@@ -26,6 +28,8 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-red-attention: var(--red-attention);
+  --color-green-attention: var(--green-attention);
 }
 
 * {

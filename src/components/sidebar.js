@@ -4,7 +4,7 @@ const navigation = [
   { href: "/portafolio", label: "Portafolio" },
   { href: "/activos/SPY", label: "Activos" },
   { href: "/cuentas/fintual-usd", label: "Cuentas" },
-  { href: "/perfil", label: "Perfil" },
+  { href: "/perfil", label: "Perfil / Mis datos" },
   { href: "/alertas", label: "Alertas" },
   { href: "/recomendaciones", label: "Recomendaciones" }
 ];
