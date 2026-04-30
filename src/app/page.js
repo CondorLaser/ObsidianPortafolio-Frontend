@@ -13,7 +13,7 @@ export default function HomePage() {
     const token = await getToken();
     console.log("TOKEN:", token);
     
-    const res = await fetch("http://localhost:8000/protected", {
+    const res = await fetch("https://obsidianportafolio-backend.onrender.com/protected", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
