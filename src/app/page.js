@@ -3,25 +3,7 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 
-import { useAuth } from "@clerk/nextjs";
-
-
 export default function HomePage() {
-  const { getToken } = useAuth();
-
-  const testBackend = async () => {
-    const token = await getToken();
-    console.log("TOKEN:", token);
-    
-    const res = await fetch("https://obsidianportafolio-backend.onrender.com/protected", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-    console.log("BACKEND:", data);
-  };
 
   const { isSignedIn, user, isLoaded } =  useUser()
 
@@ -31,10 +13,10 @@ export default function HomePage() {
         <section>
           <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
-            Visualiza tus inversiones de forma clara, simple y accionable.
+            Visualiza tus inversiones de forma clara, simple e interactiva.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-text-muted">
-            Esta base en Next.js deja listo el frontend para construir dashboard, activos,
+            Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
@@ -52,13 +34,6 @@ export default function HomePage() {
             >
               Ver perfil
             </Link>
-
-            <button
-              onClick={testBackend}
-              className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold text-sm h-11 px-4"
-            >
-              Test Backend
-            </button>
 
           </div>
         </section>
@@ -89,10 +64,10 @@ export default function HomePage() {
         <section>
           <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
-            Visualiza tus inversiones de forma clara, simple y accionable.
+            Visualiza tus inversiones de forma clara, simple e interactiva.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-text-muted">
-            Esta base en Next.js deja listo el frontend para construir dashboard, activos,
+            Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
           

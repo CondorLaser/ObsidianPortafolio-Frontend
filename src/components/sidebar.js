@@ -40,9 +40,6 @@ export function Sidebar() {
         <p className="mt-2 text-sm text-text-muted">
           Ver pestaña Perfil/Mis Datos
         </p>
-        <p className="mt-2 text-sm text-text-muted">
-          Esta base esta lista para recibir datos mock y luego conectarse al backend.
-        </p>
       </div>
     </aside>
   );

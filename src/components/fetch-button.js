@@ -29,7 +29,7 @@ export function FetchButton() {
         onClick={handleFetch}
         className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold text-sm h-11 px-4"
       >
-        {loading ? "Cargando..." : "Hacer request"}
+        {loading ? <p className="fonts-bold">Cargando...</p> : <p className="font-bold">Hacer request</p>}
       </button>
 
       {error && (
