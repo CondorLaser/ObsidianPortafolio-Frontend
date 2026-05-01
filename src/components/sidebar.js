@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const navigation = [
+  { href: "/hello_world", label: "Conexión Hello World" },
   { href: "/portafolio", label: "Portafolio" },
   { href: "/activos/SPY", label: "Activos" },
   { href: "/cuentas/fintual-usd", label: "Cuentas" },
@@ -35,7 +36,10 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-8 rounded-2xl border border-border-soft bg-panel-soft p-4">
-        <p className="text-sm font-semibold text-white">Carga manual habilitada</p>
+        <p className="text-sm font-semibold text-white">Solo se admite Carga manual de los datos</p>
+        <p className="mt-2 text-sm text-text-muted">
+          Ver pestaña Perfil/Mis Datos
+        </p>
         <p className="mt-2 text-sm text-text-muted">
           Esta base esta lista para recibir datos mock y luego conectarse al backend.
         </p>
