@@ -3,8 +3,26 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 
+import { useAuth } from "@clerk/nextjs";
+
 
 export default function HomePage() {
+  const { getToken } = useAuth();
+
+  const testBackend = async () => {
+    const token = await getToken();
+    console.log("TOKEN:", token);
+    
+    const res = await fetch("https://obsidianportafolio-backend.onrender.com/protected", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("BACKEND:", data);
+  };
+
   const { isSignedIn, user, isLoaded } =  useUser()
 
   if (isSignedIn) return (
@@ -34,6 +52,14 @@ export default function HomePage() {
             >
               Ver perfil
             </Link>
+
+            <button
+              onClick={testBackend}
+              className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold text-sm h-11 px-4"
+            >
+              Test Backend
+            </button>
+
           </div>
         </section>
 
