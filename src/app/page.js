@@ -3,11 +3,9 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 
-
 export default function HomePage() {
+
   const { isSignedIn, user, isLoaded } =  useUser()
-  console.log(isSignedIn, user, isLoaded)
-  console.log("Test de useUser()")
 
   if (isSignedIn) return (
     <main className="min-h-screen px-4 lg:px-6">
@@ -15,10 +13,10 @@ export default function HomePage() {
         <section>
           <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
-            Visualiza tus inversiones de forma clara, simple y accionable.
+            Visualiza tus inversiones de forma clara, simple e interactiva.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-text-muted">
-            Esta base en Next.js deja listo el frontend para construir dashboard, activos,
+            Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
@@ -36,6 +34,7 @@ export default function HomePage() {
             >
               Ver perfil
             </Link>
+
           </div>
         </section>
 
@@ -65,10 +64,10 @@ export default function HomePage() {
         <section>
           <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
-            Visualiza tus inversiones de forma clara, simple y accionable.
+            Visualiza tus inversiones de forma clara, simple e interactiva.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-text-muted">
-            Esta base en Next.js deja listo el frontend para construir dashboard, activos,
+            Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
           
