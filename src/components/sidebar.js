@@ -3,7 +3,7 @@ import Link from "next/link";
 const navigation = [
   { href: "/hello_world", label: "Conexión Hello World" },
   { href: "/portafolio", label: "Portafolio" },
-  { href: "/activos/SPY", label: "Activos" },
+  /* { href: "/activos/SPY", label: "Activos" }, */
   { href: "/cuentas/fintual-usd", label: "Cuentas" },
   { href: "/perfil", label: "Perfil / Mis datos" },
   { href: "/alertas", label: "Alertas" },

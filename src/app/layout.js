@@ -9,14 +9,18 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // Ideas de variaciones para el fondo:
   // [radial-gradient(circle_at_top,#183250_0%,#08111f_55%)]
+  // [radial-gradient(circle_at_top,#0b3d46_0%,#0a2e38_40%,#063a2b_70%,#00a83a_100%)]
+  // [#0a2e38]
+
   // Guardo esto aquí como referencia del fondo para después
   return (
     <html lang="es">
       <body className="bg-app text-white antialiased">
         <ClerkProvider>
-          <div className="min-h-screen bg-[radial-gradient(circle_at_top,#0b3d46_0%,#0a2e38_40%,#063a2b_70%,#00a83a_100%)] ">
-            <header className="bg-gray-800/40  flex justify-between items-center pl-3  pr-6 h-22 border-b border-gray-700/50">
+          <div className="min-h-screen bg-[radial-gradient(circle_at_top,#0b3d46_0%,#0a2e38_40%,#063a2b_70%,#00a83a_100%)]">
+            <header className="bg-gray-800/40 flex justify-between items-center pl-3 pr-6 h-22 border-gray-700/50">
               <div className="bg-stone-100/85 w-40 h-22 absolute left-0"></div>
               <div className="flex relative ">
                 <Link href="/">

@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 
-export function FileUpload({ onFileSelect, accept = ".pdf" }) {
+export function FileUploadSelector({ onFileSelect, accept = ".pdf" }) {
   const inputRef = useRef(null);
 
   const handleClick = () => {

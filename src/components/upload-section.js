@@ -1,5 +1,5 @@
 "use client"
-import { FileUpload } from "./file-upload"
+import { FileUploadSelector } from "./file-upload"
 
 export function UploadSection() {
   const handleFile = (file) => {
@@ -7,5 +7,5 @@ export function UploadSection() {
     // agregar lógica del manejo de archivos acá
   };
 
-  return <FileUpload accept=".pdf" onFileSelect={handleFile} />;
+  return <FileUploadSelector accept=".pdf" onFileSelect={handleFile} />;
 }

@@ -24,13 +24,13 @@ export default function HomePage() {
               href="/portafolio"
               // bg-teal-500 hover:bg-teal-600/90 text-white rounded-lg font-bold text-sm h-10 px-4 py-3 transition-colors duration-200
               // rounded-2xl bg-accent px-5 py-3 font-semibold text-white transition hover:opacity-90
-              className="bg-panel-soft hover:bg-teal-600/50 text-white rounded-xl font-bold text-sm h-11 px-4 py-3 transition-colors duration-200"
+              className="bg-panel-soft hover:bg-teal-600/50 text-white rounded-xl font-bold text-sm h-11 px-4 py-3 transition-colors duration-200 transition hover:scale-[1.02]"
             >
               Ir al portafolio
             </Link>
             <Link
               href="/perfil"
-              className="rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft"
+              className="rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft transition hover:scale-[1.02]"
             >
               Ver perfil
             </Link>
