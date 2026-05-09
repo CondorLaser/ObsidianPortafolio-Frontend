@@ -11,7 +11,7 @@ export function FetchButton() {
     setError(null);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_URL_GATEWAY);
+      const res = await fetch(process.env.NEXT_PUBLIC_URL_BE);
       if (!res.ok) throw new Error("Error en la request");
 
       const json = await res.json();

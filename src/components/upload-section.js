@@ -2,10 +2,39 @@
 import { FileUploadSelector } from "./file-upload"
 
 export function UploadSection() {
-  const handleFile = (file) => {
-    //console.log("Archivo:", file);
-    // agregar lógica del manejo de archivos acá
-  };
+  const handleFile = async (file) => {
+    try {
+      console.log("File:", file)
+      // Crea FormData
+      const formData = new FormData()
+      formData.append("file", file)
 
-  return <FileUploadSelector accept=".pdf" onFileSelect={handleFile} />;
+      // Llama al backend
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_BE}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+
+      // Validar respuesta
+      if (!response.ok) {
+        throw new Error("Error al subir archivo")
+      }
+
+      const data = await response.json()
+
+      console.log("Archivo subido correctamente:", data)
+
+    } catch (error) {
+      console.error("Error subiendo archivo:", error)
+    }
+  }
+
+  return (
+    <FileUploadSelector 
+      accept=".pdf" 
+      onFileSelect={handleFile} />
+  )
 }
