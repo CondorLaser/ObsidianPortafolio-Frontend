@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { CollapsableShell } from "../collapsable-shell";
 
 export function YourPreferencesCard() {
   const [loading, setLoading] = useState(false);
-
+  const [loadingPreferences, setLoadingPreferences] = useState(true);
+  const [message, setMessage] = useState(null);
   const [preferences, setPreferences] = useState({
     pnlPercentageAccountDaily: 10,
     pnlPercentageAssetDaily: 8,
@@ -16,6 +17,55 @@ export function YourPreferencesCard() {
     assetWeightWeekly: 35,
     currencyExposureWeekly: 50,
   });
+
+  async function fetchPreferences() {
+    try {
+      setLoadingPreferences(true);
+      setMessage(null);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener las preferencias");
+      }
+
+      const data = await response.json();
+
+      setPreferences({
+        pnlPercentageAccountDaily:
+          data.pnlPercentageAccountDaily,
+        pnlPercentageAssetDaily:
+          data.pnlPercentageAssetDaily,
+        maxDrawdownPortfolioDaily:
+          data.maxDrawdownPortfolioDaily,
+        maxDrawdownAccountDaily:
+          data.maxDrawdownAccountDaily,
+        assetWeightWeekly:
+          data.assetWeightWeekly,
+        currencyExposureWeekly:
+          data.currencyExposureWeekly,
+      });
+      setMessage("Preferencias cargadas correctamente");
+    } catch (error) {
+      console.error(error);
+      setMessage("No se pudieron obtener las preferencias");
+    } finally {
+      setLoadingPreferences(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPreferences();
+  }, []);
+
 
   function handleChange(key, value) {
     setPreferences((prev) => ({
@@ -27,6 +77,7 @@ export function YourPreferencesCard() {
   async function savePreferences() {
     try {
       setLoading(true);
+      setMessage(null);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
@@ -40,13 +91,13 @@ export function YourPreferencesCard() {
       );
 
       if (!response.ok) {
-        throw new Error("Error saving preferences");
+        throw new Error("Error guardando preferencias");
       }
 
-      alert("Preferencias guardadas correctamente");
+      setMessage("Preferencias guardadas correctamente");
     } catch (error) {
       console.error(error);
-      alert("No se pudieron guardar las preferencias");
+      setMessage("No se pudieron guardar las preferencias");
     } finally {
       setLoading(false);
     }
@@ -157,23 +208,34 @@ export function YourPreferencesCard() {
           </div>
         ))}
 
-        {/* Save Button */}
-        <div className="flex justify-end pt-2 font-bold">
-          <button
-            onClick={savePreferences}
-            disabled={loading}
-            className="
-              rounded-2xl bg-accent px-5 py-3
-              font-bold text-black
-              transition hover:scale-[1.02]
-              disabled:cursor-not-allowed disabled:opacity-50
-            "
-          >
-            {loading
-              ? "Guardando..."
-              : "Guardar preferencias"}
-          </button>
-        </div>
+        {/* Save Button + Menssage */}
+        <div className="flex items-center justify-between mt-2">
+              {message ? (
+                <p className="text-sm text-text-muted">
+                  {message}
+                </p>
+              ) : (
+                <div />
+              )}
+
+              <div className="font-bold">
+                <button
+                  type="button"
+                  onClick={savePreferences}
+                  disabled={loading}
+                  className="
+                    rounded-2xl bg-accent px-5 py-3
+                    font-bold text-black
+                    transition hover:scale-[1.02]
+                    disabled:cursor-not-allowed disabled:opacity-50
+                  "
+                >
+                  {loading
+                    ? "Guardando..."
+                    : "Guardar preferencias"}
+                </button>
+              </div>
+            </div>
       </div>
     </CollapsableShell>
   );

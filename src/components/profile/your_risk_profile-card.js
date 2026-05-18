@@ -44,13 +44,42 @@ const RISK_OPTIONS = [
 ]
 
 export function YourRiskProfileCard() {
-  const [selectedRisk, setSelectedRisk] = useState(null)
+  const [selectedRisk, setSelectedRisk] = useState("moderate")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
 
   const fetchRiskProfile = async () => {
-    // TODO: Cuando Backend esté disponible
-    setSelectedRisk("moderate")
+    try {
+      setLoading(true)
+      setMessage(null)
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk-profile`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include"
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Error al cargar el perfil de riesgo")
+      }
+
+      const data = await response.json()
+
+      // Ejemplo esperado:
+      // { riskProfile: "moderate" }
+
+      setSelectedRisk(data.riskProfile)
+    } catch (error) {
+      console.error(error)
+      setMessage("No se pudo obtener el perfil de riesgo")
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
