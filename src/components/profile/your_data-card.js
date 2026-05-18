@@ -1,6 +1,6 @@
-import { CollapsableShell } from "./collapsable-shell"
-import { UploadSection } from "./upload-section"
-import { SectionCard } from "./section-card"
+import { CollapsableShell } from "../collapsable-shell"
+import { UploadSection } from "./file_upload/upload-section"
+import { SectionCard } from "../section-card"
 
 export async function YourDataCard({
     etfsLastUploadDate,
@@ -44,7 +44,7 @@ export async function YourDataCard({
             {/* Div de informaciones */}
             <div className="space-y-6 mb-6">
                 {/* Sección de Cómo Obtener los certificados */}
-                <section className="rounded-3xl border border-[#3b2a5a] bg-[linear-gradient(135deg,rgba(35,15,60,0.95),rgba(20,10,35,0.92))] p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
+                <section className="rounded-3xl border border-[#3b2a5a] bg-panel p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
                     <p className="text-xl font-bold">
                         ¿Dónde obtener mis Certificados?
                     </p>
@@ -129,7 +129,7 @@ export async function YourDataCard({
                 </section>
 
                 {/* Sección de Qué Certificados Seleccionar */}
-                <section className="rounded-3xl border border-[#3b2a5a] bg-[linear-gradient(135deg,rgba(35,15,60,0.95),rgba(20,10,35,0.92))] p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
+                <section className="rounded-3xl border border-[#3b2a5a] bg-panel p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
                     <p className="text-xl font-bold">
                         ¿Qué certificados elegir?
                     </p>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { CollapsableShell } from "./collapsable-shell";
+import { CollapsableShell } from "../collapsable-shell";
 
 export function YourPreferencesCard() {
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,6 @@ export function YourPreferencesCard() {
   async function savePreferences() {
     try {
       setLoading(true);
-      console.log(preferences)
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
@@ -114,7 +113,7 @@ export function YourPreferencesCard() {
   return (
     <CollapsableShell
       title="Preferencias de Alertas"
-      description="Define los umbrales que activarán alertas automáticas sobre cambios importantes en tu portafolio."
+      description="Define los umbrales que activarán alertas automáticas sobre cambios importantes en tu portafolio"
     >
       <div className="space-y-6">
         {fields.map((field) => (

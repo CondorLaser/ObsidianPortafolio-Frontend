@@ -1,15 +1,15 @@
 "use server"
 import { DashboardShell } from "@/src/components/dashboard-shell";
-import { CollapsableShell } from "@/src/components/collapsable-shell";
 import { auth } from "@clerk/nextjs/server";
-import { YourDataCard } from "@/src/components/your_data-card";
-import { YourPreferencesCard } from "@/src/components/your_preferences-card";
+import { YourDataCard } from "@/src/components/profile/your_data-card";
+import { YourPreferencesCard } from "@/src/components/profile/your_preferences-card";
+import { YourRiskProfileCard } from "@/src/components/profile/your_risk_profile-card";
 
 export default async function ProfilePage() {
   const { isAuthenticated, redirectToSignIn, userId } = await auth()
 
   if (!isAuthenticated) return redirectToSignIn()
-
+  
   return (
     <DashboardShell
       title="Gestiona tus datos y preferencias"
@@ -21,6 +21,7 @@ export default async function ProfilePage() {
           fondosMutuosLastUploadDate={null}
         ></YourDataCard>
         <YourPreferencesCard></YourPreferencesCard>
+        <YourRiskProfileCard></YourRiskProfileCard>
       </div>
     </DashboardShell>
     
