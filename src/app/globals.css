@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --app-font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --bg-app: #08111f;
   --bg-panel: #101827;
   --bg-panel-soft: #182235;
@@ -17,7 +17,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans);
+  --font-sans: var(--app-font-sans);
   --color-app: var(--bg-app);
   --color-panel: var(--bg-panel);
   --color-panel-soft: var(--bg-panel-soft);
