@@ -8,21 +8,13 @@ export function YourPreferencesCard() {
   const [loading, setLoading] = useState(false);
 
   const [preferences, setPreferences] = useState({
-    pnlPercentage: 10,
-    priceChange: 15,
+    pnlPercentageAccountDaily: 10,
+    pnlPercentageAssetDaily: 8,
+    maxDrawdownPortfolioDaily: 7,
+    maxDrawdownAccountDaily: 14,
 
-    dailyReturn: 2,
-    weeklyReturn: 5,
-    monthlyReturn: 10,
-
-    volatility: 20,
-    maxDrawdown: 15,
-
-    diversification: 60,
-    assetWeight: 35,
-    currencyExposure: 50,
-
-    sharpeRatio: 1.2,
+    assetWeightWeekly: 35,
+    currencyExposureWeekly: 50,
   });
 
   function handleChange(key, value) {
@@ -35,9 +27,10 @@ export function YourPreferencesCard() {
   async function savePreferences() {
     try {
       setLoading(true);
+      console.log(preferences)
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/alerts/preferences`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
         {
           method: "POST",
           headers: {
@@ -62,104 +55,59 @@ export function YourPreferencesCard() {
 
   const fields = [
     {
-      key: "pnlPercentage",
-      label: "Ganancia/Pérdida (%)",
+      key: "pnlPercentageAccountDaily",
+      label: "Ganancia/Pérdida (P&L %) diaria por Cuenta",
       description:
-        "Activa alertas cuando tu portafolio gane o pierda más de este porcentaje.",
+        "Avísame si una de mis cuentas cae (pierde)/sube (gana) más de este % en un solo día",
       suffix: "%",
       min: 1,
       max: 100,
     },
     {
-      key: "priceChange",
-      label: "Cambio de precio",
+      key: "pnlPercentageAssetDaily",
+      label: "Ganancia/Pérdida (P&L %) diaria por Activo",
       description:
-        "Recibe alertas cuando un activo cambie rápidamente de precio.",
-      suffix: "%",
-      min: 1,
-      max: 50,
-    },
-    {
-      key: "dailyReturn",
-      label: "Retorno diario",
-      description:
-        "Notifica según variaciones diarias del rendimiento.",
-      suffix: "%",
-      min: 1,
-      max: 30,
-    },
-    {
-      key: "weeklyReturn",
-      label: "Retorno semanal",
-      description:
-        "Detecta variaciones importantes acumuladas durante la semana del rendimiento.",
-      suffix: "%",
-      min: 1,
-      max: 50,
-    },
-    {
-      key: "monthlyReturn",
-      label: "Retorno mensual",
-      description:
-        "Activa alertas por movimientos relevantes del rendimeinto por mes.",
+        "Avísame si uno de mis activos cae (pierde)/sube (gana) más de este % en un solo día",
       suffix: "%",
       min: 1,
       max: 100,
     },
     {
-      key: "volatility",
-      label: "Volatilidad",
+      key: "maxDrawdownPortfolioDaily",
+      label: "Máximo drawdown del Portafolio",
       description:
-        "Recibe alertas cuando un activo o el portafolio se vuelva muy volátil.",
+        "Avísame si mi el valor total de mi portafolio ha caído este % respecto a su valor máximo histórico",
       suffix: "%",
       min: 1,
       max: 100,
     },
     {
-      key: "maxDrawdown",
-      label: "Máximo drawdown",
+      key: "maxDrawdownAccountDaily",
+      label: "Máximo drawdown por Cuenta",
       description:
-        "Detecta caídas fuertes desde precios máximos recientes.",
+        "Avísame si el valor total de una de mis cuentas ha caído este % respecto a su valor máximo histórico",
       suffix: "%",
       min: 1,
       max: 100,
     },
     {
-      key: "diversification",
-      label: "Nivel mínimo de diversificación",
+      key: "assetWeightWeekly",
+      label: "Peso máximo por activo (Concentración)",
       description:
-        "Te alerta si tu portafolio queda demasiado concentrado.",
+        "Avísame si un solo activo pasa a representar más de este % de todo mi portafolio",
+        
       suffix: "%",
       min: 1,
       max: 100,
     },
     {
-      key: "assetWeight",
-      label: "Peso máximo por activo",
+      key: "currencyExposureWeekly",
+      label: "Exposición máxima por moneda (FX)",
       description:
-        "Recibe alertas si un activo supera este peso dentro del portafolio (ve la relevancia de un activo con respecto a todo el portafolio).",
+        "Avísame si más de este % de mi dinero queda expuesta a USD o CLP",
       suffix: "%",
       min: 1,
       max: 100,
-    },
-    {
-      key: "currencyExposure",
-      label: "Exposición máxima por moneda",
-      description:
-        "Controla cuánto del portafolio está expuesto a una moneda específica.",
-      suffix: "%",
-      min: 1,
-      max: 100,
-    },
-    {
-      key: "sharpeRatio",
-      label: "Sharpe ratio mínimo",
-      description:
-        "Detecta deterioro en la relación riesgo-retorno del portafolio.",
-      suffix: "",
-      min: 0,
-      max: 5,
-      step: 0.1,
     },
   ];
 
