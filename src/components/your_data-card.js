@@ -201,7 +201,7 @@ export async function YourDataCard({
                 >
                     <UploadSection />
 
-                    {cargarUploadStatus(etfsLastUploadDate)}
+                    {/* {cargarUploadStatus(etfsLastUploadDate)} */}
                 </SectionCard>
 
                 <SectionCard
@@ -210,7 +210,7 @@ export async function YourDataCard({
                 >
                     <UploadSection />
 
-                    {cargarUploadStatus(fondosMutuosLastUploadDate)}
+                    {/* {cargarUploadStatus(fondosMutuosLastUploadDate)} */}
                 </SectionCard>
             </div>
         </CollapsableShell>
