@@ -1,0 +1,18 @@
+[
+  {
+    "portfolio_snapshot_id": "s9999999-9999-9999-9999-999999999999",
+    "date": "2026-05-15",
+    "pnl": 345.20,
+    "max_drawdown": -0.0425,
+    "volatility": 0.124500,
+    "fx_decomposition": { "usd_gain": 345.20, "clp_gain": 0.00, "fx_effect": 0.00 }
+  },
+  {
+    "portfolio_snapshot_id": "s9999999-9999-9999-9999-999999999999",
+    "date": "2026-05-18",
+    "pnl": 412.80,
+    "max_drawdown": -0.0390,
+    "volatility": 0.121200,
+    "fx_decomposition": { "usd_gain": 412.80, "clp_gain": 0.00, "fx_effect": 0.00 }
+  }
+]

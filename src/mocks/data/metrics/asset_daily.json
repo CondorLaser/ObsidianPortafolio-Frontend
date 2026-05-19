@@ -1,0 +1,8 @@
+[
+  { "asset_id": "0069d69c-9a75-4a95-985c-c72cbd7d4d1e", "date": "2026-05-18", "absolute_return": 0.0525, "volatility": 0.1120, "max_drawdown": -0.0310 },
+  { "asset_id": "00af8fc1-cc5a-4baa-9bef-1913fd513c8f", "date": "2026-05-18", "absolute_return": 0.1415, "volatility": 0.1850, "max_drawdown": -0.0840 },
+  { "asset_id": "001a834f-631b-4d68-8bc4-b369d338ede5", "date": "2026-05-18", "absolute_return": 0.0454, "volatility": 0.2210, "max_drawdown": -0.1230 },
+  { "asset_id": "00c1c9f9-c1ea-4a08-bb05-77ba925c3794", "date": "2026-05-18", "absolute_return": 0.0820, "volatility": 0.1340, "max_drawdown": -0.0420 },
+  { "asset_id": "00c85db1-9fb9-4928-93a7-860c38ac05f9", "date": "2026-05-18", "absolute_return": -0.0210, "volatility": 0.1940, "max_drawdown": -0.0910 },
+  { "asset_id": "01eeec28-6844-46f2-9fac-b17ed56a0eed", "date": "2026-05-18", "absolute_return": 0.0120, "volatility": 0.2450, "max_drawdown": -0.1540 }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "asset_id": "0069d69c-9a75-4a95-985c-c72cbd7d4d1e",
+    "date": "2026-05-18",
+    "close": 58.10000000,
+    "currency": "USD",
+    "source": "YahooFinance"
+  },
+  {
+    "asset_id": "00af8fc1-cc5a-4baa-9bef-1913fd513c8f",
+    "date": "2026-05-18",
+    "close": 108.45000000,
+    "currency": "USD",
+    "source": "YahooFinance"
+  },
+  {
+    "asset_id": "001a834f-631b-4d68-8bc4-b369d338ede5",
+    "date": "2026-05-18",
+    "close": 40.25000000,
+    "currency": "USD",
+    "source": "YahooFinance"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "d9876543-2109-8765-4321-098765432101",
+    "account_id": "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d",
+    "asset_id": "0069d69c-9a75-4a95-985c-c72cbd7d4d1e",
+    "date": "2026-03-15",
+    "gross_amount": 12.85,
+    "tax_amount": 3.85,
+    "net_amount": 9.00
+  },
+  {
+    "id": "d9876543-2109-8765-4321-098765432102",
+    "account_id": "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d",
+    "asset_id": "0069d69c-9a75-4a95-985c-c72cbd7d4d1e",
+    "date": "2026-04-15",
+    "gross_amount": 12.85,
+    "tax_amount": 3.85,
+    "net_amount": 9.00
+  }
+]

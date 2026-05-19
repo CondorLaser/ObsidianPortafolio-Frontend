@@ -1,0 +1,18 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d",
+    "user_id": "e84f1a9b-7c3d-4e2a-b18f-9d5c4e6a2b10",
+    "name": "Fintual USD",
+    "broker": "Fintual",
+    "currency": "USD",
+    "created_at": "2025-11-12T10:00:00Z"
+  },
+  {
+    "id": "f6e5d4c3-b2a1-4e9f-8d7c-6b5a4f3e2d1c",
+    "user_id": "e84f1a9b-7c3d-4e2a-b18f-9d5c4e6a2b10",
+    "name": "IBKR Trading",
+    "broker": "Interactive Brokers",
+    "currency": "USD",
+    "created_at": "2026-01-05T09:15:00Z"
+  }
+]
