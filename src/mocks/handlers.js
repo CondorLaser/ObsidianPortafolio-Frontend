@@ -39,7 +39,7 @@ export const handlers = [
   // GET /user/risk_profile
   http.get(`${API_URL}/user/risk_profile`, () => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(user_profiles)
+      return HttpResponse.json(["agressive"])
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },

@@ -39,7 +39,6 @@ export function YourPreferencesCard() {
 
       const data = await response.json();
       const preferences_data = data
-      console.log("Data", preferences_data)
       setPreferences({
         pnlPercentageAccountDaily:
           preferences_data.pnlPercentageAccountDaily,

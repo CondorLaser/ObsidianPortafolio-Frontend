@@ -54,7 +54,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk-profile`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
         {
           method: "GET",
           headers: {
@@ -69,11 +69,10 @@ export function YourRiskProfileCard() {
       }
 
       const data = await response.json()
-
-      // Ejemplo esperado:
-      // { riskProfile: "moderate" }
-
-      setSelectedRisk(data.riskProfile)
+      const riskValue = data[0]
+      if (RISK_OPTIONS.some(option => option.value === riskValue)) {
+        setSelectedRisk(riskValue)
+      }
     } catch (error) {
       console.error(error)
       setMessage("No se pudo obtener el perfil de riesgo")
@@ -92,7 +91,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk-profile`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
         {
           method: "PUT",
           headers: {
