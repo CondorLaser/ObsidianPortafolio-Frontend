@@ -18,13 +18,11 @@ export function UploadSection() {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts`
         )
-        console.log(response)
         if (!response.ok) {
           throw new Error("Error obteniendo cuentas")
         }
         // Por si viene como [] o [{}]
         const data = await response.json()
-        console.log(data)
         const accountsList = Array.isArray(data)
           ? data
           : data.accounts || []
@@ -37,7 +35,6 @@ export function UploadSection() {
       }
     }
     fetchAccounts()
-    console.log(accounts)
   }, [])
 
   
