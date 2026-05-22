@@ -16,28 +16,22 @@ export const handlers = [
     return HttpResponse.json(asset_data)
   }),
 
-  // GET /user/:user_id 
-  // Solo para tener el user id
-  http.get(`${API_URL}/user/:user_id`, ({ params }) => {
-    const { user_id } = params
-    
-    // Buscamos el usuario si viene en formato array, o retornamos el mock por defecto
-    const user = Array.isArray(users_data) 
-      ? users_data.find(u => u.id === user_id || u.user_id === user_id) || users_data[0]
-      : users_data
 
-    return HttpResponse.json(user)
-  }),
 
   // Vista perfil
   // POST /upload
   http.post(`${API_URL}/upload`, async ({ request }) => {
-    // En un escenario real aquí procesarías el FormData con el archivo
     return HttpResponse.json({
       success: true,
       message: "Certificado de transacciones procesado y portafolio actualizado con éxito."
     }, { status: 201 })
   }),
+  /* http.post(`${API_URL}/upload`, async ({ request }) => {
+    return HttpResponse.json({
+      success: false,
+      message: "Error."
+    }, { status: 500 })
+  }), */
   // GET /user/risk_profile
   http.get(`${API_URL}/user/risk_profile`, () => {
     return HttpResponse.json(user_profiles)
@@ -55,7 +49,10 @@ export const handlers = [
   }),
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/user/accounts`, () => {
-    return HttpResponse.json(accounts_data)
+    return HttpResponse.json([
+      "Fintual USD",
+      "IBKR Trading"
+    ])
   }),
   // GET /preferences
   http.get(`${API_URL}/preferences`, () => {
@@ -71,5 +68,18 @@ export const handlers = [
       ...updatedPreferences,
       message: "Preferencias del usuario guardadas"
     })
-  })
+  }),
+
+  // GET /user/:user_id 
+  // Solo para tener el user id
+  http.get(`${API_URL}/user/:user_id`, ({ params }) => {
+    const { user_id } = params
+    
+    // Buscamos el usuario si viene en formato array, o retornamos el mock por defecto
+    const user = Array.isArray(users_data) 
+      ? users_data.find(u => u.id === user_id || u.user_id === user_id) || users_data[0]
+      : users_data
+
+    return HttpResponse.json(user)
+  }),
 ]
