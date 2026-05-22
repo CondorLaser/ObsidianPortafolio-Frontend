@@ -24,7 +24,7 @@ export function YourPreferencesCard() {
       setMessage(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
         {
           method: "GET",
           headers: {
@@ -80,9 +80,9 @@ export function YourPreferencesCard() {
       setMessage(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/preferences`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
