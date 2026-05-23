@@ -1,0 +1,22 @@
+[
+  {
+    "account_id": "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d",
+    "date": "2026-04-30",
+    "twr": 0.02150000,
+    "dietz": 0.02100000,
+    "sharpe_ratio": 1.4520,
+    "value_at_risk": 45.20,
+    "sortino": 1.8210,
+    "correlation": 0.4520
+  },
+  {
+    "account_id": "f6e5d4c3-b2a1-4e9f-8d7c-6b5a4f3e2d1c",
+    "date": "2026-04-30",
+    "twr": 0.04120000,
+    "dietz": 0.03950000,
+    "sharpe_ratio": 0.9850,
+    "value_at_risk": 99.80,
+    "sortino": 1.1240,
+    "correlation": 0.7840
+  }
+]

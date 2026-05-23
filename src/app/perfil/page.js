@@ -1,178 +1,29 @@
 "use server"
 import { DashboardShell } from "@/src/components/dashboard-shell";
-import { SectionCard } from "@/src/components/section-card";
 import { auth } from "@clerk/nextjs/server";
-import { UploadSection } from "@/src/components/upload-section";
+import { YourDataCard } from "@/src/components/profile/your_data-card";
+import { YourPreferencesCard } from "@/src/components/profile/your_preferences-card";
+import { YourRiskProfileCard } from "@/src/components/profile/your_risk_profile-card";
 
 export default async function ProfilePage() {
   const { isAuthenticated, redirectToSignIn, userId } = await auth()
 
   if (!isAuthenticated) return redirectToSignIn()
-
+  
   return (
     <DashboardShell
-      title="Carga o actualiza tus datos"
-      description="Sube o actualiza los datos de tu portafolio, configura tu conexion con Fintual y completa tus preferencias."
+      title="Gestiona tus datos y preferencias"
+      description="En las siguientes secciones gestiona los datos de tu portafolio y define tus preferencias y tu perfil de riesgo."
     >
-      <div className="">
-
-        <div className="space-y-6 mb-6">
-          <section className="rounded-3xl border border-[#3b2a5a] bg-[linear-gradient(135deg,rgba(35,15,60,0.95),rgba(20,10,35,0.92))] p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
-            <p className="text-xl font-bold">¿Dónde obtener mis Certificados?</p>
-            <p className="text-md font-bold text-text-muted">Sigue los siguientes pasos:</p>
-            <div className="">
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-0 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  <p className="text-lg font-semibold text-white">Acceder a Fintual</p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-lg font-semibold text-white">{"Ir a Perfil"}</p>
-                    <p className="mt-0 text-sm text-[#9fd1c0]">
-                      Ve a la esquina superior izquierda y presiona el ícono de perfil
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-lg font-semibold text-white">{"Ir a Perfil > Certificados"}</p>
-                    <p className="mt-0 text-sm text-[#9fd1c0]">
-                      Nota: Esto puede requerir que inicies sesión nuevamente
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-lg font-semibold text-white">{"Elegir los certificados a obtener"}</p>
-                    <p className="mt-0 text-sm text-[#9fd1c0]">
-                      Hay certificados que permiten descarga inmmediata y otros que se envían vía correo electrónico
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-              
-          </section>
-
-          <section className="rounded-3xl border border-[#3b2a5a] bg-[linear-gradient(135deg,rgba(35,15,60,0.95),rgba(20,10,35,0.92))] p-5 shadow-[0_0_0_1px_rgba(109,102,255,0.10)]">
-            <p className="text-xl font-bold">¿Qué certificados elegir?</p>
-            <p className="text-md font-bold text-text-muted">Orion Portafolio soporta obtener información de los siguientes certificados:</p>
-            <div className="">
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-lg font-semibold text-white">{"Certificado de Transacciones Acciones y ETFs"}</p>
-                    <p className="mt-0 text-sm text-[#9fd1c0]">
-                      En la sección <b>Certificado de transacciones y eventos de capital en Acciones</b> selecciona <b>Enviar a mi mail</b>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 flex h-7.5 w-7.5 items-center justify-center rounded-full bg-[rgba(16,185,129,0.16)] text-success">
-                    <span className="h-2.5 w-2.5 rounded-full bg-text-muted" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-lg font-semibold text-white">{" Certificado de Transacciones Fondos Mutuos"}</p>
-                    <p className="mt-0 text-sm text-[#9fd1c0]">
-                      En la sección <b>Certificado de transacciones en Fondos Mutuos</b> selecciona <b>Enviar a mi mail</b>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-              
-          </section>
-        </div>
-
-
-        <div className="space-y-6">
-          <SectionCard
-            title="Cargar Certificado de Transacciones Acciones y ETFs (PDF)"
-            description="Sube un archivo PDF con tus transacciones de Acciones y ETFs para importarlas al sistema."
-          >
-            <UploadSection></UploadSection>
-            
-            <section className="rounded-3xl border border-border-soft bg-panel-soft p-5 mt-3">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-md font-semibold text-white">Ultima actualización:</p>
-                  <p className="text-sm text-text-muted">Fecha de subida último documento</p>
-                </div>
-                <span className="rounded-full bg-green-attention px-3 py-1 text-md font-semibold text-success">
-                  28 de abril de 2026, 10:06
-                </span>
-              </div>
-            </section>
-          </SectionCard>
-
-          <SectionCard
-            title="Cargar Certificado de Transacciones Fondos Mutuos (PDF)"
-            description="Sube un archivo CSV con transacciones para importarlas al sistema."
-          >
-            <UploadSection></UploadSection>
-
-            <section className="rounded-3xl border border-border-soft bg-panel-soft p-5 mt-3">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-md font-semibold text-white">Ultima actualización:</p>
-                  <p className="text-sm text-text-muted">Fecha de subida último documento</p>
-                </div>
-                <span className="rounded-full bg-green-attention px-3 py-1 text-md font-semibold text-success">
-                  25 de abril de 2026, 19:25
-                </span>
-              </div>
-            </section>
-          </SectionCard>
-        </div>
+      <div className="flex flex-col gap-6 justify-between">
+        <YourDataCard
+          etfsLastUploadDate={"28 de abril de 2026, 10:06"}
+          fondosMutuosLastUploadDate={null}
+        ></YourDataCard>
+        <YourPreferencesCard></YourPreferencesCard>
+        <YourRiskProfileCard></YourRiskProfileCard>
       </div>
     </DashboardShell>
+    
   );
 }
-
-/* function InputField({ label, defaultValue }) {
-  return (
-    <label className="text-sm text-text-muted">
-      {label}
-      <input
-        className="mt-2 w-full rounded-2xl border border-border-soft bg-app px-4 py-3 text-white outline-none transition focus:border-accent/60"
-        defaultValue={defaultValue}
-      />
-    </label>
-  );
-} */
