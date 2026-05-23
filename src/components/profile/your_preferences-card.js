@@ -38,20 +38,20 @@ export function YourPreferencesCard() {
       }
 
       const data = await response.json();
-
+      const preferences_data = data
       setPreferences({
         pnlPercentageAccountDaily:
-          data.pnlPercentageAccountDaily,
+          preferences_data.pnlPercentageAccountDaily,
         pnlPercentageAssetDaily:
-          data.pnlPercentageAssetDaily,
+          preferences_data.pnlPercentageAssetDaily,
         maxDrawdownPortfolioDaily:
-          data.maxDrawdownPortfolioDaily,
+          preferences_data.maxDrawdownPortfolioDaily,
         maxDrawdownAccountDaily:
-          data.maxDrawdownAccountDaily,
+          preferences_data.maxDrawdownAccountDaily,
         assetWeightWeekly:
-          data.assetWeightWeekly,
+          preferences_data.assetWeightWeekly,
         currencyExposureWeekly:
-          data.currencyExposureWeekly,
+          preferences_data.currencyExposureWeekly,
       });
       setMessage("Preferencias cargadas correctamente");
     } catch (error) {
