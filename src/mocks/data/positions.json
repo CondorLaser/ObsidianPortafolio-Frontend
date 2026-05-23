@@ -9,7 +9,15 @@
     "total_dividends": 18.00000000,
     "total_fees": 1.50000000,
     "last_transaction_at": "2026-02-10T14:30:00Z",
-    "updated_at": "2026-04-15T18:00:00Z"
+    "updated_at": "2026-04-15T18:00:00Z",
+    "asset": {
+      "id": "0069d69c-9a75-4a95-985c-c72cbd7d4d1e",
+      "symbol": "O",
+      "name": "Realty Income",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   },
   {
     "id": "p2222222-2222-2222-2222-222222222222",
@@ -21,7 +29,15 @@
     "total_dividends": 0.00000000,
     "total_fees": 1.00000000,
     "last_transaction_at": "2026-04-20T11:20:00Z",
-    "updated_at": "2026-04-20T11:25:00Z"
+    "updated_at": "2026-04-20T11:25:00Z",
+    "asset": {
+      "id": "00af8fc1-cc5a-4baa-9bef-1913fd513c8f",
+      "symbol": "DIS",
+      "name": "Walt Disney Company (The)",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   },
   {
     "id": "p3333333-3333-3333-3333-333333333333",
@@ -33,7 +49,15 @@
     "total_dividends": 0.00000000,
     "total_fees": 1.00000000,
     "last_transaction_at": "2026-05-02T10:15:00Z",
-    "updated_at": "2026-05-02T10:18:00Z"
+    "updated_at": "2026-05-02T10:18:00Z",
+    "asset": {
+      "id": "001a834f-631b-4d68-8bc4-b369d338ede5",
+      "symbol": "HAL",
+      "name": "Halliburton",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   },
   {
     "id": "p4444444-4444-4444-4444-444444444444",
@@ -45,7 +69,15 @@
     "total_dividends": 6.30000000,
     "total_fees": 1.20000000,
     "last_transaction_at": "2026-02-15T15:45:00Z",
-    "updated_at": "2026-04-01T10:00:00Z"
+    "updated_at": "2026-04-01T10:00:00Z",
+    "asset": {
+      "id": "00c1c9f9-c1ea-4a08-bb05-77ba925c3794",
+      "symbol": "BRO",
+      "name": "Brown & Brown",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   },
   {
     "id": "p5555555-5555-5555-5555-555555555555",
@@ -57,7 +89,15 @@
     "total_dividends": 11.25000000,
     "total_fees": 0.50000000,
     "last_transaction_at": "2026-03-22T13:10:00Z",
-    "updated_at": "2026-03-22T13:10:00Z"
+    "updated_at": "2026-03-22T13:10:00Z",
+    "asset": {
+      "id": "00c85db1-9fb9-4928-93a7-860c38ac05f9",
+      "symbol": "HAS",
+      "name": "Hasbro",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   },
   {
     "id": "p6666666-6666-6666-6666-666666666666",
@@ -69,6 +109,14 @@
     "total_dividends": 0.00000000,
     "total_fees": 2.00000000,
     "last_transaction_at": "2026-05-05T16:00:00Z",
-    "updated_at": "2026-05-05T16:00:00Z"
+    "updated_at": "2026-05-05T16:00:00Z",
+    "asset": {
+      "id": "01eeec28-6844-46f2-9fac-b17ed56a0eed",
+      "symbol": "SWKS",
+      "name": "Skyworks Solutions",
+      "kind": "stock",
+      "currency": "USD",
+      "created_at": "2026-05-05 21:15:42.141067+00"
+    }
   }
 ]

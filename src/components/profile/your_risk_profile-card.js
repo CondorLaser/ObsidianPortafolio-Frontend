@@ -1,4 +1,3 @@
-// src/components/your_risk-profile-card.jsx
 "use client"
 
 import { useState, useEffect } from "react"

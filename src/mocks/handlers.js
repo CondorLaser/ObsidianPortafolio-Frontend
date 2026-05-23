@@ -5,7 +5,12 @@ import asset_data from "./data/asset_actions_mini.json"
 import users_data from "./data/users.json"
 import user_profiles from "./data/user_profiles.json"
 import accounts_data from "./data/accounts.json"
+import accounts_daily_metrics from "./data/metrics/account_daily.json"
+import accounts_monthly_metrics from "./data/metrics/account_monthly.json"
 import user_preferences from "./data/user_preferences.json"
+import positions_data from "./data/positions.json"
+import dividends_data from "./data/dividends.json"
+import transactions_data from "./data/transactions.json"
  
 const API_URL = process.env.NEXT_PUBLIC_URL_BE
 const REQUEST_SUCCESSFUL = true
@@ -93,6 +98,86 @@ export const handlers = [
       )
     }
   }),
+
+  // GET /accounts/:account_id
+  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      // Busco la información de la cuenta específica
+      const account = accounts_data.find(acc => acc.id === account_id)
+      return HttpResponse.json(account)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  http.get(`${API_URL}/accounts/metrics/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      // Busco las métricas daily de la cuenta específica
+      const dailyMetrics = accounts_daily_metrics.filter(metric => metric.account_id === account_id)
+      // Busco las métricas monthly de la cuenta específica
+      const monthlyMetrics = accounts_monthly_metrics.filter(metric => metric.account_id === account_id)
+      return HttpResponse.json({
+        daily: dailyMetrics,
+        monthly: monthlyMetrics
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  http.get(`${API_URL}/accounts/positions/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const positions = positions_data.filter(position => position.account_id === account_id)      
+      return HttpResponse.json({
+        positions
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+  http.get(`${API_URL}/accounts/transactions/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const transactions = transactions_data.filter(transaction => transaction.account_id === account_id)      
+      return HttpResponse.json({
+        transactions
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+  http.get(`${API_URL}/accounts/dividends/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const dividends = dividends_data.filter(dividend => dividend.account_id === account_id)      
+      return HttpResponse.json({
+        dividends
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+
+
 
   // GET /preferences
   http.get(`${API_URL}/preferences`, () => {
