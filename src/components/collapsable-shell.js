@@ -8,7 +8,7 @@ export function CollapsableShell({ title, description, children, actions }) {
 
   return (
     <div>
-      <main className="rounded-3xl border border-border-soft bg-accent-soft p-6 lg:p-8">
+      <main className="rounded-3xl border border-border-soft  p-6 lg:p-8">
         {/* Header */}
         <div className="mb-1">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
