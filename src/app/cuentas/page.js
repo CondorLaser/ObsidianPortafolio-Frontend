@@ -1,84 +1,95 @@
+"use client"
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
 import { DashboardShell } from "@/src/components/dashboard-shell";
-import { SectionCard } from "@/src/components/section-card";
-import { accountCards } from "@/src/lib/account-detail-config";
+import { AccountCard } from "@/src/components/accounts/account-card";
 
-export default async function AccountsPage() {
-  const { isAuthenticated, redirectToSignIn } = await auth();
+export default function AccountsPage() {
+  const [accounts, setAccounts] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!isAuthenticated) return redirectToSignIn();
+  useEffect(() => {
+    async function loadAccounts() {
+      try {
+        setLoading(true);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!res.ok) throw new Error("Error en el servidor");
+
+        const data = await res.json();
+        setAccounts(data);
+      } catch (error) {
+        console.error("Fetch Accounts Error:", error);
+        setAccounts(null); // Caso de error v/s [] cuando no hay cuenta
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAccounts();
+  }, []);
 
   return (
     <DashboardShell
       title="Cuentas"
-      description="Selecciona una cuenta para revisar su evolución, posiciones vinculadas y contexto operativo."
+      description="Selecciona una cuenta para revisar su evolución, posiciones vinculadas y métricas."
     >
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.9fr]">
-        <SectionCard
-          title="Cuentas disponibles"
-          description="Cada cuenta conserva su moneda, estado de sincronización y accesos separados para no mezclar el contexto de USD y CLP."
-        >
+      <div className="grid gap-6">
+
+          {//CASO: Cargando datos
+          loading ? (
+            <div className="text-center py-8 text-sm text-text-muted animate-pulse">
+              Cargando cuentas...
+            </div>
+          ) : 
+          
+          // CASO: Error de la request
+          accounts === null ? (
+            <div className="rounded-[24px] border border-red-500/20 bg-red-500/5 p-8 text-center">
+              <p className="text-sm font-medium text-red-400">
+                Hubo un error de conexión con el servidor al intentar cargar tus cuentas.
+              </p>
+              <p className="mt-1 text-xs text-text-muted">
+                Por favor, inténtalo de nuevo más tarde o verifica el estado de tu conexión.
+              </p>
+            </div>
+          ) : 
+          
+          //CASO 3: usuario sin cuentas
+          accounts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-border-soft bg-surface/35 p-12 text-center">
+              <div className="max-w-md">
+                <h3 className="text-lg font-semibold text-white">No se encontraron cuentas activas</h3>
+                <p className="mt-2 text-sm leading-[1.6] text-text-muted">
+                  Para reconstruir tu portafolio y ver tus cuentas, es necesario que primero cargues tus Certificados de Transacciones en la plataforma.
+                </p>
+                
+                <div className="mt-6">
+                  <Link
+                    href="/perfil"
+                    className="inline-flex items-center justify-center rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02]"
+                  >
+                    Ir a Perfil / Mis Datos
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+          //CASO 4: Despliegue de las cuentas mockeadas
           <div className="grid gap-5 md:grid-cols-2">
-            {accountCards.map((account) => (
-              <Link
-                key={account.slug}
-                href={`/cuentas/${account.slug}`}
-                className="group rounded-[24px] border border-border-soft bg-surface/65 p-6 transition hover:border-accent/35 hover:bg-panel"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-[760] uppercase tracking-[0.16em] text-accent">Cuenta {account.shortLabel}</p>
-                    <h2 className="mt-3 text-[28px] leading-[1.05] font-semibold tracking-[-0.03em] text-white">
-                      {account.name}
-                    </h2>
-                  </div>
-                  <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">{account.share}</span>
-                </div>
-
-                <p className="mt-4 max-w-[28ch] text-sm leading-[1.6] text-text-muted">{account.description}</p>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[18px] border border-border-soft bg-panel-soft p-4">
-                    <p className="text-xs uppercase tracking-[0.12em] text-text-muted">Monto total</p>
-                    <p className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-white">{account.amount}</p>
-                  </div>
-                  <div className="rounded-[18px] border border-border-soft bg-panel-soft p-4">
-                    <p className="text-xs uppercase tracking-[0.12em] text-text-muted">Posiciones</p>
-                    <p className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-white">{account.accountCountLabel}</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex items-center justify-between gap-4 rounded-[18px] border border-border-soft bg-panel-soft px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-white">{account.status}</p>
-                    <p className="mt-1 text-xs text-text-muted">Variación reciente {account.change}</p>
-                  </div>
-                  <span className="inline-flex min-h-10 items-center rounded-2xl border border-border-soft px-4 text-sm font-semibold text-white transition group-hover:border-accent/35 group-hover:text-accent">
-                    Ver cuenta
-                  </span>
-                </div>
-              </Link>
+            {accounts.map((account) => (
+              <AccountCard key={account.id} account={account} />
             ))}
           </div>
-        </SectionCard>
 
-        <SectionCard
-          title="Cómo usar esta vista"
-          description="La idea es que primero elijas la cuenta y luego profundices en sus activos, sin perder el contexto de moneda y origen de datos."
-        >
-          <div className="space-y-4">
-            {[
-              "Fintual USD agrupa ETFs y acciones internacionales.",
-              "Fintual CLP concentra fondos locales, acciones chilenas y caja operativa.",
-              "Cada detalle de cuenta muestra solo los activos vinculados a esa fuente."
-            ].map((detail) => (
-              <article key={detail} className="rounded-[20px] border border-border-soft bg-surface/55 px-5 py-4">
-                <p className="text-sm leading-[1.6] text-text-muted">{detail}</p>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
+          )}
+        
       </div>
     </DashboardShell>
   );

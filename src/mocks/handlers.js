@@ -68,12 +68,24 @@ export const handlers = [
   }),
 
   // GET /accounts/:user_id <-------------
-  http.get(`${API_URL}/accounts/:user_id`, ({ params }) => {
+  http.get(`${API_URL}/user/accounts_names`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       return HttpResponse.json([
         "Fintual USD",
         "IBKR Trading"
       ])
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // GET /accounts/:user_id <-------------
+  http.get(`${API_URL}/accounts`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json(accounts_data)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },

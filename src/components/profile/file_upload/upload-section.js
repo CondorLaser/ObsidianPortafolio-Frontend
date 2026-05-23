@@ -16,7 +16,7 @@ export function UploadSection() {
         setLoadingAccounts(true)
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts`
+          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts_names`
         )
         if (!response.ok) {
           throw new Error("Error obteniendo cuentas")
