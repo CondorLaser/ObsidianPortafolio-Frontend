@@ -300,9 +300,9 @@ export default function AccountDetailPage({ params }) {
                             <span className="text-[10px] text-text-muted max-w-[140px] truncate">{asset.name || ""}</span>
                           </div>
                         </td>
-                        <td className="p-3 text-right font-medium">{Number(tx.quantity).toFixed(4)}</td>
-                        <td className="p-3 text-right font-medium">{Number(tx.price).toFixed(2)} {account.currency}</td>
-                        <td className="p-3 text-right text-text-muted">{Number(tx.fees).toFixed(2)}</td>
+                        <td className="p-3 text-right font-medium">{Number(tx.quantity)}</td>
+                        <td className="p-3 text-right font-medium"> {tx.price !== null ? `${Number(tx.price)} ${account.currency}` : "-"}</td>
+                        <td className="p-3 text-right text-text-muted">{Number(tx.fees)}</td>
                       </tr>
                     );
                   })}
@@ -343,7 +343,7 @@ export default function AccountDetailPage({ params }) {
                             <span className="text-[10px] text-text-muted max-w-[140px] truncate">{asset.name || ""}</span>
                           </div>
                         </td>
-                        <td className="p-3 text-right text-text-muted">{Number(div.gross_amount).toFixed(2)}</td>
+                        <td className="p-3 text-right text-text-muted">{Number(div.gross_amount)}</td>
                         <td className="p-3 text-right text-danger font-medium">
                           {Number(div.tax_amount) > 0 ? "-" : ""}{Number(div.tax_amount).toFixed(2)}
                         </td>

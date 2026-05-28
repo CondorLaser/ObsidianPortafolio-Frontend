@@ -102,7 +102,7 @@ export const handlers = [
   // GET /preferences
   http.get(`${API_URL}/preferences`, () => {
     if(REQUEST_SUCCESSFUL){
-      return HttpResponse.json(user_preferences)
+      return HttpResponse.json(user_preferences, {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -120,7 +120,7 @@ export const handlers = [
         ...user_preferences,
         ...updatedPreferences,
         message: "Preferencias del usuario guardadas"
-      })
+      }, {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
