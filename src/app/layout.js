@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
               height={13}
               width={135}
               alt="Orion logo"
+              className="h-auto w-auto"
             />
           </Link>
         </div>
