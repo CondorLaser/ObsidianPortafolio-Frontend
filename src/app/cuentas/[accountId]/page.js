@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
@@ -10,6 +11,7 @@ import { CollapsableShell } from "@/src/components/collapsable-shell";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
+  const { getToken } = useAuth();
 
   const [account, setAccount] = useState(null);
   const [metrics, setMetrics] = useState(null);
@@ -28,14 +30,40 @@ export default function AccountDetailPage({ params }) {
         setLoading(true);
         setError(false);
         const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+        const token = await getToken();
 
         // Hace las request en paralelo
         const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([
-          fetch(`${baseUrl}/accounts/${accountId}`),
-          fetch(`${baseUrl}/accounts/metrics/${accountId}`),
-          fetch(`${baseUrl}/accounts/positions/${accountId}`),
-          fetch(`${baseUrl}/accounts/transactions/${accountId}`),
-          fetch(`${baseUrl}/accounts/dividends/${accountId}`)
+          fetch(`${baseUrl}/accounts/${accountId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          }}),
+          fetch(`${baseUrl}/accounts/metrics/${accountId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          }}),
+          fetch(`${baseUrl}/accounts/positions/${accountId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          }}),
+          fetch(`${baseUrl}/accounts/transactions/${accountId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          }}),
+          fetch(`${baseUrl}/accounts/dividends/${accountId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          }})
         ]);
 
         if (!resAccount.ok || !resMetrics.ok || !resPositions.ok || !resTransactions.ok || !resDividends.ok) {
@@ -59,9 +87,8 @@ export default function AccountDetailPage({ params }) {
         setLoading(false);
       }
     }
-
     loadAccountData();
-  }, [accountId]);
+  }, [accountId, getToken]);
 
   // Acción para regresar a la vista general de portafolios
   const actions = (

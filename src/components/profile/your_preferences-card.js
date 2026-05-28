@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import { useAuth } from "@clerk/nextjs";
 import { CollapsableShell } from "../collapsable-shell";
 
 export function YourPreferencesCard() {
@@ -17,18 +17,20 @@ export function YourPreferencesCard() {
     assetWeightWeekly: 35,
     currencyExposureWeekly: 50,
   });
+  const { getToken } = useAuth();
 
   async function fetchPreferences() {
     try {
       setLoadingPreferences(true);
       setMessage(null);
-
+      const token = await getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
         }
       );
@@ -64,7 +66,7 @@ export function YourPreferencesCard() {
 
   useEffect(() => {
     fetchPreferences();
-  }, []);
+  }, [getToken]);
 
 
   function handleChange(key, value) {
@@ -78,13 +80,14 @@ export function YourPreferencesCard() {
     try {
       setLoading(true);
       setMessage(null);
-
+      const token = await getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(preferences),
         }

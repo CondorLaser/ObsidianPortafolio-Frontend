@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
+import { useAuth } from "@clerk/nextjs";
 
 export function UploadSection() {
   const [selectedFile, setSelectedFile] = useState(null)
@@ -9,14 +10,22 @@ export function UploadSection() {
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loading, setLoading] = useState(false)
 
+  const { getToken } = useAuth();
+
   // Cargar cuentas del usuario
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         setLoadingAccounts(true)
-
+        const token = await getToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts_names`
+          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts_names`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }            
+          }
         )
         if (!response.ok) {
           throw new Error("Error obteniendo cuentas")
@@ -35,7 +44,7 @@ export function UploadSection() {
       }
     }
     fetchAccounts()
-  }, [])
+  }, [getToken])
 
   
 
@@ -67,6 +76,7 @@ export function UploadSection() {
 
     try {
       setLoading(true)
+      const token = await getToken();
       const sanitizedName = sanitizeAccountName(accountName)
       /* console.log("Archivo:", selectedFile)
       console.log("Cuenta:", accountName ,sanitizedName) */
@@ -81,6 +91,10 @@ export function UploadSection() {
         `${process.env.NEXT_PUBLIC_URL_BE}/upload`,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },         
           body: formData,
         }
       )

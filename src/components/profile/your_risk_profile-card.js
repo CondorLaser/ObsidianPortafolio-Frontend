@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { CollapsableShell } from "../collapsable-shell"
-
+import { useAuth } from "@clerk/nextjs";
 const RISK_OPTIONS = [
   {
     value: "conservative",
@@ -46,18 +46,20 @@ export function YourRiskProfileCard() {
   const [selectedRisk, setSelectedRisk] = useState("moderate")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  const { getToken } = useAuth();
 
   const fetchRiskProfile = async () => {
     try {
       setLoading(true)
       setMessage(null)
-
+      const token = await getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           credentials: "include"
         }
@@ -82,19 +84,20 @@ export function YourRiskProfileCard() {
 
   useEffect(() => {
     fetchRiskProfile()
-  }, [])
+  }, [getToken])
 
   const handleSave = async () => {
     try {
       setLoading(true)
       setMessage(null)
-
+      const token = await getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
             riskProfile: selectedRisk
