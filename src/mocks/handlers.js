@@ -11,6 +11,7 @@ import user_preferences from "./data/user_preferences.json"
 import positions_data from "./data/positions.json"
 import dividends_data from "./data/dividends.json"
 import transactions_data from "./data/transactions.json"
+import account_names from "./data/accounts_names.json"
  
 const API_URL = process.env.NEXT_PUBLIC_URL_BE
 const REQUEST_SUCCESSFUL = true
@@ -23,8 +24,25 @@ export const handlers = [
   }),
 
   // Vista perfil
-  // POST /upload
-  http.post(`${API_URL}/upload`, async ({ request }) => {
+  // POST /pdf/extract_stocks_etf_1
+  http.post(`${API_URL}/pdf/extract_stocks_etf_1`, async ({ request }) => {
+    if(REQUEST_SUCCESSFUL){
+      return HttpResponse.json({
+        success: true,
+        message: "Certificado de transacciones procesado y portafolio actualizado con éxito."
+      }, { status: 201 }
+      )
+    }
+    else{
+      return HttpResponse.json({
+        success: false,
+        error: "Internal Server Error"
+      }, { status: 500 }
+      )
+    }
+  }),
+  // POST /pdf/extract_mutual_funds
+  http.post(`${API_URL}/pdf/extract_mutual_funds`, async ({ request }) => {
     if(REQUEST_SUCCESSFUL){
       return HttpResponse.json({
         success: true,
@@ -41,10 +59,10 @@ export const handlers = [
     }
   }),
 
-  // GET /user/risk_profile
-  http.get(`${API_URL}/user/risk_profile`, () => {
+  // GET /profile (obtener perfil de riesgo)
+  http.get(`${API_URL}/profile`, () => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(["agressive"])
+      return HttpResponse.json(user_profiles[0], {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -53,17 +71,14 @@ export const handlers = [
     }
   }),
 
-  // PUT /user/risk_profile
-  http.put(`${API_URL}/user/risk_profile`, async ({ request }) => {
+  // PUT /profile (cambiar perfil de riesgo)
+  http.put(`${API_URL}/profile`, async ({ request }) => {
     if (REQUEST_SUCCESSFUL) {
       const updatedProfile = await request.json()
       
       // Retornamos el perfil modificado simulando la persistencia
-      return HttpResponse.json({
-        ...user_profiles,
-        ...updatedProfile,
-        message: "Perfil de riesgo actualizado correctamente"
-      })
+      return HttpResponse.json(
+        user_profiles[0], {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -72,13 +87,10 @@ export const handlers = [
     }
   }),
 
-  // GET /accounts/:user_id <-------------
+  // GET /user/accounts_names (obtener nombres de cuentas del usuario)
   http.get(`${API_URL}/user/accounts_names`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json([
-        "Fintual USD",
-        "IBKR Trading"
-      ])
+      return HttpResponse.json(account_names, {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },

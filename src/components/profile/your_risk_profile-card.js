@@ -54,7 +54,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
       const token = await getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/profile`,
         {
           method: "GET",
           headers: {
@@ -70,7 +70,7 @@ export function YourRiskProfileCard() {
       }
 
       const data = await response.json()
-      const riskValue = data[0]
+      const riskValue = data.risk_profile
       if (RISK_OPTIONS.some(option => option.value === riskValue)) {
         setSelectedRisk(riskValue)
       }
@@ -92,7 +92,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
       const token = await getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
+        `${process.env.NEXT_PUBLIC_URL_BE}/profile`,
         {
           method: "PUT",
           headers: {
@@ -100,10 +100,15 @@ export function YourRiskProfileCard() {
             "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
-            riskProfile: selectedRisk
+            risk_profile: selectedRisk
           })
         }
       )
+      const data = await response.json()
+      const riskValue = data.risk_profile
+      if (RISK_OPTIONS.some(option => option.value === riskValue)) {
+        setSelectedRisk(riskValue)
+      }
 
       if (!response.ok) {
         throw new Error("No se pudo actualizar el perfil de riesgo")

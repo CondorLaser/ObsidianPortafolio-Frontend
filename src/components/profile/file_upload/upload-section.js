@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
 import { useAuth } from "@clerk/nextjs";
 
-export function UploadSection() {
+export function UploadSection(finantial_file_type) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [accountName, setAccountName] = useState("")
   const [accounts, setAccounts] = useState([])
@@ -35,8 +35,8 @@ export function UploadSection() {
         const accountsList = Array.isArray(data)
           ? data
           : data.accounts || []
-
-        setAccounts(accountsList)
+        const accountNames = accountsList.map(account => account.name)
+        setAccounts(accountNames)
       } catch (error) {
         console.error("Error obteniendo cuentas:", error)
       } finally {
@@ -78,17 +78,18 @@ export function UploadSection() {
       setLoading(true)
       const token = await getToken();
       const sanitizedName = sanitizeAccountName(accountName)
-      /* console.log("Archivo:", selectedFile)
-      console.log("Cuenta:", accountName ,sanitizedName) */
       // Crea FormData y agrega info
       const formData = new FormData()
       formData.append("file", selectedFile)
       formData.append("accountName", sanitizedName)
 
+      const endpoint = finantial_file_type === "mutual_funds"
+        ? `${process.env.NEXT_PUBLIC_URL_BE}/pdf/extract_mutual_funds`
+        : `${process.env.NEXT_PUBLIC_URL_BE}/pdf/extract_stocks_etf_1`
 
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/upload`,
+        endpoint,
         {
           method: "POST",
           headers: {
