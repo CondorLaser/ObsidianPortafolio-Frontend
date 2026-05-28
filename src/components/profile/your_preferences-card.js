@@ -9,13 +9,13 @@ export function YourPreferencesCard() {
   const [loadingPreferences, setLoadingPreferences] = useState(true);
   const [message, setMessage] = useState(null);
   const [preferences, setPreferences] = useState({
-    pnlPercentageAccountDaily: 10,
-    pnlPercentageAssetDaily: 8,
-    maxDrawdownPortfolioDaily: 7,
-    maxDrawdownAccountDaily: 14,
+    pnl_percentage_account_daily: 10,
+    pnl_percentage_asset_daily: 8,
+    max_drawdown_portfolio_daily: 7,
+    max_drawdown_account_daily: 14,
 
-    assetWeightWeekly: 35,
-    currencyExposureWeekly: 50,
+    asset_weight_weekly: 35,
+    currency_exposure_weekly: 50,
   });
   const { getToken } = useAuth();
 
@@ -38,22 +38,34 @@ export function YourPreferencesCard() {
       if (!response.ok) {
         throw new Error("Error al obtener las preferencias");
       }
-
-      const data = await response.json();
-      const preferences_data = data
+      
+      const preferences_data = await response.json();
+      
       setPreferences({
-        pnlPercentageAccountDaily:
-          preferences_data.pnlPercentageAccountDaily,
-        pnlPercentageAssetDaily:
-          preferences_data.pnlPercentageAssetDaily,
-        maxDrawdownPortfolioDaily:
-          preferences_data.maxDrawdownPortfolioDaily,
-        maxDrawdownAccountDaily:
-          preferences_data.maxDrawdownAccountDaily,
-        assetWeightWeekly:
-          preferences_data.assetWeightWeekly,
-        currencyExposureWeekly:
-          preferences_data.currencyExposureWeekly,
+        pnl_percentage_account_daily:
+          preferences_data.pnl_percentage_account_daily !== null
+          ? Number(preferences_data.pnl_percentage_account_daily)
+          : 1,
+        pnl_percentage_asset_daily: 
+          preferences_data.pnl_percentage_asset_daily !== null
+          ? Number(preferences_data.pnl_percentage_asset_daily)
+          : 1,
+        max_drawdown_portfolio_daily: 
+          preferences_data.max_drawdown_portfolio_daily !== null
+          ? Number(preferences_data.max_drawdown_portfolio_daily)
+          : 1,
+        max_drawdown_account_daily:
+          preferences_data.max_drawdown_account_daily !== null
+          ? Number(preferences_data.max_drawdown_account_daily)
+          : 1,
+        asset_weight_weekly:
+          preferences_data.asset_weight_weekly !== null
+          ? Number(preferences_data.asset_weight_weekly)
+          : 1,
+        currency_exposure_weekly:
+          preferences_data.currency_exposure_weekly !== null
+          ? Number(preferences_data.currency_exposure_weekly)
+          : 1,
       });
       setMessage("Preferencias cargadas correctamente");
     } catch (error) {
@@ -92,6 +104,7 @@ export function YourPreferencesCard() {
           body: JSON.stringify(preferences),
         }
       );
+      console.log(JSON.stringify(preferences))
 
       if (!response.ok) {
         throw new Error("Error guardando preferencias");
@@ -108,7 +121,7 @@ export function YourPreferencesCard() {
 
   const fields = [
     {
-      key: "pnlPercentageAccountDaily",
+      key: "pnl_percentage_account_daily",
       label: "Ganancia/Pérdida (P&L %) diaria por Cuenta",
       description:
         "Avísame si una de mis cuentas cae (pierde)/sube (gana) más de este % en un solo día",
@@ -117,7 +130,7 @@ export function YourPreferencesCard() {
       max: 100,
     },
     {
-      key: "pnlPercentageAssetDaily",
+      key: "pnl_percentage_asset_daily",
       label: "Ganancia/Pérdida (P&L %) diaria por Activo",
       description:
         "Avísame si uno de mis activos cae (pierde)/sube (gana) más de este % en un solo día",
@@ -126,7 +139,7 @@ export function YourPreferencesCard() {
       max: 100,
     },
     {
-      key: "maxDrawdownPortfolioDaily",
+      key: "max_drawdown_portfolio_daily",
       label: "Máximo drawdown del Portafolio",
       description:
         "Avísame si mi el valor total de mi portafolio ha caído este % respecto a su valor máximo histórico",
@@ -135,7 +148,7 @@ export function YourPreferencesCard() {
       max: 100,
     },
     {
-      key: "maxDrawdownAccountDaily",
+      key: "max_drawdown_account_daily",
       label: "Máximo drawdown por Cuenta",
       description:
         "Avísame si el valor total de una de mis cuentas ha caído este % respecto a su valor máximo histórico",
@@ -144,7 +157,7 @@ export function YourPreferencesCard() {
       max: 100,
     },
     {
-      key: "assetWeightWeekly",
+      key: "asset_weight_weekly",
       label: "Peso máximo por activo (Concentración)",
       description:
         "Avísame si un solo activo pasa a representar más de este % de todo mi portafolio",
@@ -154,7 +167,7 @@ export function YourPreferencesCard() {
       max: 100,
     },
     {
-      key: "currencyExposureWeekly",
+      key: "currency_exposure_weekly",
       label: "Exposición máxima por moneda (FX)",
       description:
         "Avísame si más de este % de mi dinero queda expuesta a USD o CLP",

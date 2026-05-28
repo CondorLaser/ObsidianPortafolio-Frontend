@@ -23,7 +23,7 @@ export const handlers = [
     return HttpResponse.json(asset_data)
   }),
 
-  // Vista perfil
+  // Vista perfil ===============================================
   // POST /pdf/extract_stocks_etf_1
   http.post(`${API_URL}/pdf/extract_stocks_etf_1`, async ({ request }) => {
     if(REQUEST_SUCCESSFUL){
@@ -99,6 +99,38 @@ export const handlers = [
     }
   }),
 
+  // GET /preferences
+  http.get(`${API_URL}/preferences`, () => {
+    if(REQUEST_SUCCESSFUL){
+      return HttpResponse.json(user_preferences)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        {status: 500}
+      )
+    }    
+  }),
+
+  // PUT /preferences
+  http.put(`${API_URL}/preferences`, async ({ request }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const updatedPreferences = await request.json()
+      // Retornamos las preferencias modificadas simulando la persistencia
+      return HttpResponse.json({
+        ...user_preferences,
+        ...updatedPreferences,
+        message: "Preferencias del usuario guardadas"
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+
+  // Vista Cuentas ============================================
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
@@ -111,6 +143,7 @@ export const handlers = [
     }
   }),
 
+  // Vista Cuenta Específica =================================
   // GET /accounts/:account_id
   http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
@@ -191,35 +224,7 @@ export const handlers = [
 
 
 
-  // GET /preferences
-  http.get(`${API_URL}/preferences`, () => {
-    if(REQUEST_SUCCESSFUL){
-      return HttpResponse.json(user_preferences[0])
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        {status: 500}
-      )
-    }    
-  }),
 
-  // PUT /preferences
-  http.put(`${API_URL}/preferences`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedPreferences = await request.json()
-      // Retornamos las preferencias modificadas simulando la persistencia
-      return HttpResponse.json({
-        ...user_preferences,
-        ...updatedPreferences,
-        message: "Preferencias del usuario guardadas"
-      })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
   // GET /user/:user_id 
   // Solo para tener el user id
