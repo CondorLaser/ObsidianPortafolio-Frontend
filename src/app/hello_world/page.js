@@ -1,11 +1,10 @@
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { SectionCard } from "@/src/components/section-card";
-import { auth } from "@clerk/nextjs/server";
 import { FetchButton } from "@/src/components/fetch-button";
-import { shouldRedirectToSignIn } from "@/src/lib/auth-mode";
+import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
 
 export default async function HelloWorldPage() {
-  const { isAuthenticated, redirectToSignIn, userId} = await auth()
+  const { isAuthenticated, redirectToSignIn, userId} = await getServerAuth()
 
   if (shouldRedirectToSignIn(isAuthenticated)) return redirectToSignIn()
 

@@ -1,13 +1,12 @@
 "use server"
 import { DashboardShell } from "@/src/components/dashboard-shell";
-import { auth } from "@clerk/nextjs/server";
 import { YourDataCard } from "@/src/components/profile/your_data-card";
 import { YourPreferencesCard } from "@/src/components/profile/your_preferences-card";
 import { YourRiskProfileCard } from "@/src/components/profile/your_risk_profile-card";
-import { shouldRedirectToSignIn } from "@/src/lib/auth-mode";
+import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
 
 export default async function ProfilePage() {
-  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+  const { isAuthenticated, redirectToSignIn, userId } = await getServerAuth()
 
   if (shouldRedirectToSignIn(isAuthenticated)) return redirectToSignIn()
   
