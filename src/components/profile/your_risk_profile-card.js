@@ -42,6 +42,8 @@ const RISK_OPTIONS = [
   }
 ]
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
+
 export function YourRiskProfileCard() {
   const [selectedRisk, setSelectedRisk] = useState("moderate")
   const [loading, setLoading] = useState(false)
@@ -53,7 +55,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
+        `${API_BASE_URL}/user/risk_profile`,
         {
           method: "GET",
           headers: {
@@ -90,7 +92,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/user/risk_profile`,
+        `${API_BASE_URL}/user/risk_profile`,
         {
           method: "PUT",
           headers: {

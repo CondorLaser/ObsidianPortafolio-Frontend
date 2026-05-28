@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 
 export function CollapsableShell({ title, description, children, actions }) {
@@ -28,11 +27,9 @@ export function CollapsableShell({ title, description, children, actions }) {
               </div>
 
               <div className="mt-2 shrink-0">
-                {open ? (
-                  <ChevronUp className="h-5 w-5 text-text-muted" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-text-muted" />
-                )}
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border-soft text-lg leading-none text-text-muted">
+                  {open ? "˄" : "˅"}
+                </span>
               </div>
             </button>
 

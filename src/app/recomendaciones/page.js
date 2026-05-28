@@ -1,13 +1,14 @@
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
+import { shouldRedirectToSignIn } from "@/src/lib/auth-mode";
 import { recommendations } from "@/src/lib/mock-data";
 import { auth } from '@clerk/nextjs/server'
 
 export default async function RecommendationsPage() {
   const { isAuthenticated, redirectToSignIn, userId } = await auth()
 
-  if (!isAuthenticated) return redirectToSignIn()
+  if (shouldRedirectToSignIn(isAuthenticated)) return redirectToSignIn()
   
   return (
     <DashboardShell

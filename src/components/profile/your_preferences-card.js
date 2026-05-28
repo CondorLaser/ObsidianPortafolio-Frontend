@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 
 import { CollapsableShell } from "../collapsable-shell";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || "";
+
 export function YourPreferencesCard() {
   const [loading, setLoading] = useState(false);
   const [loadingPreferences, setLoadingPreferences] = useState(true);
@@ -24,7 +26,7 @@ export function YourPreferencesCard() {
       setMessage(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
+        `${API_BASE_URL}/preferences`,
         {
           method: "GET",
           headers: {
@@ -80,7 +82,7 @@ export function YourPreferencesCard() {
       setMessage(null);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/preferences`,
+        `${API_BASE_URL}/preferences`,
         {
           method: "PUT",
           headers: {

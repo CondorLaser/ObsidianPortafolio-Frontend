@@ -12,7 +12,7 @@ import positions_data from "./data/positions.json"
 import dividends_data from "./data/dividends.json"
 import transactions_data from "./data/transactions.json"
  
-const API_URL = process.env.NEXT_PUBLIC_URL_BE
+const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
 
 export const handlers = [
@@ -99,21 +99,6 @@ export const handlers = [
     }
   }),
 
-  // GET /accounts/:account_id
-  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const { account_id } = params
-      // Busco la información de la cuenta específica
-      const account = accounts_data.find(acc => acc.id === account_id)
-      return HttpResponse.json(account)
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
   http.get(`${API_URL}/accounts/metrics/:account_id`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       const { account_id } = params
@@ -125,6 +110,30 @@ export const handlers = [
         daily: dailyMetrics,
         monthly: monthlyMetrics
       })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // GET /accounts/:account_id
+  // Debe ir despues de las rutas /accounts/metrics, /positions, /transactions y
+  // /dividends para no interceptarlas como si "metrics" fuera el id de cuenta.
+  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const account = accounts_data.find(acc => acc.id === account_id)
+
+      if (!account) {
+        return HttpResponse.json(
+          { error: "Cuenta no encontrada", code: "ACCOUNT_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },

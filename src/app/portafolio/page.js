@@ -3,12 +3,13 @@ import { auth } from "@clerk/nextjs/server";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SimpleChart } from "@/src/components/simple-chart";
+import { shouldRedirectToSignIn } from "@/src/lib/auth-mode";
 import {
   accountDistribution,
   certificateStatus,
+  getPositionsWithAssets,
   portfolioSummary,
-  portfolioTrend,
-  positions
+  portfolioTrend
 } from "@/src/lib/mock-data";
 
 const toneClasses = {
@@ -109,9 +110,9 @@ function PositionRow({ position }) {
 
 export default async function PortfolioPage() {
   const { isAuthenticated, redirectToSignIn } = await auth();
-  const visiblePositions = positions.slice(0, 3);
+  const positions = getPositionsWithAssets();
 
-  if (!isAuthenticated) return redirectToSignIn();
+  if (shouldRedirectToSignIn(isAuthenticated)) return redirectToSignIn();
 
   return (
     <DashboardShell
@@ -141,7 +142,7 @@ export default async function PortfolioPage() {
         <MetricCard
           label="Posiciones activas"
           value={portfolioSummary.activePositions}
-          helper="3 visibles en mock actual"
+          helper="Activos visibles en tabla"
           helperTone="muted"
         />
         <MetricCard
@@ -183,26 +184,14 @@ export default async function PortfolioPage() {
         </section>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[220px_minmax(0,1fr)]">
-        <section className="rounded-[28px] border border-border-soft bg-panel-soft p-7">
-          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Recomendaciones</h2>
-
-          <div className="mt-9 rounded-[24px] border border-border-soft bg-surface p-5">
-            <h3 className="text-[18px] font-semibold text-white">Datos por carga manual</h3>
-            <p className="mt-4 text-[14px] leading-7 text-text-muted">
-              El dashboard debe mostrar cuándo fue la última importación y qué certificado falta para confiar en los
-              números.
-            </p>
-          </div>
-        </section>
-
+      <div className="mt-6">
         <section className="rounded-[28px] border border-border-soft bg-panel-soft p-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Tabla de posiciones</h2>
+              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Activos principales</h2>
               <p className="mt-2 text-[14px] text-text-muted">
-                Activos principales del portafolio. Cada símbolo lleva a su ficha específica, equivalente a la futura
-                ruta{" "}
+                Activos principales del portafolio. Cada fila conserva el contexto de cuenta, cantidad y retorno, y
+                lleva a la ficha{" "}
                 <span className="rounded-full bg-accent/12 px-3 py-1 font-mono text-accent">/activos/[symbol]</span>.
               </p>
             </div>
@@ -223,7 +212,7 @@ export default async function PortfolioPage() {
                 </tr>
               </thead>
               <tbody>
-                {visiblePositions.map((position) => (
+                {positions.map((position) => (
                   <PositionRow key={`${position.account}-${position.symbol}`} position={position} />
                 ))}
               </tbody>
