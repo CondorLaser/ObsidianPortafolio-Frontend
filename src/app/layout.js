@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
               height={13}
               width={135}
               alt="Orion logo"
-              className="h-auto w-auto"
+              className="h-auto"
             />
           </Link>
         </div>
@@ -68,7 +68,7 @@ export default function RootLayout({ children }) {
     <html lang="es">
       <body className="bg-app text-white antialiased">
         <MswProvider>
-          {isE2eMode() ? appShell : <ClerkProvider>{appShell}</ClerkProvider>}
+          {isE2eMode() ? <ClerkProvider>{appShell}</ClerkProvider> : <ClerkProvider>{appShell}</ClerkProvider>}
         </MswProvider>
       </body>
     </html>
