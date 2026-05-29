@@ -1,4 +1,4 @@
-name: CI Pipeline con Cypress
+name: Pipeline CI con Cypress
 run-name: Push by @${{ github.actor }}
 on:
     [push, pull_request]
