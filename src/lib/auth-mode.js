@@ -3,13 +3,13 @@ export function isE2eMode() {
 }
 
 export async function getServerAuth() {
-  if (isE2eMode()) {
+  /* if (isE2eMode()) {
     return {
       isAuthenticated: true,
       redirectToSignIn: () => null,
       userId: "e2e-user"
     };
-  }
+  } */
 
   const { auth } = await import("@clerk/nextjs/server");
   return auth();

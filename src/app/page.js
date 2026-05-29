@@ -98,7 +98,7 @@ function ClerkHomePage() {
 export default function HomePage() {
   const isE2eMode = process.env.NEXT_PUBLIC_E2E_MODE === "true";
 
-  if (isE2eMode) return <SignedInHome />;
+  // if (isE2eMode) return <SignedInHome />;
 
   return <ClerkHomePage />;
 }
