@@ -3,11 +3,8 @@ import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function HomePage() {
-
-  const { isSignedIn, user, isLoaded } =  useUser()
-
-  if (isSignedIn) return (
+function SignedInHome() {
+  return (
     <main className="min-h-screen px-4 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section>
@@ -60,7 +57,11 @@ export default function HomePage() {
         </section>
       </div>
     </main>
-  ); else return (
+  );
+}
+
+function SignedOutHome() {
+  return (
     <main className="min-h-screen px-4 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section>
@@ -85,5 +86,19 @@ export default function HomePage() {
         </div>
       </div>
     </main>
-  )  
+  );
+}
+
+function ClerkHomePage() {
+  const { isSignedIn } = useUser();
+
+  return isSignedIn ? <SignedInHome /> : <SignedOutHome />;
+}
+
+export default function HomePage() {
+  const isE2eMode = process.env.NEXT_PUBLIC_E2E_MODE === "true";
+
+  if (isE2eMode) return <SignedInHome />;
+
+  return <ClerkHomePage />;
 }

@@ -16,8 +16,9 @@ export default function AccountsPage() {
     async function loadAccounts() {
       try {
         setLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
         const token = await getToken();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
+        const res = await fetch(`${baseUrl}/accounts`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -89,7 +90,10 @@ export default function AccountsPage() {
           //CASO 4: Despliegue de las cuentas mockeadas
           <div className="grid gap-5 md:grid-cols-2">
             {accounts.map((account) => (
-              <AccountCard key={account.id} account={account} />
+              <AccountCard
+                key={account.id}
+                account={account}
+              />
             ))}
           </div>
 

@@ -143,11 +143,18 @@ export default function AccountDetailPage({ params }) {
   const totalDividendsNet = dividends.reduce((sum, div) => sum + Number(div.net_amount || 0), 0);
   const dividendsValue = `${totalDividendsNet.toFixed(2)} ${account.currency}`;
 
+  const getTransactionType = (transaction) => (
+    transaction.transaction_type || transaction.kind || ""
+  ).toString().toUpperCase();
+
   let lastTxLabel = "Ninguna";
   if (transactions.length > 0) {
-    const sortedTx = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sortedTx = [...transactions].sort(
+      (a, b) => new Date(b.executed_at || b.date) - new Date(a.executed_at || a.date)
+    );
     const lastTx = sortedTx[0];
-    lastTxLabel = `${lastTx.kind === "buy" ? "Compra" : "Venta"} (${new Date(lastTx.executed_at).toLocaleDateString("es-CL")})`;
+    const lastTxType = getTransactionType(lastTx) === "BUY" ? "Compra" : "Venta";
+    lastTxLabel = `${lastTxType} (${new Date(lastTx.executed_at || lastTx.date).toLocaleDateString("es-CL")})`;
   }
 
   // Mapeo adaptativo para el componente de gráficos
@@ -187,7 +194,7 @@ export default function AccountDetailPage({ params }) {
       <div className="mt-6">
         <SectionCard
           title="Evolución del P&L Diario"
-          description="Monitoreo histórico del rendimiento acumulado para la cuenta"
+          description="Monitoreo histórico del rendimiento acumulado para la cuenta."
         >
           {chartData.length === 0 ? (
             <p className="text-sm text-text-muted py-6 text-center">No hay registros históricos suficientes para graficar</p>
@@ -286,12 +293,13 @@ export default function AccountDetailPage({ params }) {
                 <tbody className="divide-y divide-border-soft/20 text-s text-white">
                   {transactions.map((tx) => {
                     const asset = tx.asset || {};
+                    const txType = getTransactionType(tx);
                     return (
                       <tr key={tx.id} className="hover:bg-panel/20 transition-colors">
                         <td className="p-3 text-text-muted">{new Date(tx.executed_at).toLocaleDateString("es-CL")}</td>
                         <td className="p-3">
-                          <span className={`rounded px-2 py-0.5 font-bold text-[10px] uppercase ${tx.kind === 'buy' ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400'}`}>
-                            {tx.kind === 'buy' ? 'Compra' : 'Venta'}
+                          <span className={`rounded px-2 py-0.5 font-bold text-[10px] uppercase ${txType === "BUY" ? "bg-blue-500/10 text-blue-400" : "bg-orange-500/10 text-orange-400"}`}>
+                            {txType === "BUY" ? "Compra" : "Venta"}
                           </span>
                         </td>
                         <td className="p-3">

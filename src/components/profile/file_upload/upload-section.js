@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
 import { useAuth } from "@clerk/nextjs";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
+
 export function UploadSection(finantial_file_type) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [accountName, setAccountName] = useState("")
@@ -19,7 +21,7 @@ export function UploadSection(finantial_file_type) {
         setLoadingAccounts(true)
         const token = await getToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts_names`, {
+          `${API_BASE_URL}/user/accounts_names`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -84,8 +86,8 @@ export function UploadSection(finantial_file_type) {
       formData.append("accountName", sanitizedName)
 
       const endpoint = finantial_file_type === "mutual_funds"
-        ? `${process.env.NEXT_PUBLIC_URL_BE}/pdf/extract_mutual_funds`
-        : `${process.env.NEXT_PUBLIC_URL_BE}/pdf/extract_stocks_etf_1`
+        ? `${API_BASE_URL}/pdf/extract_mutual_funds`
+        : `${API_BASE_URL}/pdf/extract_stocks_etf_1`
 
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(

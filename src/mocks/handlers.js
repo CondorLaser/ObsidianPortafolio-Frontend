@@ -1,26 +1,319 @@
 import { http, HttpResponse } from 'msw'
 
 import asset_data from "./data/asset_actions_mini.json"
-
 import users_data from "./data/users.json"
 import user_profiles from "./data/user_profiles.json"
 import accounts_data from "./data/accounts.json"
 import accounts_daily_metrics from "./data/metrics/account_daily.json"
 import accounts_monthly_metrics from "./data/metrics/account_monthly.json"
+import asset_daily_metrics from "./data/metrics/asset_daily.json"
+import asset_monthly_metrics from "./data/metrics/asset_monthly.json"
 import user_preferences from "./data/user_preferences.json"
+import asset_prices from "./data/asset_prices.json"
+import portfolio_snapshot from "./data/portfolio_snapshot.json"
 import positions_data from "./data/positions.json"
 import dividends_data from "./data/dividends.json"
 import transactions_data from "./data/transactions.json"
 import account_names from "./data/accounts_names.json"
  
-const API_URL = process.env.NEXT_PUBLIC_URL_BE
+const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
+
+const formatCurrency = (value, currency = "USD") => {
+  const number = Number(value || 0)
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: number % 1 === 0 ? 0 : 2
+  }).format(number)
+}
+
+const formatPercent = (value) => {
+  const number = Number(value || 0)
+  return `${number >= 0 ? "+" : ""}${(number * 100).toFixed(2)}%`
+}
+
+const formatDateTime = (date) => {
+  if (!date) return "Sin registro"
+
+  return new Date(date).toLocaleString("es-CL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+}
+
+const getAccountById = (accountId) => (
+  accounts_data.find((account) => account.id === accountId)
+)
+
+const getLatestPrice = (assetId, fallback) => {
+  const price = asset_prices.find((item) => item.asset_id === assetId)
+  return Number(price?.close ?? fallback ?? 0)
+}
+
+const getAssetDailyMetrics = (assetId) => (
+  asset_daily_metrics.find((item) => item.asset_id === assetId)
+)
+
+const getAssetMonthlyMetrics = (assetId) => (
+  asset_monthly_metrics.find((item) => item.asset_id === assetId)
+)
+
+const getAssetTypeLabel = (kind) => {
+  if (kind === "stock") return "Acción"
+  if (kind === "etf") return "ETF"
+  if (kind === "fund") return "Fondo mutuo"
+  return "Activo"
+}
+
+const buildPriceHistory = (currentPrice, returnPct) => {
+  const current = Number(currentPrice || 0)
+  const variation = Number(returnPct || 0)
+  const start = Math.max(current / (1 + Math.max(variation, -0.85)), current * 0.82)
+
+  return [
+    start,
+    start * 1.04,
+    start * 1.09,
+    current * 0.94,
+    current * 0.98,
+    current
+  ].map((value) => Number(value.toFixed(2)))
+}
+
+const mapPosition = (position) => {
+  const account = getAccountById(position.account_id)
+  const asset = position.asset || {}
+  const currentPrice = getLatestPrice(position.asset_id, position.avg_cost)
+  const totalValue = currentPrice * Number(position.quantity || 0)
+  const returnPct = position.avg_cost
+    ? (currentPrice - Number(position.avg_cost)) / Number(position.avg_cost)
+    : 0
+  const dailyMetrics = getAssetDailyMetrics(position.asset_id)
+  const monthlyMetrics = getAssetMonthlyMetrics(position.asset_id)
+
+  return {
+    id: position.id,
+    accountId: position.account_id,
+    assetId: position.asset_id,
+    symbol: asset.symbol,
+    account: account?.name ?? "Cuenta sin nombre",
+    quantity: Number(position.quantity || 0).toLocaleString("es-CL", {
+      maximumFractionDigits: 4
+    }),
+    avgCost: formatCurrency(position.avg_cost, account?.currency ?? asset.currency ?? "USD"),
+    totalValue: formatCurrency(totalValue, account?.currency ?? asset.currency ?? "USD"),
+    unrealizedPnl: formatCurrency(totalValue - (Number(position.avg_cost || 0) * Number(position.quantity || 0)), account?.currency ?? asset.currency ?? "USD"),
+    realizedPnl: formatCurrency(position.realized_pnl, account?.currency ?? asset.currency ?? "USD"),
+    totalDividends: formatCurrency(position.total_dividends, account?.currency ?? asset.currency ?? "USD"),
+    totalFees: formatCurrency(position.total_fees, account?.currency ?? asset.currency ?? "USD"),
+    currentPrice: formatCurrency(currentPrice, account?.currency ?? asset.currency ?? "USD"),
+    returnPct: formatPercent(returnPct),
+    weight: "Por calcular",
+    source: currentPrice ? "Precio de mercado" : "Certificado importado",
+    lastTransactionAt: formatDateTime(position.last_transaction_at),
+    updatedAt: formatDateTime(position.updated_at),
+    name: asset.name,
+    type: getAssetTypeLabel(asset.kind),
+    market: asset.currency === "USD" ? "Estados Unidos" : "Chile",
+    currency: asset.currency,
+    asset: {
+      ...asset,
+      currentPrice: formatCurrency(currentPrice, asset.currency ?? account?.currency ?? "USD"),
+      priceSource: currentPrice ? "YahooFinance" : "Certificado importado",
+      priceHistory: buildPriceHistory(currentPrice, returnPct),
+      dailyMetrics: dailyMetrics
+        ? {
+            absoluteReturn: formatPercent(dailyMetrics.absolute_return),
+            volatility: formatPercent(dailyMetrics.volatility),
+            maxDrawdown: formatPercent(dailyMetrics.max_drawdown)
+          }
+        : null,
+      monthlyMetrics: monthlyMetrics
+        ? {
+            absoluteReturn: "Disponible próximamente",
+            beta: Number(monthlyMetrics.beta).toFixed(2)
+          }
+        : null
+    }
+  }
+}
+
+const getPositionsWithAssets = () => positions_data.map(mapPosition)
+
+const getPositionBySymbol = (symbol) => {
+  const normalizedSymbol = decodeURIComponent(symbol).toUpperCase()
+  return getPositionsWithAssets().find((position) => position.symbol.toUpperCase() === normalizedSymbol)
+}
+
+const getPortfolioTrend = () => (
+  portfolio_snapshot.map((snapshot) => ({
+    label: new Date(snapshot.date).toLocaleDateString("es-CL", { day: "2-digit", month: "short" }),
+    value: Number(snapshot.total_value)
+  }))
+)
+
+const getPortfolioSummary = () => {
+  const latest = portfolio_snapshot.at(-1)
+  const previous = portfolio_snapshot.at(-2)
+  const changePct = previous?.total_value
+    ? (Number(latest.total_value) - Number(previous.total_value)) / Number(previous.total_value)
+    : 0
+
+  return {
+    totalValue: formatCurrency(latest?.total_value, "USD"),
+    totalReturn: formatCurrency(latest?.unrealized_pnl, "USD"),
+    totalReturnPct: formatPercent(changePct),
+    activePositions: positions_data.length.toString(),
+    linkedAccounts: accounts_data.length.toString(),
+    dataFreshness: `${formatPercent(changePct)} último período`,
+    pendingItems: accounts_data.map((account) => account.name).join(" y ")
+  }
+}
+
+const getAccountDistribution = () => {
+  const latest = portfolio_snapshot.at(-1)
+  const total = Number(latest?.total_value || 0)
+
+  return accounts_data.map((account) => {
+    const amount = Number(latest?.breakdown_by_account?.[account.id] || 0)
+    const percentage = total ? (amount / total) * 100 : 0
+
+    return {
+      name: account.name,
+      value: `${Math.round(percentage)}%`,
+      amount: formatCurrency(amount, account.currency),
+      change: "Actualizada",
+      status: `Registrada el ${new Date(account.created_at).toLocaleDateString("es-CL")}`
+    }
+  })
+}
+
+const getCertificateStatus = () => (
+  accounts_data.map((account) => ({
+    title: account.name,
+    status: "Actualizado",
+    detail: new Date(account.created_at).toLocaleDateString("es-CL"),
+    tone: "success"
+  }))
+)
 
 export const handlers = [
   // Para testear
   // Actualmente solo con Assets de tipo Stock
   http.get(`${API_URL}/assets`, () => {
     return HttpResponse.json(asset_data)
+  }),
+
+  // Vista portafolio
+  http.get(`${API_URL}/portfolio/dashboard`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        summary: getPortfolioSummary(),
+        accountDistribution: getAccountDistribution(),
+        certificateStatus: getCertificateStatus(),
+        trend: getPortfolioTrend(),
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista activos
+  http.get(`${API_URL}/positions`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista detalle activo
+  http.get(`${API_URL}/positions/:symbol`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { symbol } = params
+      const position = getPositionBySymbol(symbol)
+
+      if (!position) {
+        return HttpResponse.json(
+          { error: "Activo no encontrado", code: "POSITION_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(position)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista portafolio 
+  http.get(`${API_URL}/portfolio/dashboard`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        summary: getPortfolioSummary(),
+        accountDistribution: getAccountDistribution(),
+        certificateStatus: getCertificateStatus(),
+        trend: getPortfolioTrend(),
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista activos
+  http.get(`${API_URL}/positions`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista detalle activo
+  http.get(`${API_URL}/positions/:symbol`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { symbol } = params
+      const position = getPositionBySymbol(symbol)
+
+      if (!position) {
+        return HttpResponse.json(
+          { error: "Activo no encontrado", code: "POSITION_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(position)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
   }),
 
   // Vista perfil ===============================================
@@ -170,6 +463,30 @@ export const handlers = [
         daily: dailyMetrics,
         monthly: monthlyMetrics
       })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // GET /accounts/:account_id
+  // Debe ir despues de las rutas /accounts/metrics, /positions, /transactions y
+  // /dividends para no interceptarlas como si "metrics" fuera el id de cuenta.
+  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const account = accounts_data.find(acc => acc.id === account_id)
+
+      if (!account) {
+        return HttpResponse.json(
+          { error: "Cuenta no encontrada", code: "ACCOUNT_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
