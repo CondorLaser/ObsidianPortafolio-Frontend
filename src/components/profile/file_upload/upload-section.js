@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
+
 export function UploadSection() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [accountName, setAccountName] = useState("")
@@ -15,9 +17,7 @@ export function UploadSection() {
       try {
         setLoadingAccounts(true)
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_BE}/user/accounts_names`
-        )
+        const response = await fetch(`${API_BASE_URL}/user/accounts_names`)
         if (!response.ok) {
           throw new Error("Error obteniendo cuentas")
         }
@@ -78,7 +78,7 @@ export function UploadSection() {
 
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_BE}/upload`,
+        `${API_BASE_URL}/upload`,
         {
           method: "POST",
           body: formData,
