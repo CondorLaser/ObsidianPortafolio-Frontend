@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { AccountCard } from "@/src/components/accounts/account-card";
 
@@ -9,15 +10,19 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const { getToken } = useAuth();
+
   useEffect(() => {
     async function loadAccounts() {
       try {
         setLoading(true);
         const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+        const token = await getToken();
         const res = await fetch(`${baseUrl}/accounts`, {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           }
         });
 
@@ -34,7 +39,7 @@ export default function AccountsPage() {
     }
 
     loadAccounts();
-  }, []);
+  }, [getToken]);
 
   return (
     <DashboardShell

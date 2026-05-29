@@ -199,7 +199,7 @@ export async function YourDataCard({
                     title="Cargar Certificado de Transacciones Acciones y ETFs (PDF)"
                     description="Sube un archivo PDF con tus transacciones de Acciones y ETFs para importarlas al sistema."
                 >
-                    <UploadSection />
+                    <UploadSection finantial_file_type="stocks_etfs"/>
 
                     {/* {cargarUploadStatus(etfsLastUploadDate)} */}
                 </SectionCard>
@@ -208,7 +208,7 @@ export async function YourDataCard({
                     title="Cargar Certificado de Transacciones Fondos Mutuos (PDF)"
                     description="Sube un archivo CSV con transacciones para importarlas al sistema."
                 >
-                    <UploadSection />
+                    <UploadSection finantial_file_type="mutual_funds"/>
 
                     {/* {cargarUploadStatus(fondosMutuosLastUploadDate)} */}
                 </SectionCard>

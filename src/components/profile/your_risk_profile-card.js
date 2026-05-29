@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { CollapsableShell } from "../collapsable-shell"
-
+import { useAuth } from "@clerk/nextjs";
 const RISK_OPTIONS = [
   {
     value: "conservative",
@@ -48,18 +48,20 @@ export function YourRiskProfileCard() {
   const [selectedRisk, setSelectedRisk] = useState("moderate")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  const { getToken } = useAuth();
 
   const fetchRiskProfile = async () => {
     try {
       setLoading(true)
       setMessage(null)
-
+      const token = await getToken();
       const response = await fetch(
         `${API_BASE_URL}/user/risk_profile`,
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           credentials: "include"
         }
@@ -70,7 +72,7 @@ export function YourRiskProfileCard() {
       }
 
       const data = await response.json()
-      const riskValue = data[0]
+      const riskValue = data.risk_profile
       if (RISK_OPTIONS.some(option => option.value === riskValue)) {
         setSelectedRisk(riskValue)
       }
@@ -84,25 +86,31 @@ export function YourRiskProfileCard() {
 
   useEffect(() => {
     fetchRiskProfile()
-  }, [])
+  }, [getToken])
 
   const handleSave = async () => {
     try {
       setLoading(true)
       setMessage(null)
-
+      const token = await getToken();
       const response = await fetch(
         `${API_BASE_URL}/user/risk_profile`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
-            riskProfile: selectedRisk
+            risk_profile: selectedRisk
           })
         }
       )
+      const data = await response.json()
+      const riskValue = data.risk_profile
+      if (RISK_OPTIONS.some(option => option.value === riskValue)) {
+        setSelectedRisk(riskValue)
+      }
 
       if (!response.ok) {
         throw new Error("No se pudo actualizar el perfil de riesgo")

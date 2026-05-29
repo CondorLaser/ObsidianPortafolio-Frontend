@@ -1,23 +1,34 @@
 "use client"
 import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
+import { useAuth } from "@clerk/nextjs";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 
-export function UploadSection() {
+export function UploadSection(finantial_file_type) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [accountName, setAccountName] = useState("")
   const [accounts, setAccounts] = useState([])
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loading, setLoading] = useState(false)
 
+  const { getToken } = useAuth();
+
   // Cargar cuentas del usuario
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         setLoadingAccounts(true)
-
-        const response = await fetch(`${API_BASE_URL}/user/accounts_names`)
+        const token = await getToken();
+        const response = await fetch(
+          `${API_BASE_URL}/user/accounts_names`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }            
+          }
+        )
         if (!response.ok) {
           throw new Error("Error obteniendo cuentas")
         }
@@ -26,8 +37,8 @@ export function UploadSection() {
         const accountsList = Array.isArray(data)
           ? data
           : data.accounts || []
-
-        setAccounts(accountsList)
+        const accountNames = accountsList.map(account => account.name)
+        setAccounts(accountNames)
       } catch (error) {
         console.error("Error obteniendo cuentas:", error)
       } finally {
@@ -35,7 +46,7 @@ export function UploadSection() {
       }
     }
     fetchAccounts()
-  }, [])
+  }, [getToken])
 
   
 
@@ -67,20 +78,26 @@ export function UploadSection() {
 
     try {
       setLoading(true)
+      const token = await getToken();
       const sanitizedName = sanitizeAccountName(accountName)
-      /* console.log("Archivo:", selectedFile)
-      console.log("Cuenta:", accountName ,sanitizedName) */
       // Crea FormData y agrega info
       const formData = new FormData()
       formData.append("file", selectedFile)
       formData.append("accountName", sanitizedName)
 
+      const endpoint = finantial_file_type === "mutual_funds"
+        ? `${API_BASE_URL}/pdf/extract_mutual_funds`
+        : `${API_BASE_URL}/pdf/extract_stocks_etf_1`
 
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(
-        `${API_BASE_URL}/upload`,
+        endpoint,
         {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },         
           body: formData,
         }
       )

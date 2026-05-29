@@ -14,6 +14,7 @@ import portfolio_snapshot from "./data/portfolio_snapshot.json"
 import positions_data from "./data/positions.json"
 import dividends_data from "./data/dividends.json"
 import transactions_data from "./data/transactions.json"
+import account_names from "./data/accounts_names.json"
  
 const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
@@ -261,9 +262,80 @@ export const handlers = [
     }
   }),
 
-  // Vista perfil
-  // POST /upload
-  http.post(`${API_URL}/upload`, async ({ request }) => {
+  // Vista portafolio 
+  http.get(`${API_URL}/portfolio/dashboard`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        summary: getPortfolioSummary(),
+        accountDistribution: getAccountDistribution(),
+        certificateStatus: getCertificateStatus(),
+        trend: getPortfolioTrend(),
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista activos
+  http.get(`${API_URL}/positions`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json({
+        positions: getPositionsWithAssets()
+      })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista detalle activo
+  http.get(`${API_URL}/positions/:symbol`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { symbol } = params
+      const position = getPositionBySymbol(symbol)
+
+      if (!position) {
+        return HttpResponse.json(
+          { error: "Activo no encontrado", code: "POSITION_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(position)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista perfil ===============================================
+  // POST /pdf/extract_stocks_etf_1
+  http.post(`${API_URL}/pdf/extract_stocks_etf_1`, async ({ request }) => {
+    if(REQUEST_SUCCESSFUL){
+      return HttpResponse.json({
+        success: true,
+        message: "Certificado de transacciones procesado y portafolio actualizado con éxito."
+      }, { status: 201 }
+      )
+    }
+    else{
+      return HttpResponse.json({
+        success: false,
+        error: "Internal Server Error"
+      }, { status: 500 }
+      )
+    }
+  }),
+  // POST /pdf/extract_mutual_funds
+  http.post(`${API_URL}/pdf/extract_mutual_funds`, async ({ request }) => {
     if(REQUEST_SUCCESSFUL){
       return HttpResponse.json({
         success: true,
@@ -280,10 +352,10 @@ export const handlers = [
     }
   }),
 
-  // GET /user/risk_profile
-  http.get(`${API_URL}/user/risk_profile`, () => {
+  // GET /profile (obtener perfil de riesgo)
+  http.get(`${API_URL}/profile`, () => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(["agressive"])
+      return HttpResponse.json(user_profiles[0], {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -292,17 +364,14 @@ export const handlers = [
     }
   }),
 
-  // PUT /user/risk_profile
-  http.put(`${API_URL}/user/risk_profile`, async ({ request }) => {
+  // PUT /profile (cambiar perfil de riesgo)
+  http.put(`${API_URL}/profile`, async ({ request }) => {
     if (REQUEST_SUCCESSFUL) {
       const updatedProfile = await request.json()
       
       // Retornamos el perfil modificado simulando la persistencia
-      return HttpResponse.json({
-        ...user_profiles,
-        ...updatedProfile,
-        message: "Perfil de riesgo actualizado correctamente"
-      })
+      return HttpResponse.json(
+        user_profiles[0], {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -311,13 +380,10 @@ export const handlers = [
     }
   }),
 
-  // GET /accounts/:user_id <-------------
+  // GET /user/accounts_names (obtener nombres de cuentas del usuario)
   http.get(`${API_URL}/user/accounts_names`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json([
-        "Fintual USD",
-        "IBKR Trading"
-      ])
+      return HttpResponse.json(account_names, {status: 200})
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -326,10 +392,58 @@ export const handlers = [
     }
   }),
 
+  // GET /preferences
+  http.get(`${API_URL}/preferences`, () => {
+    if(REQUEST_SUCCESSFUL){
+      return HttpResponse.json(user_preferences, {status: 200})
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        {status: 500}
+      )
+    }    
+  }),
+
+  // PUT /preferences
+  http.put(`${API_URL}/preferences`, async ({ request }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const updatedPreferences = await request.json()
+      // Retornamos las preferencias modificadas simulando la persistencia
+      return HttpResponse.json({
+        ...user_preferences,
+        ...updatedPreferences,
+        message: "Preferencias del usuario guardadas"
+      }, {status: 200})
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+
+  // Vista Cuentas ============================================
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       return HttpResponse.json(accounts_data)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista Cuenta Específica =================================
+  // GET /accounts/:account_id
+  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      // Busco la información de la cuenta específica
+      const account = accounts_data.find(acc => acc.id === account_id)
+      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -427,35 +541,7 @@ export const handlers = [
 
 
 
-  // GET /preferences
-  http.get(`${API_URL}/preferences`, () => {
-    if(REQUEST_SUCCESSFUL){
-      return HttpResponse.json(user_preferences[0])
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        {status: 500}
-      )
-    }    
-  }),
 
-  // PUT /preferences
-  http.put(`${API_URL}/preferences`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedPreferences = await request.json()
-      // Retornamos las preferencias modificadas simulando la persistencia
-      return HttpResponse.json({
-        ...user_preferences,
-        ...updatedPreferences,
-        message: "Preferencias del usuario guardadas"
-      })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
   // GET /user/:user_id 
   // Solo para tener el user id
