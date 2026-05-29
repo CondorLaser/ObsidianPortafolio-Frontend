@@ -21,6 +21,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.5",
     "cypress": "^15.16.0",
+    "cypress-mochawesome-reporter": "^4.0.2",
     "msw": "^2.14.6",
     "tailwindcss": "4.1.5"
   },
