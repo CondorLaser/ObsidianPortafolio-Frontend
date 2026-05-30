@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { FileUploadSelector } from "./file-upload"
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 
@@ -12,7 +12,7 @@ export function UploadSection(finantial_file_type) {
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loading, setLoading] = useState(false)
 
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   // Cargar cuentas del usuario
   useEffect(() => {

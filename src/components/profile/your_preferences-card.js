@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 import { CollapsableShell } from "../collapsable-shell";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || "";
@@ -19,7 +19,7 @@ export function YourPreferencesCard() {
     asset_weight_weekly: 35,
     currency_exposure_weekly: 50,
   });
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   async function fetchPreferences() {
     try {

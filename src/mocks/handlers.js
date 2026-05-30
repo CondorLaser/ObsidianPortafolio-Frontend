@@ -262,60 +262,6 @@ export const handlers = [
     }
   }),
 
-  // Vista portafolio 
-  http.get(`${API_URL}/portfolio/dashboard`, () => {
-    if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json({
-        summary: getPortfolioSummary(),
-        accountDistribution: getAccountDistribution(),
-        certificateStatus: getCertificateStatus(),
-        trend: getPortfolioTrend(),
-        positions: getPositionsWithAssets()
-      })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
-  // Vista activos
-  http.get(`${API_URL}/positions`, () => {
-    if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json({
-        positions: getPositionsWithAssets()
-      })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
-  // Vista detalle activo
-  http.get(`${API_URL}/positions/:symbol`, ({ params }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const { symbol } = params
-      const position = getPositionBySymbol(symbol)
-
-      if (!position) {
-        return HttpResponse.json(
-          { error: "Activo no encontrado", code: "POSITION_NOT_FOUND" },
-          { status: 404 }
-        )
-      }
-
-      return HttpResponse.json(position)
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
   // Vista perfil ===============================================
   // POST /pdf/extract_stocks_etf_1
   http.post(`${API_URL}/pdf/extract_stocks_etf_1`, async ({ request }) => {
@@ -423,27 +369,11 @@ export const handlers = [
   }),
 
 
-  // Vista Cuentas ============================================
+  // Vista Cuentas 
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       return HttpResponse.json(accounts_data)
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
-  // Vista Cuenta Específica =================================
-  // GET /accounts/:account_id
-  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const { account_id } = params
-      // Busco la información de la cuenta específica
-      const account = accounts_data.find(acc => acc.id === account_id)
-      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -463,30 +393,6 @@ export const handlers = [
         daily: dailyMetrics,
         monthly: monthlyMetrics
       })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
-  // GET /accounts/:account_id
-  // Debe ir despues de las rutas /accounts/metrics, /positions, /transactions y
-  // /dividends para no interceptarlas como si "metrics" fuera el id de cuenta.
-  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const { account_id } = params
-      const account = accounts_data.find(acc => acc.id === account_id)
-
-      if (!account) {
-        return HttpResponse.json(
-          { error: "Cuenta no encontrada", code: "ACCOUNT_NOT_FOUND" },
-          { status: 404 }
-        )
-      }
-
-      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
@@ -530,6 +436,31 @@ export const handlers = [
       return HttpResponse.json({
         dividends
       })
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  // Vista Cuenta Específica 
+  // GET /accounts/:account_id
+  // Debe ir despues de las rutas /accounts/metrics, /positions, /transactions y
+  // /dividends para no interceptarlas como si "metrics" fuera el id de cuenta.
+  http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { account_id } = params
+      const account = accounts_data.find(acc => acc.id === account_id)
+
+      if (!account) {
+        return HttpResponse.json(
+          { error: "Cuenta no encontrada", code: "ACCOUNT_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(account)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
@@ -11,7 +11,7 @@ import { CollapsableShell } from "@/src/components/collapsable-shell";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const [account, setAccount] = useState(null);
   const [metrics, setMetrics] = useState(null);
