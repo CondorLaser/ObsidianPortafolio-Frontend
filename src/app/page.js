@@ -69,15 +69,20 @@ function SignedOutHome() {
     <main className="min-h-screen px-4 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section>
-          <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">Orion Portafolio</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-teal-200 font-bold">
+            Orion Portafolio
+          </p>
+
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-tight lg:text-7xl">
             Visualiza tus inversiones de forma clara, simple e interactiva.
           </h1>
+
           <p className="mt-6 max-w-2xl text-lg text-text-muted">
             Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
         </section>
+
         <div>
           <Image src="/assets/grafico_stock_1.jpg" height={500} width={500} alt="Orion logo" className="w-auto h-auto rounded-xl opacity-85"/>
         </div>
