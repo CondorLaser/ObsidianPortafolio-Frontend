@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, passthrough } from 'msw'
 
 import asset_data from "./data/asset_actions_mini.json"
 import users_data from "./data/users.json"
@@ -18,6 +18,7 @@ import account_names from "./data/accounts_names.json"
  
 const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
+const USE_REAL_UPLOAD = process.env.NEXT_PUBLIC_REAL_UPLOAD === "true"
 
 const formatCurrency = (value, currency = "USD") => {
   const number = Number(value || 0)
@@ -319,6 +320,10 @@ export const handlers = [
   // Vista perfil ===============================================
   // POST /pdf/extract_stocks_etf_1
   http.post(`${API_URL}/pdf/extract_stocks_etf_1`, async ({ request }) => {
+    if (USE_REAL_UPLOAD) {
+      return passthrough()
+    }
+
     if(REQUEST_SUCCESSFUL){
       return HttpResponse.json({
         success: true,
@@ -336,6 +341,10 @@ export const handlers = [
   }),
   // POST /pdf/extract_mutual_funds
   http.post(`${API_URL}/pdf/extract_mutual_funds`, async ({ request }) => {
+    if (USE_REAL_UPLOAD) {
+      return passthrough()
+    }
+
     if(REQUEST_SUCCESSFUL){
       return HttpResponse.json({
         success: true,

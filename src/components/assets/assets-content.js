@@ -24,6 +24,9 @@ export function AssetsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL_BE || ""; 
+  console.log("[debug] fetching:", `${baseUrl}/positions`);
+
   useEffect(() => {
     async function loadPositions() {
       try {

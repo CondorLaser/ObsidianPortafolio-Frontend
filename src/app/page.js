@@ -1,9 +1,24 @@
 'use client'
 import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 function SignedInHome() {
+  const { getToken } = useAuth()
+
+  useEffect(() => {
+    const init = async () => {
+      const token = await getToken()
+      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      console.log("[init] accounts check", res.status)
+    }
+    init()
+  }, [])
+
   return (
     <main className="min-h-screen px-4 lg:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
@@ -17,23 +32,12 @@ function SignedInHome() {
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              href="/portafolio"
-              prefetch={false}
-              // bg-teal-500 hover:bg-teal-600/90 text-white rounded-lg font-bold text-sm h-10 px-4 py-3 transition-colors duration-200
-              // rounded-2xl bg-accent px-5 py-3 font-semibold text-white transition hover:opacity-90
-              className="bg-panel-soft hover:bg-teal-600/50 text-white rounded-xl font-bold text-sm h-11 px-4 py-3 transition-colors duration-200 transition hover:scale-[1.02]"
-            >
+            <Link href="/portafolio" prefetch={false} className="bg-panel-soft hover:bg-teal-600/50 text-white rounded-xl font-bold text-sm h-11 px-4 py-3 transition-colors duration-200 transition hover:scale-[1.02]">
               Ir al portafolio
             </Link>
-            <Link
-              href="/perfil"
-              prefetch={false}
-              className="rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft"
-            >
+            <Link href="/perfil" prefetch={false} className="rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft">
               Ver perfil
             </Link>
-
           </div>
         </section>
 
@@ -73,16 +77,9 @@ function SignedOutHome() {
             Esta es la base para construir el dashboard, presentar los activos,
             cuentas, alertas y recomendaciones con una estructura facil de seguir.
           </p>
-          
         </section>
         <div>
-          <Image 
-            src="/assets/grafico_stock_1.jpg" 
-            height={500} 
-            width={500}
-            alt="Orion logo"
-            className="w-auto h-auto rounded-xl opacity-85"
-            />
+          <Image src="/assets/grafico_stock_1.jpg" height={500} width={500} alt="Orion logo" className="w-auto h-auto rounded-xl opacity-85"/>
         </div>
       </div>
     </main>
@@ -91,14 +88,11 @@ function SignedOutHome() {
 
 function ClerkHomePage() {
   const { isSignedIn } = useUser();
-
   return isSignedIn ? <SignedInHome /> : <SignedOutHome />;
 }
 
 export default function HomePage() {
   const isE2eMode = process.env.NEXT_PUBLIC_E2E_MODE === "true";
-
   if (isE2eMode) return <SignedInHome />;
-
   return <ClerkHomePage />;
 }

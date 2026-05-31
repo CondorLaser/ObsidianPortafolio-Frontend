@@ -56,7 +56,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
       const token = await getToken();
       const response = await fetch(
-        `${API_BASE_URL}/user/risk_profile`,
+        `${API_BASE_URL}/profile`, // era /risk/profile en el contrato
         {
           method: "GET",
           headers: {
@@ -94,7 +94,7 @@ export function YourRiskProfileCard() {
       setMessage(null)
       const token = await getToken();
       const response = await fetch(
-        `${API_BASE_URL}/user/risk_profile`,
+        `${API_BASE_URL}/profile`,
         {
           method: "PUT",
           headers: {

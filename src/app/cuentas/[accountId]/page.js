@@ -12,6 +12,7 @@ import { CollapsableShell } from "@/src/components/collapsable-shell";
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
   const { getToken } = useAuth();
+  const [assetsMap, setAssetsMap] = useState({});
 
   const [account, setAccount] = useState(null);
   const [metrics, setMetrics] = useState(null);
@@ -33,7 +34,7 @@ export default function AccountDetailPage({ params }) {
         const token = await getToken();
 
         // Hace las request en paralelo
-        const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([
+        const [resAccount, resMetrics, resPositions, resTransactions, resDividends, resAssets] = await Promise.all([
           fetch(`${baseUrl}/accounts/${accountId}`, {
             method: "GET",
             headers: {
@@ -71,15 +72,36 @@ export default function AccountDetailPage({ params }) {
         }
         const dataAccount = await resAccount.json();
         const dataMetrics = await resMetrics.json();
-        const dataPositions = await resPositions.json();
         const dataTransactions = await resTransactions.json();
+        const dataPositions = await resPositions.json();
         const dataDividends = await resDividends.json();
+
+        const normalizedTransactions = Array.isArray(dataTransactions) ? dataTransactions : (dataTransactions.transactions ?? []);
+        const normalizedPositions = Array.isArray(dataPositions) ? dataPositions : (dataPositions.positions ?? []);
+        const normalizedDividends = Array.isArray(dataDividends) ? dataDividends : (dataDividends.dividends ?? []);
+        const assetIds = [...new Set([
+          ...normalizedTransactions.map(tx => tx.asset_id),
+          ...normalizedPositions.map(pos => pos.asset_id),
+          ...normalizedDividends.map(div => div.asset_id),
+        ].filter(Boolean))];
+
+        const assetResults = await Promise.all(
+          assetIds.map(id =>
+            fetch(`${baseUrl}/assets/${id}`, {
+              headers: { "Authorization": `Bearer ${token}` }
+            }).then(r => r.ok ? r.json() : null)
+          )
+        );
+
+        const map = {};
+        assetResults.filter(Boolean).forEach(a => { map[a.id] = a; });
+        setAssetsMap(map);
 
         setAccount(dataAccount);
         setMetrics(dataMetrics);
-        setPositions(dataPositions.positions || []);
-        setTransactions(dataTransactions.transactions || []);
-        setDividends(dataDividends.dividends || []);
+        setTransactions(normalizedTransactions);
+        setPositions(normalizedPositions);
+        setDividends(normalizedDividends);
       } catch (err) {
         console.error("Fetch Account Detail Error:", err);
         setError(true);
@@ -88,7 +110,7 @@ export default function AccountDetailPage({ params }) {
       }
     }
     loadAccountData();
-  }, [accountId, getToken]);
+  }, [accountId])
 
   // Acción para regresar a la vista general de portafolios
   const actions = (
@@ -228,7 +250,7 @@ export default function AccountDetailPage({ params }) {
                 </thead>
                 <tbody className="divide-y divide-border-soft/40 text-sm text-white">
                   {positions.map((pos) => {
-                    const asset = pos.asset || {};
+                    const asset = assetsMap[pos.asset_id] || {};
                     const isStock = asset.kind === "stock";
                     const isEtf = asset.kind === "etf";
                     
@@ -292,7 +314,7 @@ export default function AccountDetailPage({ params }) {
                 </thead>
                 <tbody className="divide-y divide-border-soft/20 text-s text-white">
                   {transactions.map((tx) => {
-                    const asset = tx.asset || {};
+                    const asset = assetsMap[tx.asset_id] || {};
                     const txType = getTransactionType(tx);
                     return (
                       <tr key={tx.id} className="hover:bg-panel/20 transition-colors">
@@ -310,7 +332,7 @@ export default function AccountDetailPage({ params }) {
                         </td>
                         <td className="p-3 text-right font-medium">{Number(tx.quantity)}</td>
                         <td className="p-3 text-right font-medium"> {tx.price !== null ? `${Number(tx.price)} ${account.currency}` : "-"}</td>
-                        <td className="p-3 text-right text-text-muted">{Number(tx.fees)}</td>
+                        <td className="p-3 text-right text-text-muted">{Number(tx.fee || 0).toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -341,7 +363,7 @@ export default function AccountDetailPage({ params }) {
                 </thead>
                 <tbody className="divide-y divide-border-soft/20 text-s text-white">
                   {dividends.map((div) => {
-                    const asset = div.asset || {};
+                    const asset = assetsMap[div.asset_id] || {};
                     return (
                       <tr key={div.id} className="hover:bg-panel/20 transition-colors">
                         <td className="p-3 text-text-muted">{new Date(div.date).toLocaleDateString("es-CL")}</td>

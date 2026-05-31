@@ -7,7 +7,7 @@ export function MswProvider({ children }) {
 
   useEffect(() => {
     async function init() {
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_API_MOCKING !== "disabled") {
         const { worker } = await import("../../mocks/browser")
         await worker.start({
             onUnhandledRequest: "bypass",
@@ -19,9 +19,10 @@ export function MswProvider({ children }) {
     init()
   }, [])
 
-  if (!isReady && process.env.NODE_ENV === "development") {
+  if (!isReady && process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_API_MOCKING !== "disabled") {
     return null
   }
+  
 
   return children
 }
