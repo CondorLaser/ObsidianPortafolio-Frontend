@@ -1,0 +1,32 @@
+[
+  {
+    "user_id": "e84f1a9b-7c3d-4e2a-b18f-9d5c4e6a2b10",
+    "date": "2026-05-15",
+    "total_value": 8620.10000000,
+    "total_invested": 8273.40000000,
+    "unrealized_pnl": 346.70000000,
+    "realized_pnl_period": 0.00000000,
+    "breakdown_by_currency": {
+      "USD": 8620.10000000
+    },
+    "breakdown_by_account": {
+      "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d": 5820.40000000,
+      "f6e5d4c3-b2a1-4e9f-8d7c-6b5a4f3e2d1c": 2799.70000000
+    }
+  },
+  {
+    "user_id": "e84f1a9b-7c3d-4e2a-b18f-9d5c4e6a2b10",
+    "date": "2026-05-18",
+    "total_value": 8751.74000000,
+    "total_invested": 8273.40000000,
+    "unrealized_pnl": 478.34000000,
+    "realized_pnl_period": 0.00000000,
+    "breakdown_by_currency": {
+      "USD": 8751.74000000
+    },
+    "breakdown_by_account": {
+      "a1b2c3d4-e5f6-4a1b-8c2d-9e0f1a2b3c4d": 5917.15000000,
+      "f6e5d4c3-b2a1-4e9f-8d7c-6b5a4f3e2d1c": 2834.59000000
+    }
+  }
+]

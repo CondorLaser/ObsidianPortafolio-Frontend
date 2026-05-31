@@ -1,0 +1,10 @@
+{
+  "id": "a2d84c9f-7f31-4d8b-9f14-2d7c1c6b8a90",
+  "user_id": "e84f1a9b-7c3d-4e2a-b18f-9d5c4e6a2b10",
+  "pnl_percentage_account_daily": "5.00",
+  "pnl_percentage_asset_daily": "10.00",
+  "max_drawdown_portfolio_daily": "5.00",
+  "max_drawdown_account_daily": "7.00",
+  "asset_weight_weekly": "25.00",
+  "currency_exposure_weekly": "75.00"
+}

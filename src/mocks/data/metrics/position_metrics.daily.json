@@ -1,0 +1,50 @@
+[
+  {
+    "position_id": "p1111111-1111-1111-1111-111111111111",
+    "date": "2026-05-18",
+    "daily_pnl": 15.00000000,
+    "unrealized_pnl": 145.00000000,
+    "total_pnl": 163.00000000,
+    "personal_return": 0.0525
+  },
+  {
+    "position_id": "p2222222-2222-2222-2222-222222222222",
+    "date": "2026-05-18",
+    "daily_pnl": 22.50000000,
+    "unrealized_pnl": 134.50000000,
+    "total_pnl": 234.50000000,
+    "personal_return": 0.1415
+  },
+  {
+    "position_id": "p3333333-3333-3333-3333-333333333333",
+    "date": "2026-05-18",
+    "daily_pnl": -5.20000000,
+    "unrealized_pnl": 26.25000000,
+    "total_pnl": 26.25000000,
+    "personal_return": 0.0454
+  },
+  {
+    "position_id": "p4444444-4444-4444-4444-444444444444",
+    "date": "2026-05-18",
+    "daily_pnl": 12.00000000,
+    "unrealized_pnl": 182.40000000,
+    "total_pnl": 188.70000000,
+    "personal_return": 0.0820
+  },
+  {
+    "position_id": "p5555555-5555-5555-5555-555555555555",
+    "date": "2026-05-18",
+    "daily_pnl": -8.40000000,
+    "unrealized_pnl": -19.68000000,
+    "total_pnl": -8.43000000,
+    "personal_return": -0.0210
+  },
+  {
+    "position_id": "p6666666-6666-6666-6666-666666666666",
+    "date": "2026-05-18",
+    "daily_pnl": 4.10000000,
+    "unrealized_pnl": 9.87000000,
+    "total_pnl": 54.87000000,
+    "personal_return": 0.0120
+  }
+]

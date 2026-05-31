@@ -1,13 +1,13 @@
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
+import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
 import { alerts } from "@/src/lib/mock-data";
-import { auth } from "@clerk/nextjs/server";
 
 export default async function AlertsPage() {
-  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+  const { isAuthenticated, redirectToSignIn, userId } = await getServerAuth()
 
-  if (!isAuthenticated) return redirectToSignIn()
+  if (shouldRedirectToSignIn(isAuthenticated)) return redirectToSignIn()
 
   return (
     <DashboardShell
