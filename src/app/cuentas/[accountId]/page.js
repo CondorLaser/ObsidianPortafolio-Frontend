@@ -72,13 +72,17 @@ export default function AccountDetailPage({ params }) {
         }
         const dataAccount = await resAccount.json();
         const dataMetrics = await resMetrics.json();
-        const dataPositions = await resPositions.json();
         const dataTransactions = await resTransactions.json();
+        const dataPositions = await resPositions.json();
         const dataDividends = await resDividends.json();
+
+        const normalizedTransactions = Array.isArray(dataTransactions) ? dataTransactions : (dataTransactions.transactions ?? []);
+        const normalizedPositions = Array.isArray(dataPositions) ? dataPositions : (dataPositions.positions ?? []);
+        const normalizedDividends = Array.isArray(dataDividends) ? dataDividends : (dataDividends.dividends ?? []);
         const assetIds = [...new Set([
-          ...dataTransactions.map(tx => tx.asset_id),
-          ...dataPositions.map(pos => pos.asset_id),
-          ...dataDividends.map(div => div.asset_id),
+          ...normalizedTransactions.map(tx => tx.asset_id),
+          ...normalizedPositions.map(pos => pos.asset_id),
+          ...normalizedDividends.map(div => div.asset_id),
         ].filter(Boolean))];
 
         const assetResults = await Promise.all(
@@ -95,9 +99,9 @@ export default function AccountDetailPage({ params }) {
 
         setAccount(dataAccount);
         setMetrics(dataMetrics);
-        setPositions(dataPositions || []);
-        setTransactions(dataTransactions || []);
-        setDividends(dataDividends || []);
+        setTransactions(normalizedTransactions);
+        setPositions(normalizedPositions);
+        setDividends(normalizedDividends);
       } catch (err) {
         console.error("Fetch Account Detail Error:", err);
         setError(true);
@@ -246,7 +250,7 @@ export default function AccountDetailPage({ params }) {
                 </thead>
                 <tbody className="divide-y divide-border-soft/40 text-sm text-white">
                   {positions.map((pos) => {
-                    const asset = assetsMap[tx.asset_id] || {};
+                    const asset = assetsMap[pos.asset_id] || {};
                     const isStock = asset.kind === "stock";
                     const isEtf = asset.kind === "etf";
                     

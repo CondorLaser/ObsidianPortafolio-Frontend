@@ -19,9 +19,10 @@ export function MswProvider({ children }) {
     init()
   }, [])
 
-  if (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_API_MOCKING !== "disabled") {
+  if (!isReady && process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_API_MOCKING !== "disabled") {
     return null
   }
+  
 
   return children
 }
