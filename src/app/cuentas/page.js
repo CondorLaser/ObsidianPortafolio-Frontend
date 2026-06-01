@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { AccountCard } from "@/src/components/accounts/account-card";
 
@@ -10,7 +10,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   useEffect(() => {
     async function loadAccounts() {

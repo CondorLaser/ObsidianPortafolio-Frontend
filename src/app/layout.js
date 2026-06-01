@@ -67,9 +67,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className="bg-app text-white antialiased">
-        <MswProvider>
-          {isE2eMode() ? <ClerkProvider>{appShell}</ClerkProvider> : <ClerkProvider>{appShell}</ClerkProvider>}
-        </MswProvider>
+        {isE2eMode() ? (
+          <MswProvider>{appShell}</MswProvider>
+        ) : (
+          <ClerkProvider>
+            <MswProvider>{appShell}</MswProvider>
+          </ClerkProvider>
+        )}
       </body>
     </html>
   );

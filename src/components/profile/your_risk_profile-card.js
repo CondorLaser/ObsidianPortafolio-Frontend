@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { CollapsableShell } from "../collapsable-shell"
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 const RISK_OPTIONS = [
   {
     value: "conservative",
@@ -48,7 +48,7 @@ export function YourRiskProfileCard() {
   const [selectedRisk, setSelectedRisk] = useState("moderate")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const fetchRiskProfile = async () => {
     try {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAppAuth } from "@/src/lib/client-auth";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
@@ -11,7 +11,7 @@ import { CollapsableShell } from "@/src/components/collapsable-shell";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const [assetsMap, setAssetsMap] = useState({});
 
   const [account, setAccount] = useState(null);
@@ -34,7 +34,7 @@ export default function AccountDetailPage({ params }) {
         const token = await getToken();
 
         // Hace las request en paralelo
-        const [resAccount, resMetrics, resPositions, resTransactions, resDividends, resAssets] = await Promise.all([
+        const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([
           fetch(`${baseUrl}/accounts/${accountId}`, {
             method: "GET",
             headers: {
@@ -110,7 +110,7 @@ export default function AccountDetailPage({ params }) {
       }
     }
     loadAccountData();
-  }, [accountId])
+  }, [accountId, getToken])
 
   // Acción para regresar a la vista general de portafolios
   const actions = (
