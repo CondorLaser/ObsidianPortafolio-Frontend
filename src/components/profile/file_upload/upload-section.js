@@ -16,7 +16,7 @@ export function UploadSection({ finantial_file_type } = {}) {
 
   // Cargar cuentas del usuario
   useEffect(() => {
-    const accountsEndpoint = `${API_BASE_URL}/user/accounts_names`
+    const accountsEndpoint = `${API_BASE_URL}/accounts`
 
     const fetchAccounts = async () => {
       try {

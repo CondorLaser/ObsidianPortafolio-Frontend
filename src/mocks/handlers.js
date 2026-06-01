@@ -435,6 +435,10 @@ export const handlers = [
   // Vista Cuentas ============================================
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
+    if (USE_REAL_UPLOAD) {
+      return passthrough()
+    }
+
     if (REQUEST_SUCCESSFUL) {
       return HttpResponse.json(accounts_data)
     } else {
