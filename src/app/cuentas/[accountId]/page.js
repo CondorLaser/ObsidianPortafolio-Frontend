@@ -32,6 +32,7 @@ export default function AccountDetailPage({ params }) {
         setError(false);
         const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
         const token = await getToken();
+        console.log(token)
 
         // Hace las request en paralelo
         const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([

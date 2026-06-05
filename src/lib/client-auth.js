@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/react";
-import { isE2eMode } from "@/src/lib/auth-mode";
+import { isE2eMode } from "./auth-mode-client";
 
 const e2eAuth = {
   getToken: async () => "e2e-token",
