@@ -5,20 +5,24 @@ import { useAppAuth } from "@/src/lib/client-auth";
 import { CollapsableShell } from "../collapsable-shell";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || "";
+const DEFAULT_PREFERENCES = {
+  pnl_percentage_account_daily: 10,
+  pnl_percentage_asset_daily: 8,
+  max_drawdown_portfolio_daily: 7,
+  max_drawdown_account_daily: 14,
+  asset_weight_weekly: 35,
+  currency_exposure_weekly: 50,
+};
+
+function normalizePreferenceValue(value, fallback) {
+  return value !== null && value !== undefined ? Number(value) : fallback;
+}
 
 export function YourPreferencesCard() {
   const [loading, setLoading] = useState(false);
   const [loadingPreferences, setLoadingPreferences] = useState(true);
   const [message, setMessage] = useState(null);
-  const [preferences, setPreferences] = useState({
-    pnl_percentage_account_daily: 10,
-    pnl_percentage_asset_daily: 8,
-    max_drawdown_portfolio_daily: 7,
-    max_drawdown_account_daily: 14,
-
-    asset_weight_weekly: 35,
-    currency_exposure_weekly: 50,
-  });
+  const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
   const { getToken } = useAppAuth();
 
   async function fetchPreferences() {
@@ -37,6 +41,12 @@ export function YourPreferencesCard() {
         }
       );
 
+      if (response.status === 404) {
+        setPreferences(DEFAULT_PREFERENCES);
+        setMessage("Aun no tienes preferencias guardadas. Puedes configurarlas abajo.");
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Error al obtener las preferencias");
       }
@@ -44,34 +54,34 @@ export function YourPreferencesCard() {
       const preferences_data = await response.json();
       
       setPreferences({
-        pnl_percentage_account_daily:
-          preferences_data.pnl_percentage_account_daily !== null
-          ? Number(preferences_data.pnl_percentage_account_daily)
-          : 1,
-        pnl_percentage_asset_daily: 
-          preferences_data.pnl_percentage_asset_daily !== null
-          ? Number(preferences_data.pnl_percentage_asset_daily)
-          : 1,
-        max_drawdown_portfolio_daily: 
-          preferences_data.max_drawdown_portfolio_daily !== null
-          ? Number(preferences_data.max_drawdown_portfolio_daily)
-          : 1,
-        max_drawdown_account_daily:
-          preferences_data.max_drawdown_account_daily !== null
-          ? Number(preferences_data.max_drawdown_account_daily)
-          : 1,
-        asset_weight_weekly:
-          preferences_data.asset_weight_weekly !== null
-          ? Number(preferences_data.asset_weight_weekly)
-          : 1,
-        currency_exposure_weekly:
-          preferences_data.currency_exposure_weekly !== null
-          ? Number(preferences_data.currency_exposure_weekly)
-          : 1,
+        pnl_percentage_account_daily: normalizePreferenceValue(
+          preferences_data.pnl_percentage_account_daily,
+          DEFAULT_PREFERENCES.pnl_percentage_account_daily
+        ),
+        pnl_percentage_asset_daily: normalizePreferenceValue(
+          preferences_data.pnl_percentage_asset_daily,
+          DEFAULT_PREFERENCES.pnl_percentage_asset_daily
+        ),
+        max_drawdown_portfolio_daily: normalizePreferenceValue(
+          preferences_data.max_drawdown_portfolio_daily,
+          DEFAULT_PREFERENCES.max_drawdown_portfolio_daily
+        ),
+        max_drawdown_account_daily: normalizePreferenceValue(
+          preferences_data.max_drawdown_account_daily,
+          DEFAULT_PREFERENCES.max_drawdown_account_daily
+        ),
+        asset_weight_weekly: normalizePreferenceValue(
+          preferences_data.asset_weight_weekly,
+          DEFAULT_PREFERENCES.asset_weight_weekly
+        ),
+        currency_exposure_weekly: normalizePreferenceValue(
+          preferences_data.currency_exposure_weekly,
+          DEFAULT_PREFERENCES.currency_exposure_weekly
+        ),
       });
       setMessage("Preferencias cargadas correctamente");
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching preferences:", error);
       setMessage("No se pudieron obtener las preferencias");
     } finally {
       setLoadingPreferences(false);
