@@ -7,6 +7,17 @@ const shouldUseMocks =
     process.env.NEXT_PUBLIC_API_MOCKING !== "disabled") ||
   process.env.NEXT_PUBLIC_E2E_MODE === "true"
 
+const mockedApiPrefixes = [
+  "/assets",
+  "/portfolio",
+  "/positions",
+  "/pdf",
+  "/profile",
+  "/preferences",
+  "/accounts",
+  "/user",
+]
+
 export function MswProvider({ children }) {
   const [isReady, setIsReady] = useState(false)
 
@@ -15,7 +26,20 @@ export function MswProvider({ children }) {
       if (shouldUseMocks) {
         const { worker } = await import("../../mocks/browser")
         await worker.start({
-          onUnhandledRequest: "bypass",
+          onUnhandledRequest(request, print) {
+            if (process.env.NEXT_PUBLIC_E2E_MODE !== "true") {
+              return
+            }
+
+            const { pathname } = new URL(request.url)
+            const isMockedApiRequest = mockedApiPrefixes.some(
+              (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+            )
+
+            if (isMockedApiRequest) {
+              print.error()
+            }
+          },
         })
       }
       setIsReady(true)

@@ -50,6 +50,10 @@ const getAccountById = (accountId) => (
   accounts_data.find((account) => account.id === accountId)
 )
 
+const getAssetById = (assetId) => (
+  asset_data.find((asset) => asset.id === assetId)
+)
+
 const getLatestPrice = (assetId, fallback) => {
   const price = asset_prices.find((item) => item.asset_id === assetId)
   return Number(price?.close ?? fallback ?? 0)
@@ -207,6 +211,20 @@ export const handlers = [
   // Actualmente solo con Assets de tipo Stock
   http.get(`${API_URL}/assets`, () => {
     return HttpResponse.json(asset_data)
+  }),
+
+  http.get(`${API_URL}/assets/:asset_id`, ({ params }) => {
+    const { asset_id } = params
+    const asset = getAssetById(asset_id)
+
+    if (!asset) {
+      return HttpResponse.json(
+        { error: "Activo no encontrado", code: "ASSET_NOT_FOUND" },
+        { status: 404 }
+      )
+    }
+
+    return HttpResponse.json(asset)
   }),
 
   // Vista portafolio

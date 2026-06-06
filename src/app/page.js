@@ -1,23 +1,29 @@
 'use client'
 import { useUser } from "@clerk/nextjs";
-import { useAuth } from "@clerk/nextjs";
 import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAppAuth } from "@/src/lib/client-auth";
 
 function SignedInHome() {
-  const { getToken } = useAuth()
+  const { getToken } = useAppAuth();
 
   useEffect(() => {
     const init = async () => {
-      const token = await getToken()
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      console.log("[init] accounts check", res.status)
-    }
-    init()
-  }, [])
+      try {
+        const token = await getToken();
+        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+        const res = await fetch(`${baseUrl}/accounts`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("[init] accounts check", res.status);
+      } catch (error) {
+        console.error("[init] accounts check failed", error);
+      }
+    };
+
+    init();
+  }, [getToken]);
 
   return (
     <main className="min-h-screen px-4 lg:px-6">
