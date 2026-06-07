@@ -1,8 +1,15 @@
-"use client"
+"use client";
+
+import { useEffect, useState } from "react";
 
 import { useState, useEffect } from "react"
 import { CollapsableShell } from "../collapsable-shell"
 import { useAppAuth } from "@/src/lib/client-auth";
+
+import { CollapsableShell } from "../collapsable-shell";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || "";
+
 const RISK_OPTIONS = [
   {
     value: "conservative",
@@ -37,91 +44,132 @@ const RISK_OPTIONS = [
       bg: "bg-[var(--red-attention)]",
       hover: "hover:border-red-400/70",
       badge: "bg-red-500",
-      text: "text-red-300"
-    }
-  }
-]
+      text: "text-red-300",
+    },
+  },
+];
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || ""
+const DEFAULT_RISK_PROFILE = "moderate";
+
+function isValidRiskProfile(value) {
+  return RISK_OPTIONS.some((option) => option.value === value);
+}
+
+function normalizeRiskProfile(value) {
+  if (isValidRiskProfile(value)) {
+    return value;
+  }
+
+  if (value === "aggressive") {
+    return "agressive";
+  }
+
+  return DEFAULT_RISK_PROFILE;
+}
+
+function getFeedbackClass(tone) {
+  if (tone === "error") {
+    return "text-danger";
+  }
+
+  if (tone === "success") {
+    return "text-success";
+  }
+
+  return "text-text-muted";
+}
 
 export function YourRiskProfileCard() {
-  const [selectedRisk, setSelectedRisk] = useState("moderate")
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState(null)
+  const [selectedRisk, setSelectedRisk] = useState(DEFAULT_RISK_PROFILE);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const { getToken } = useAppAuth();
 
-  const fetchRiskProfile = async () => {
-    try {
-      setLoading(true)
-      setMessage(null)
-      const token = await getToken();
-      const response = await fetch(
-        `${API_BASE_URL}/profile`, // era /risk/profile en el contrato
-        {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRiskProfile() {
+      try {
+        setIsLoadingProfile(true);
+        setFeedback(null);
+
+        const token = await getToken();
+        const response = await fetch(`${API_BASE_URL}/profile`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          credentials: "include"
+        });
+
+        if (!response.ok) {
+          throw new Error("Error al cargar el perfil de riesgo");
         }
-      )
 
-      if (!response.ok) {
-        throw new Error("Error al cargar el perfil de riesgo")
-      }
+        const profileData = await response.json();
 
-      const data = await response.json()
-      const riskValue = data.risk_profile
-      if (RISK_OPTIONS.some(option => option.value === riskValue)) {
-        setSelectedRisk(riskValue)
+        if (!isMounted) return;
+
+        setSelectedRisk(normalizeRiskProfile(profileData?.risk_profile));
+      } catch (error) {
+        console.error("Error fetching risk profile:", error);
+
+        if (!isMounted) return;
+
+        setFeedback({
+          tone: "error",
+          text: "No se pudo obtener el perfil de riesgo.",
+        });
+      } finally {
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
       }
-    } catch (error) {
-      console.error(error)
-      setMessage("No se pudo obtener el perfil de riesgo")
-    } finally {
-      setLoading(false)
     }
-  }
 
-  useEffect(() => {
-    fetchRiskProfile()
-  }, [getToken])
+    loadRiskProfile();
 
-  const handleSave = async () => {
+    return () => {
+      isMounted = false;
+    };
+  }, [getToken]);
+
+  async function handleSave() {
     try {
-      setLoading(true)
-      setMessage(null)
+      setIsSaving(true);
+      setFeedback(null);
+
       const token = await getToken();
-      const response = await fetch(
-        `${API_BASE_URL}/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            risk_profile: selectedRisk
-          })
-        }
-      )
-      const data = await response.json()
-      const riskValue = data.risk_profile
-      if (RISK_OPTIONS.some(option => option.value === riskValue)) {
-        setSelectedRisk(riskValue)
-      }
+      const response = await fetch(`${API_BASE_URL}/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          risk_profile: selectedRisk,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error("No se pudo actualizar el perfil de riesgo")
+        throw new Error("No se pudo actualizar el perfil de riesgo");
       }
 
-      setMessage("Perfil de riesgo actualizado correctamente")
+      const updatedProfile = await response.json();
+      setSelectedRisk(normalizeRiskProfile(updatedProfile?.risk_profile));
+      setFeedback({
+        tone: "success",
+        text: "Perfil de riesgo actualizado correctamente.",
+      });
     } catch (error) {
-      console.error(error)
-      setMessage("Ocurrió un error al actualizar el perfil de riesgo")
+      console.error("Error saving risk profile:", error);
+      setFeedback({
+        tone: "error",
+        text: "Ocurrió un error al actualizar el perfil de riesgo.",
+      });
     } finally {
-      setLoading(false)
+      setIsSaving(false);
     }
   }
 
@@ -131,25 +179,34 @@ export function YourRiskProfileCard() {
       description="Define el nivel de riesgo que mejor representa tus preferencias de inversión"
     >
       <div className="flex flex-col gap-4">
+        {isLoadingProfile ? (
+          <div className="rounded-2xl border border-border-soft bg-panel p-5 text-sm text-text-muted">
+            Cargando tu perfil de riesgo...
+          </div>
+        ) : null}
+
         {RISK_OPTIONS.map((option) => {
-          const isSelected = selectedRisk === option.value
+          const isSelected = selectedRisk === option.value;
 
           return (
             <button
               key={option.value}
               type="button"
               onClick={() => setSelectedRisk(option.value)}
+              disabled={isLoadingProfile}
               className={`
-                rounded-2xl border p-4 text-left transition-all bg-panel
+                rounded-2xl border bg-panel p-4 text-left transition-all
                 ${isSelected
                   ? `${option.styles.border} ${option.styles.bg}`
-                  : `border-border-soft ${option.styles.hover}`
-                }
+                  : `border-border-soft ${option.styles.hover}`}
+                disabled:cursor-not-allowed disabled:opacity-70
               `}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className={`font-medium ${isSelected ? option.styles.text : ""}`}>
+                  <h3
+                    className={`font-medium ${isSelected ? option.styles.text : ""}`}
+                  >
                     {option.label}
                   </h3>
 
@@ -159,22 +216,27 @@ export function YourRiskProfileCard() {
                 </div>
 
                 <div
+                  aria-hidden="true"
                   className={`
                     h-4 w-4 rounded-full border transition-all
                     ${isSelected
                       ? `${option.styles.badge} border-transparent`
-                      : "border-border-soft"
-                    }
+                      : "border-border-soft"}
                   `}
                 />
               </div>
             </button>
-          )
+          );
         })}
 
-        <div className="flex items-center justify-between mt-2">
-          {message ? (
-            <p className="text-sm text-text-muted">{message}</p>
+        <div className="mt-2 flex items-center justify-between gap-4">
+          {feedback ? (
+            <p
+              aria-live="polite"
+              className={`text-sm ${getFeedbackClass(feedback.tone)}`}
+            >
+              {feedback.text}
+            </p>
           ) : (
             <div />
           )}
@@ -183,7 +245,7 @@ export function YourRiskProfileCard() {
             <button
               type="button"
               onClick={handleSave}
-              disabled={loading}
+              disabled={isSaving || isLoadingProfile}
               className="
                 rounded-2xl bg-accent px-5 py-3
                 font-bold text-black
@@ -191,11 +253,11 @@ export function YourRiskProfileCard() {
                 disabled:cursor-not-allowed disabled:opacity-50
               "
             >
-              {loading ? "Guardando..." : "Guardar cambios"}
+              {isSaving ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </div>
       </div>
     </CollapsableShell>
-  )
+  );
 }

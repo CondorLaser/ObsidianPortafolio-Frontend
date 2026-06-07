@@ -327,33 +327,7 @@ export const handlers = [
     }
   }),
 
-  // GET /profile (obtener perfil de riesgo)
-  http.get(`${API_URL}/profile`, () => {
-    if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(user_profiles[0], {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
-  // PUT /profile (cambiar perfil de riesgo)
-  http.put(`${API_URL}/profile`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedProfile = await request.json()
-      
-      // Retornamos el perfil modificado simulando la persistencia
-      return HttpResponse.json(
-        user_profiles[0], {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
   // GET /user/accounts_names (obtener nombres de cuentas del usuario)
   http.get(`${API_URL}/user/accounts_names`, ({ params }) => {
