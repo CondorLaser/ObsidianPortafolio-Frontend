@@ -49,6 +49,25 @@ describe("Profile Page", () => {
     cy.contains("button", "Guardar preferencias").should("be.visible");
   });
 
+  it("Debería cargar y guardar las preferencias de alertas", () => {
+    cy.contains("Preferencias de Alertas").click();
+    cy.contains("Cargando tus preferencias guardadas...").should("not.exist");
+
+    cy.contains("5%").should("be.visible");
+    cy.contains("10%").should("be.visible");
+    cy.contains("25%").should("be.visible");
+    cy.contains("75%").should("be.visible");
+
+    cy.get('input[aria-label="Ganancia/Pérdida (P&L %) diaria por Cuenta"]')
+      .invoke("val", 12)
+      .trigger("input")
+      .trigger("change");
+
+    cy.contains("12%").should("be.visible");
+    cy.contains("button", "Guardar preferencias").click();
+    cy.contains("Preferencias guardadas correctamente.").should("be.visible");
+  });
+
   it("Debería mostrar componente YourRiskProfileCard", () => {
     // Verificar que YourRiskProfileCard está visible
     cy.contains("Perfil de Riesgo").should("be.visible");

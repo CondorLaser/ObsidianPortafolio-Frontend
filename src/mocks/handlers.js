@@ -20,6 +20,7 @@ const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
 const USE_REAL_UPLOAD = process.env.NEXT_PUBLIC_REAL_UPLOAD === "true"
 let accountsStore = [...accounts_data]
+let userPreferencesStore = { ...user_preferences }
 
 const formatCurrency = (value, currency = "USD") => {
   const number = Number(value || 0)
@@ -365,37 +366,6 @@ export const handlers = [
       )
     }
   }),
-
-  // GET /preferences
-  http.get(`${API_URL}/preferences`, () => {
-    if(REQUEST_SUCCESSFUL){
-      return HttpResponse.json(user_preferences, {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        {status: 500}
-      )
-    }    
-  }),
-
-  // PUT /preferences
-  http.put(`${API_URL}/preferences`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedPreferences = await request.json()
-      // Retornamos las preferencias modificadas simulando la persistencia
-      return HttpResponse.json({
-        ...user_preferences,
-        ...updatedPreferences,
-        message: "Preferencias del usuario guardadas"
-      }, {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
 
   // Vista Cuentas 
   // GET /accounts/:user_id <-------------
