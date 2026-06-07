@@ -86,7 +86,6 @@ function normalizePreferenceValue(value, fallback) {
   }
 
   // Soporta tanto porcentajes enteros heredados (25) como ratios del backend
-  // real (0.25).
   return Math.abs(numericValue) <= 1 ? Math.round(numericValue * 100) : Math.round(numericValue);
 }
 

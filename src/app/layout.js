@@ -3,7 +3,7 @@ import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { MswProvider } from "../components/msw/msw-provider";
-import { isE2eMode } from "@/src/lib/auth-mode";
+import { isE2eMode } from "@/src/lib/e2e-mode";
 
 export const metadata = {
   title: "Orion Portafolio",
