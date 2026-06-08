@@ -22,7 +22,7 @@ jobs:
                 NEXT_PUBLIC_E2E_MODE: "true"
               with:
                 build: npm run build
-                start: npm run start
+                start: npm run dev
                 wait-on: "http://localhost:3000"
                 wait-on-timeout: 120
                 spec: cypress/e2e/**/*.cy.js
