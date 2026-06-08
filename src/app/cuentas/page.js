@@ -5,10 +5,31 @@ import Link from "next/link";
 import { useAppAuth } from "@/src/lib/client-auth";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { AccountCard } from "@/src/components/accounts/account-card";
+import { CreateAccountForm } from "@/src/components/accounts/create-account-form";
+
+async function fetchAccounts(getToken) {
+  const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+  const token = await getToken();
+  const response = await fetch(`${baseUrl}/accounts`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Error en el servidor");
+  }
+
+  return response.json();
+}
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [creationFeedback, setCreationFeedback] = useState(null);
 
   const { getToken } = useAppAuth();
 
@@ -16,19 +37,7 @@ export default function AccountsPage() {
     async function loadAccounts() {
       try {
         setLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
-        const token = await getToken();
-        const res = await fetch(`${baseUrl}/accounts`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
-        });
-
-        if (!res.ok) throw new Error("Error en el servidor");
-
-        const data = await res.json();
+        const data = await fetchAccounts(getToken);
         setAccounts(data);
       } catch (error) {
         console.error("Fetch Accounts Error:", error);
@@ -41,12 +50,70 @@ export default function AccountsPage() {
     loadAccounts();
   }, [getToken]);
 
+  async function handleCreateAccount(payload) {
+    const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+    const token = await getToken();
+    const response = await fetch(`${baseUrl}/accounts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      let message = "No se pudo crear la cuenta.";
+
+      try {
+        const errorBody = await response.json();
+        message = errorBody.detail || message;
+      } catch {
+        // Si el backend no responde JSON, dejamos el mensaje por defecto.
+      }
+
+      throw new Error(message);
+    }
+
+    const refreshedAccounts = await fetchAccounts(getToken);
+    setAccounts(refreshedAccounts);
+    setCreationFeedback(`Cuenta "${payload.name}" creada correctamente.`);
+    setIsCreatingAccount(false);
+  }
+
   return (
     <DashboardShell
       title="Cuentas"
       description="Selecciona una cuenta para revisar su evolución, posiciones vinculadas y métricas."
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            setCreationFeedback(null);
+            setIsCreatingAccount((current) => !current);
+          }}
+          className="rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02]"
+        >
+          <div className="font-bold">
+          {isCreatingAccount ? "Cerrar formulario" : "Nueva cuenta"}
+          </div>
+          
+        </button>
+      }
     >
       <div className="grid gap-6">
+          {creationFeedback ? (
+            <div className="rounded-[24px] border border-emerald-500/20 bg-emerald-500/8 p-4 text-sm text-emerald-300">
+              {creationFeedback}
+            </div>
+          ) : null}
+
+          {isCreatingAccount ? (
+            <CreateAccountForm
+              onCancel={() => setIsCreatingAccount(false)}
+              onCreate={handleCreateAccount}
+            />
+          ) : null}
 
           {//CASO: Cargando datos
           loading ? (

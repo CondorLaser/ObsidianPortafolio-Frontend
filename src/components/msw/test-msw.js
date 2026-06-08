@@ -10,8 +10,9 @@ export function TestMSW() {
   useEffect(() => {
     async function fetchAssets() {
       try {
+        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || ""
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_URL_BE}/assets`
+          `${baseUrl}/assets`
         )
 
         const json = await response.json()

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 export function AccountCard({ account }) {
   const {
+    broker = "Broker no especificado",
     total_positions = 10,
     stock_count = 4,
     etf_count = 2,
@@ -16,7 +17,7 @@ export function AccountCard({ account }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-[760] uppercase tracking-[0.16em] text-text-muted">
-            {account.broker}
+            {broker}
           </p>
           <h2 className="mt-2 text-[26px] leading-[1.1] font-semibold tracking-[-0.02em] text-white transition-colors group-hover:text-accent">
             {account.name}

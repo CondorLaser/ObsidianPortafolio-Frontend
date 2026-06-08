@@ -32,6 +32,7 @@ export default function AccountDetailPage({ params }) {
         setError(false);
         const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
         const token = await getToken();
+        console.log(token)
 
         // Hace las request en paralelo
         const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([
@@ -89,7 +90,9 @@ export default function AccountDetailPage({ params }) {
           assetIds.map(id =>
             fetch(`${baseUrl}/assets/${id}`, {
               headers: { "Authorization": `Bearer ${token}` }
-            }).then(r => r.ok ? r.json() : null)
+            })
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null)
           )
         );
 
