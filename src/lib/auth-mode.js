@@ -1,4 +1,5 @@
-import { isE2eMode } from "@/src/lib/e2e-mode";
+"use server"
+import { isE2eMode } from "./auth-mode-client";
 
 export async function getServerAuth() {
   if (isE2eMode()) {
@@ -11,13 +12,4 @@ export async function getServerAuth() {
 
   const { auth } = await import("@clerk/nextjs/server");
   return auth();
-}
-
-export function shouldRedirectToSignIn(isAuthenticated) {
-  const hasClerkKey = Boolean(
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-      process.env.CLERK_PUBLISHABLE_KEY
-  );
-
-  return !isAuthenticated && hasClerkKey && !isE2eMode();
 }

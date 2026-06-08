@@ -94,7 +94,10 @@ export default function AccountsPage() {
           }}
           className="rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02]"
         >
+          <div className="font-bold">
           {isCreatingAccount ? "Cerrar formulario" : "Nueva cuenta"}
+          </div>
+          
         </button>
       }
     >

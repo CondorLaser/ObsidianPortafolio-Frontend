@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { PortfolioContent } from "@/src/components/portfolio/portfolio-content";
-import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
+import { getServerAuth } from "@/src/lib/auth-mode";
+import { shouldRedirectToSignIn } from "@/src/lib/auth-mode-client";
 
 function QuickAction({ href, label, muted = false }) {
   return (

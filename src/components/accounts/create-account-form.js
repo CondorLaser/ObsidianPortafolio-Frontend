@@ -15,10 +15,31 @@ export function CreateAccountForm({ onCancel, onCreate }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-
-    if (!form.name.trim()) {
+    
+    const cleanName = form.name.trim();
+    // Nombre no vacío
+    if (!cleanName) {
       setError("Debes ingresar un nombre para la cuenta.");
       return;
+    }
+    // Solo contenga letras, números y espacios (incluye tildes + ñ)
+    const validCharacters = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!validCharacters.test(cleanName)) {
+      setError("El nombre de la cuenta solo puede contener letras, números y espacios.");
+      return;
+    }
+
+    if(form.broker != ""){
+      const cleanBroker = form.broker.trim();
+      // Nombre no vacío
+      if (!cleanBroker) {
+        setError("Debes ingresar un nombre para el broker.");
+        return;
+      }
+      if(!validCharacters.test(cleanBroker)){
+        setError("El nombre del broker solo puede contener letras, números y espacios.");
+        return;
+      }
     }
 
     try {
@@ -100,7 +121,10 @@ export function CreateAccountForm({ onCancel, onCreate }) {
             disabled={submitting}
             className="rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creando..." : "Crear cuenta"}
+            <div className="font-bold">
+              {submitting ? "Creando..." : "Crear cuenta"}
+            </div>
+            
           </button>
 
           <button
@@ -109,7 +133,10 @@ export function CreateAccountForm({ onCancel, onCreate }) {
             disabled={submitting}
             className="rounded-2xl border border-border-soft px-5 py-3 text-sm font-semibold text-white transition hover:border-accent/40 hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Cancelar
+            <div className="font-bold">
+              Cancelar
+            </div>
+            
           </button>
         </div>
       </form>
