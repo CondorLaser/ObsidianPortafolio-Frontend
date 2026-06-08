@@ -11,6 +11,7 @@ export function UploadSection({ finantial_file_type } = {}) {
   const [accounts, setAccounts] = useState([])
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const { getToken } = useAppAuth();
 
@@ -166,20 +167,44 @@ export function UploadSection({ finantial_file_type } = {}) {
           Indica a qué cuenta vas a asociar tus datos
         </p>
 
-        <select
-          value={selectedAccountId}
-          onChange={(e) => setSelectedAccountId(e.target.value)}
-          className="w-full rounded-xl border border-accent/30 bg-panel px-4 py-3 text-white outline-none transition focus:border-accent"
-        >
-          <option value="" disabled>
-            Selecciona una cuenta
-          </option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex w-full items-center justify-between rounded-xl border border-accent/30 bg-panel px-4 py-3 text-left text-white outline-none transition focus:border-accent"
+          >
+            <span className={!selectedAccountId ? "text-text-muted" : "text-white"}>
+              {accounts.find((acc) => acc.id === selectedAccountId)?.name || "Selecciona una cuenta"}
+            </span>
+            <svg
+              className={`h-5 w-5 text-white/50 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {isDropdownOpen && (
+            <ul className="absolute z-50 mt-1 max-h-[180px] w-full overflow-y-auto rounded-xl border border-accent/30 bg-panel shadow-2xl">
+              {accounts.map((account) => (
+                <li
+                  key={account.id}
+                  onClick={() => {
+                    setSelectedAccountId(account.id);
+                    setIsDropdownOpen(false); // Cierra el menú al seleccionar
+                  }}
+                  className={`cursor-pointer px-4 py-3 text-sm text-white transition hover:bg-accent/20 ${
+                    selectedAccountId === account.id ? "bg-accent/30 font-bold text-accent" : ""
+                  }`}
+                >
+                  {account.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {loadingAccounts && (
           <p className="mt-2 text-sm text-text-muted">
