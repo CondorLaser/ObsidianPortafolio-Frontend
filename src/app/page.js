@@ -14,7 +14,7 @@ function SignedInHome() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      console.log("[init] accounts check", res.status)
+      console.log(token)
     }
     init()
   }, [])
