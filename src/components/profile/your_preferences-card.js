@@ -136,7 +136,7 @@ function getFeedbackClass(tone) {
     return "text-success";
   }
 
-  return "text-text-muted";
+  return "text-warning";
 }
 
 export function YourPreferencesCard() {
@@ -262,6 +262,19 @@ export function YourPreferencesCard() {
           </div>
         ) : null}
 
+        <div>
+          {feedback && feedback.tone == "info" ? (
+            <p
+              aria-live="polite"
+              className={`text-sm ${getFeedbackClass(feedback.tone)}`}
+            >
+              {feedback.text}
+            </p>
+          ) : (
+            <div />
+          )}
+        </div>
+
         {PREFERENCE_FIELDS.map((field) => {
           const inputId = `preference-${field.key}`;
 
@@ -307,7 +320,7 @@ export function YourPreferencesCard() {
         })}
 
         <div className="mt-2 flex items-center justify-between gap-4">
-          {feedback ? (
+          {feedback && feedback.tone !== "info"? (
             <p
               aria-live="polite"
               className={`text-sm ${getFeedbackClass(feedback.tone)}`}
