@@ -1,7 +1,8 @@
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
-import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
+import { getServerAuth } from "@/src/lib/auth-mode";
+import { shouldRedirectToSignIn } from "@/src/lib/auth-mode-client";
 import { alerts } from "@/src/lib/mock-data";
 
 export default async function AlertsPage() {

@@ -23,11 +23,11 @@ export function UploadSection({ finantial_file_type } = {}) {
         setLoadingAccounts(true)
         const token = await getToken();
 
-        console.log("[UploadSection] Fetching accounts", {
+        /* console.log("[UploadSection] Fetching accounts", {
           endpoint: accountsEndpoint,
           hasToken: Boolean(token),
           realUpload: process.env.NEXT_PUBLIC_REAL_UPLOAD === "true",
-        })
+        }) */
 
         const response = await fetch(
           accountsEndpoint, {
@@ -39,11 +39,11 @@ export function UploadSection({ finantial_file_type } = {}) {
           }
         )
 
-        console.log("[UploadSection] Accounts response", {
+        /* console.log("[UploadSection] Accounts response", {
           endpoint: accountsEndpoint,
           ok: response.ok,
           status: response.status,
-        })
+        }) */
 
         if (!response.ok) {
           const errorMessage = await response.text()
@@ -102,14 +102,14 @@ export function UploadSection({ finantial_file_type } = {}) {
         ? `${API_BASE_URL}/pdf/extract_mutual_funds`
         : `${API_BASE_URL}/pdf/extract_stocks_etf_1`
 
-      console.log("[UploadSection] Uploading PDF", {
+      /* console.log("[UploadSection] Uploading PDF", {
         endpoint,
         fileName: selectedFile.name,
         fileSize: selectedFile.size,
         accountId: selectedAccountId,
         uploadType: finantial_file_type || "stocks_etf",
         hasToken: Boolean(token),
-      })
+      }) */
 
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(
@@ -122,12 +122,14 @@ export function UploadSection({ finantial_file_type } = {}) {
           body: formData,
         }
       )
+      const data = await response.json()
+      console.log(data)
 
-      console.log("[UploadSection] Upload response", {
+      /* console.log("[UploadSection] Upload response", {
         endpoint,
         ok: response.ok,
         status: response.status,
-      })
+      }) */
 
       if (!response.ok) {
         const errorMessage = await response.text()
@@ -135,7 +137,7 @@ export function UploadSection({ finantial_file_type } = {}) {
       }
       // const data = await response.json()
       //console.log("Archivo subido correctamente:", data)
-      alert("Archivo subido correctamente, sus datos serán procesados próximamente")
+      alert(data.message)
 
       // Reseteo formulario
       setSelectedFile(null)
