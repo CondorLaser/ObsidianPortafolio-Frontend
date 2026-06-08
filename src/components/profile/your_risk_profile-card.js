@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useState, useEffect } from "react"
 import { CollapsableShell } from "../collapsable-shell"
 import { useAppAuth } from "@/src/lib/client-auth";
-
-import { CollapsableShell } from "../collapsable-shell";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_URL_BE || "";
 
