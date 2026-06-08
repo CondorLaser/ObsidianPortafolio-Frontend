@@ -3,7 +3,7 @@ run-name: Push by @${{ github.actor }}
 on:
     [push, pull_request]
 jobs:
-    build:
+    cypress-run:
         runs-on: ubuntu-latest
         
         steps:
@@ -15,22 +15,25 @@ jobs:
               with:
                 node-version: "24"
                 cache: "npm"
-            
-            - name: Instalar dependencias
-              run: npm ci
-            
-            - name: Hacer build del proyecto
-              run: npm run build
 
             - name: Ejecutar tests de Cypress
               uses: cypress-io/github-action@v6
               env:
                 NEXT_PUBLIC_E2E_MODE: "true"
               with:
-                start: npm run dev:e2e
+                build: npm run build
+                start: npm run start
                 wait-on: "http://localhost:3000"
                 wait-on-timeout: 120
                 spec: cypress/e2e/**/*.cy.js
+            
+            - name: Guardar reporte HTML de Mochawesome
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: cypress-mochawesome-report
+                path: cypress/reports/html
+                retention-days: 7
             
             - name: Guardar screenshots en caso de fallos
               if: failure()
