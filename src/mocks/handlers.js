@@ -19,6 +19,8 @@ import account_names from "./data/accounts_names.json"
 const API_URL = process.env.NEXT_PUBLIC_URL_BE || ""
 const REQUEST_SUCCESSFUL = true
 const USE_REAL_UPLOAD = process.env.NEXT_PUBLIC_REAL_UPLOAD === "true"
+let accountsStore = [...accounts_data]
+let userPreferencesStore = { ...user_preferences }
 
 const formatCurrency = (value, currency = "USD") => {
   const number = Number(value || 0)
@@ -47,7 +49,11 @@ const formatDateTime = (date) => {
 }
 
 const getAccountById = (accountId) => (
-  accounts_data.find((account) => account.id === accountId)
+  accountsStore.find((account) => account.id === accountId)
+)
+
+const getAssetById = (assetId) => (
+  asset_data.find((asset) => asset.id === assetId)
 )
 
 const getLatestPrice = (assetId, fallback) => {
@@ -169,9 +175,9 @@ const getPortfolioSummary = () => {
     totalReturn: formatCurrency(latest?.unrealized_pnl, "USD"),
     totalReturnPct: formatPercent(changePct),
     activePositions: positions_data.length.toString(),
-    linkedAccounts: accounts_data.length.toString(),
+    linkedAccounts: accountsStore.length.toString(),
     dataFreshness: `${formatPercent(changePct)} último período`,
-    pendingItems: accounts_data.map((account) => account.name).join(" y ")
+    pendingItems: accountsStore.map((account) => account.name).join(" y ")
   }
 }
 
@@ -179,7 +185,7 @@ const getAccountDistribution = () => {
   const latest = portfolio_snapshot.at(-1)
   const total = Number(latest?.total_value || 0)
 
-  return accounts_data.map((account) => {
+  return accountsStore.map((account) => {
     const amount = Number(latest?.breakdown_by_account?.[account.id] || 0)
     const percentage = total ? (amount / total) * 100 : 0
 
@@ -194,7 +200,7 @@ const getAccountDistribution = () => {
 }
 
 const getCertificateStatus = () => (
-  accounts_data.map((account) => ({
+  accountsStore.map((account) => ({
     title: account.name,
     status: "Actualizado",
     detail: new Date(account.created_at).toLocaleDateString("es-CL"),
@@ -207,6 +213,20 @@ export const handlers = [
   // Actualmente solo con Assets de tipo Stock
   http.get(`${API_URL}/assets`, () => {
     return HttpResponse.json(asset_data)
+  }),
+
+  http.get(`${API_URL}/assets/:asset_id`, ({ params }) => {
+    const { asset_id } = params
+    const asset = getAssetById(asset_id)
+
+    if (!asset) {
+      return HttpResponse.json(
+        { error: "Activo no encontrado", code: "ASSET_NOT_FOUND" },
+        { status: 404 }
+      )
+    }
+
+    return HttpResponse.json(asset)
   }),
 
   // Vista portafolio
@@ -307,33 +327,7 @@ export const handlers = [
     }
   }),
 
-  // GET /profile (obtener perfil de riesgo)
-  http.get(`${API_URL}/profile`, () => {
-    if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(user_profiles[0], {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
-  // PUT /profile (cambiar perfil de riesgo)
-  http.put(`${API_URL}/profile`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedProfile = await request.json()
-      
-      // Retornamos el perfil modificado simulando la persistencia
-      return HttpResponse.json(
-        user_profiles[0], {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
 
   // GET /user/accounts_names (obtener nombres de cuentas del usuario)
   http.get(`${API_URL}/user/accounts_names`, ({ params }) => {
@@ -347,48 +341,43 @@ export const handlers = [
     }
   }),
 
-  // GET /preferences
-  http.get(`${API_URL}/preferences`, () => {
-    if(REQUEST_SUCCESSFUL){
-      return HttpResponse.json(user_preferences, {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        {status: 500}
-      )
-    }    
-  }),
-
-  // PUT /preferences
-  http.put(`${API_URL}/preferences`, async ({ request }) => {
-    if (REQUEST_SUCCESSFUL) {
-      const updatedPreferences = await request.json()
-      // Retornamos las preferencias modificadas simulando la persistencia
-      return HttpResponse.json({
-        ...user_preferences,
-        ...updatedPreferences,
-        message: "Preferencias del usuario guardadas"
-      }, {status: 200})
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
-  }),
-
-
   // Vista Cuentas 
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json(accounts_data)
+      return HttpResponse.json(accountsStore)
     } else {
       return HttpResponse.json(
         { error: "Internal Server Error", code: "ERR_500" },
         { status: 500 }
       )
     }
+  }),
+
+  http.post(`${API_URL}/accounts`, async ({ request }) => {
+    if (!REQUEST_SUCCESSFUL) {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+
+    const payload = await request.json()
+    const newAccount = {
+      id: crypto.randomUUID(),
+      user_id: accountsStore[0]?.user_id ?? "e2e-user",
+      name: payload.name,
+      broker: payload.broker ?? null,
+      currency: payload.currency ?? "USD",
+      created_at: new Date().toISOString(),
+      total_positions: 0,
+      stock_count: 0,
+      etf_count: 0,
+      fund_count: 0
+    }
+
+    accountsStore = [newAccount, ...accountsStore]
+    return HttpResponse.json(newAccount, { status: 201 })
   }),
 
   http.get(`${API_URL}/accounts/metrics/:account_id`, ({ params }) => {
@@ -460,7 +449,7 @@ export const handlers = [
   http.get(`${API_URL}/accounts/:account_id`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       const { account_id } = params
-      const account = accounts_data.find(acc => acc.id === account_id)
+      const account = accountsStore.find(acc => acc.id === account_id)
 
       if (!account) {
         return HttpResponse.json(
