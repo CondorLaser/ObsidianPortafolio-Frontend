@@ -4,31 +4,31 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { MetricCard } from "@/src/components/metric-card";
-import { SimpleChart } from "@/src/components/simple-chart";
+import { useAppAuth} from "@/src/lib/client-auth";
+import dynamic from "next/dynamic";
 
-const toneClasses = {
-  accent: "border-accent/20 bg-accent/10 text-accent",
-  success: "border-emerald-500/20 bg-emerald-500/10 text-success",
-  warning: "border-amber-500/20 bg-amber-500/10 text-warning",
-  default: "border-border-soft bg-panel text-white/70"
-};
+const PortfolioTrend = dynamic(
+  () => import("./portfolio-trend").then((mod) => mod.PortfolioTrend),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[490px] w-full flex-col items-center justify-center rounded-[28px] border border-border-soft bg-panel-soft p-6 text-center">
+        <p className="text-lg font-semibold text-white animate-pulse">Cargando evolución del portafolio...</p>
+      </div>
+    )
+  }
+);
 
-const defaultDashboardData = {
-  summary: null,
-  accountDistribution: [],
-  certificateStatus: [],
-  trend: [],
-  positions: []
-};
-
-function StatusPill({ children, tone = "default", className = "" }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.02em] ${toneClasses[tone] ?? toneClasses.default} ${className}`}
-    >
-      {children}
-    </span>
-  );
+// Formatear dinero según divisa (CLP o USD)
+function formatMoney(amount, currency = "USD") {
+  if (amount === null || amount === undefined) return "-";
+  const numAmount = Number(amount);
+  
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: currency === "CLP" ? 0 : 2,
+  }).format(numAmount);
 }
 
 function FeedbackCard({ title, detail, tone = "default" }) {
@@ -45,8 +45,9 @@ function FeedbackCard({ title, detail, tone = "default" }) {
   );
 }
 
-function DistributionRow({ item, certificateStatus }) {
-  const certificate = certificateStatus.find((status) => status.title === item.name);
+function DistributionRow({ item }) {
+  const widthPct = `${(Number(item.percentage) * 100).toFixed(1)}%`;
+  const isUSD = item.currency === "USD";
 
   return (
     <div className="space-y-4">
@@ -54,15 +55,15 @@ function DistributionRow({ item, certificateStatus }) {
         <p className="text-[18px] font-semibold text-white">{item.name}</p>
         <div className="flex min-w-[210px] items-center gap-4">
           <div className="h-3 flex-1 rounded-full bg-[#2d374c]">
-            <div className="h-full rounded-full bg-accent" style={{ width: item.value }} />
+            <div className="h-full rounded-full bg-accent" style={{ width: widthPct }} />
           </div>
-          <span className="text-[18px] font-bold text-white">{item.value}</span>
+          <span className="text-[18px] font-bold text-white">{widthPct}</span>
         </div>
       </div>
       <div className="rounded-[20px] border border-border-soft bg-surface px-6 py-6">
-        <p className="text-sm text-text-muted">{item.name.includes("USD") ? "Acciones y ETFs" : "Fondos mutuos"}</p>
+        <p className="text-sm text-text-muted">{isUSD ? "Acciones y ETFs (USD)" : "Fondos mutuos (CLP)"}</p>
         <p className="mt-3 font-mono text-[18px] font-bold tracking-[-0.02em] text-white">
-          {certificate?.status} {certificate?.detail}
+          {formatMoney(item.amount, item.currency)}
         </p>
       </div>
     </div>
@@ -70,6 +71,12 @@ function DistributionRow({ item, certificateStatus }) {
 }
 
 function PositionRow({ position }) {
+  const pnl = Number(position.unrealized_pnl);
+  const isNegative = pnl < 0;
+  const pnlFormatted = position.unrealized_pnl 
+    ? `${isNegative ? "" : "+"}${formatMoney(pnl, "USD")}` 
+    : "-";
+
   return (
     <tr className="border-t border-border-soft align-middle transition hover:bg-accent/5 first:border-t-0">
       <td className="px-5 py-5 align-middle">
@@ -78,29 +85,37 @@ function PositionRow({ position }) {
           className="inline-flex max-w-full items-center gap-3 rounded-[14px] outline-offset-4"
         >
           <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] border border-border-soft bg-surface font-mono text-xs font-extrabold text-white">
-            {position.symbol}
+            {position.symbol.substring(0, 3)}
           </div>
           <div className="min-w-0 max-w-[260px]">
             <p className="text-[15px] font-semibold leading-[1.2] text-white">{position.symbol}</p>
-            <p className="mt-[3px] text-[13px] leading-[1.35] text-text-muted">{position.name}</p>
+            <p className="mt-[3px] truncate text-[13px] leading-[1.35] text-text-muted">{position.name}</p>
           </div>
         </Link>
       </td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white">{position.type}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white">{position.account}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.quantity}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.currentPrice}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.totalValue}</td>
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white">Activo</td>
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
+        {position.account_id.substring(0, 8)}
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+        {Number(position.quantity).toFixed(4)}
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+        {formatMoney(position.last_price, "USD")}
+      </td>
+      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+        {formatMoney(position.market_value, "USD")}
+      </td>
       <td
         className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-bold ${
-          position.returnPct.startsWith("-") ? "text-danger" : "text-success"
+          isNegative ? "text-danger" : "text-success"
         }`}
       >
-        {position.returnPct}
+        {pnlFormatted}
       </td>
       <td className="px-3 py-5 text-right">
         <Link
-          href={`/activos/${encodeURIComponent(position.symbol)}`}
+          href={`/activos/${encodeURIComponent(position.asset_id)}`}
           className="inline-flex min-h-[34px] min-w-[110px] items-center justify-center whitespace-nowrap rounded-full border border-border-soft px-[10px] text-[12px] font-semibold text-white transition hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
         >
           Ver detalle
@@ -111,106 +126,134 @@ function PositionRow({ position }) {
 }
 
 export function PortfolioContent() {
-  const [data, setData] = useState(defaultDashboardData);
+  const { getToken } = useAppAuth();
+
+  const [summaryData, setSummaryData] = useState(null);
+  const [positionsData, setPositionsData] = useState([]);
+  const [page, setPage] = useState(0);
+  const limit = 10;
+
   const [loading, setLoading] = useState(true);
+  const [loadingPositions, setLoadingPositions] = useState(false);
   const [error, setError] = useState(false);
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+
+  // Carga inicial del summary
   useEffect(() => {
-    async function loadDashboard() {
+    async function loadSummary() {
       try {
         setLoading(true);
         setError(false);
+        const token = await getToken();
 
-        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
-        const response = await fetch(`${baseUrl}/portfolio/dashboard`);
-
-        if (!response.ok) throw new Error("Error al cargar el dashboard");
-
-        const dashboardData = await response.json();
-        setData({ ...defaultDashboardData, ...dashboardData });
-      } catch (fetchError) {
-        console.error("Fetch Portfolio Dashboard Error:", fetchError);
+        const res = await fetch(`${baseUrl}/portfolio/summary`, {
+          method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+        }})
+        if (!res.ok) throw new Error("Error al cargar el summary");
+        const data = await res.json();
+        setSummaryData(data);
+      } catch (err) {
+        console.error("Fetch Summary Error:", err);
         setError(true);
       } finally {
         setLoading(false);
       }
     }
+    loadSummary();
+  }, [baseUrl]);
 
-    loadDashboard();
-  }, []);
+  // Carga de Posiciones según la paginación
+  useEffect(() => {
+    async function loadPositions() {
+      try {
+        setLoadingPositions(true);
+        const token = await getToken();
+        const skip = page * limit;
+        const res = await fetch(`${baseUrl}/positions?skip=${skip}&limit=${limit}`,{
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!res.ok) throw new Error("Error al cargar las posiciones");
+        const data = await res.json();
+        setPositionsData(data);
+      } catch (err) {
+        console.error("Fetch Positions Error:", err);
+      } finally {
+        setLoadingPositions(false);
+      }
+    }
+    loadPositions();
+  }, [baseUrl, page, limit]);
 
   if (loading) {
-    return <FeedbackCard title="Cargando portafolio..." detail="Estamos obteniendo los datos del dashboard." />;
+    return <FeedbackCard title="Cargando portafolio..." detail="Obteniendo el resumen de tu cuenta." />;
   }
 
-  if (error || !data.summary) {
+  if (error || !summaryData) {
     return (
       <FeedbackCard
         title="No se pudo cargar el portafolio"
-        detail="Revisa la conexion con el backend o que los mocks de desarrollo esten activos."
+        detail="Por favor, revisa la conexión con el backend."
         tone="error"
       />
     );
   }
 
-  const { summary, accountDistribution, certificateStatus, trend, positions } = data;
+  const { summary, account_distribution } = summaryData;
+
+  // Mapa rápido para obtener el nombre de la cuenta para la tabla
+  const accountMap = account_distribution.reduce((acc, curr) => {
+    acc[curr.account_id] = curr.name;
+    return acc;
+  }, {});
 
   return (
     <>
       <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">
         <MetricCard
           label="Valor total del portafolio"
-          value={summary.totalValue}
-          helper={summary.dataFreshness}
+          value={formatMoney(summary.total_value, "USD")}
+          helper={`Datos actualizados: ${summary.last_snapshot_date}`}
           helperTone="pill"
           hero
         />
         <MetricCard
           label="Retorno no realizado"
-          value={summary.totalReturn}
-          helper={summary.totalReturnPct}
+          value={formatMoney(summary.unrealized_pnl, "USD")}
+          helper={`${Number(summary.total_return_pct).toFixed(2)}%`}
           helperTone="pill"
         />
         <MetricCard
           label="Posiciones activas"
-          value={summary.activePositions}
-          helper="Activos visibles en tabla"
+          value={summary.active_positions}
+          helper="Activos en portafolio"
           helperTone="muted"
         />
         <MetricCard
           label="Cuentas vinculadas"
-          value={summary.linkedAccounts}
-          helper={summary.pendingItems}
+          value={summary.linked_accounts}
+          helper="Operativas"
           helperTone="muted"
         />
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Evolución del portafolio</h2>
-              <p className="mt-2 text-[14px] text-text-muted">Serie visual de referencia hasta conectar histórico real.</p>
-            </div>
-            <StatusPill tone="accent" className="border-none bg-accent/12 px-4 py-2 font-mono text-sm normal-case">
-              request mock
-            </StatusPill>
-          </div>
-
-          <SimpleChart
-            className="h-[404px] rounded-[22px] border border-border-soft bg-surface"
-            data={trend.map((item) => item.value)}
-            labels={trend.map((item) => item.label)}
-          />
-        </section>
+      <div className="mt-6 flex flex-col gap-6">
+        <PortfolioTrend></PortfolioTrend>
 
         <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6">
-          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Distribución y frescura</h2>
-          <p className="mt-2 text-[14px] text-text-muted">Estado mínimo que faltaba en el dashboard actual.</p>
+          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Distribución por cuenta</h2>
+          <p className="mt-2 text-[14px] text-text-muted">Desglose de capital total distribuido.</p>
 
           <div className="mt-10 space-y-5">
-            {accountDistribution.map((item) => (
-              <DistributionRow key={item.name} item={item} certificateStatus={certificateStatus} />
+            {account_distribution.map((item) => (
+              <DistributionRow key={item.account_id} item={item} />
             ))}
           </div>
         </section>
@@ -222,9 +265,7 @@ export function PortfolioContent() {
             <div>
               <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Activos principales</h2>
               <p className="mt-2 text-[14px] text-text-muted">
-                Activos principales del portafolio. Cada fila conserva el contexto de cuenta, cantidad y retorno, y
-                lleva a la ficha{" "}
-                <span className="rounded-full bg-accent/12 px-3 py-1 font-mono text-accent">/activos/[symbol]</span>.
+                Tus posiciones activas.
               </p>
             </div>
           </div>
@@ -233,22 +274,49 @@ export function PortfolioContent() {
             <table className="w-full min-w-[980px] border-separate border-spacing-0 text-left">
               <thead>
                 <tr className="text-[12px] uppercase tracking-[0.1em] text-text-muted">
-                  <th className="w-[38%] px-5 pb-4 font-semibold">Activo</th>
+                  <th className="w-[30%] px-5 pb-4 font-semibold">Activo</th>
                   <th className="w-[10%] px-3 pb-4 font-semibold">Tipo</th>
                   <th className="w-[14%] px-3 pb-4 font-semibold">Cuenta</th>
                   <th className="w-[8%] px-3 pb-4 text-right font-semibold">Cantidad</th>
-                  <th className="w-[8%] px-3 pb-4 text-right font-semibold">Precio</th>
-                  <th className="w-[10%] px-3 pb-4 text-right font-semibold">Valor total</th>
-                  <th className="w-[6%] px-3 pb-4 text-right font-semibold">Retorno</th>
-                  <th className="w-[12%] px-3 pb-4 text-right font-semibold">Acción</th>
+                  <th className="w-[10%] px-3 pb-4 text-right font-semibold">Precio Mercado</th>
+                  <th className="w-[10%] px-3 pb-4 text-right font-semibold">Valor Total</th>
+                  <th className="w-[8%] px-3 pb-4 text-right font-semibold">PnL No Realizado</th>
+                  <th className="w-[10%] px-3 pb-4 text-right font-semibold">Acción</th>
                 </tr>
               </thead>
-              <tbody>
-                {positions.map((position) => (
-                  <PositionRow key={`${position.account}-${position.symbol}`} position={position} />
+              <tbody className={loadingPositions ? "opacity-50" : ""}>
+                {positionsData.map((position) => (
+                  <PositionRow 
+                    key={`${position.account_id}-${position.symbol}`} 
+                    position={position} 
+                    accountName={accountMap[position.account_id]}
+                  />
                 ))}
               </tbody>
             </table>
+            
+            {/* Controles de Paginación */}
+            <div className="mt-6 flex items-center justify-between border-t border-border-soft pt-4">
+              <span className="text-sm text-text-muted">
+                Página {page + 1}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0 || loadingPositions}
+                  className="rounded-lg border border-border-soft bg-surface px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-accent/10 transition-colors"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={positionsData.length < limit || loadingPositions}
+                  className="rounded-lg border border-border-soft bg-surface px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-accent/10 transition-colors"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </div>
