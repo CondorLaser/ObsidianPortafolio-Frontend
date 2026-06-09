@@ -84,4 +84,14 @@ describe("Profile Page", () => {
     cy.contains("Moderado").should("be.visible");
     cy.contains("Agresivo").should("be.visible");
   });
+
+  it("Debería cargar y guardar el perfil de riesgo", () => {
+    cy.contains("Perfil de Riesgo").click();
+    cy.contains("Cargando tu perfil de riesgo...").should("not.exist");
+
+    cy.contains("button", "Guardar cambios").should("be.visible");
+    cy.contains("Agresivo").click();
+    cy.contains("button", "Guardar cambios").click();
+    cy.contains("Perfil de riesgo actualizado correctamente.").should("be.visible");
+  });
 });
