@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAppAuth} from "@/src/lib/client-auth";
-
+import { FeedbackCard } from "../feedback-card";
 
 function formatMoney(amount, currency = "USD") {
   if (amount === null || amount === undefined) return "-";
@@ -14,20 +14,6 @@ function formatMoney(amount, currency = "USD") {
     currency: currency,
     maximumFractionDigits: currency === "CLP" ? 0 : 2,
   }).format(numAmount);
-}
-
-function FeedbackCard({ title, detail, tone = "default" }) {
-  const toneClass =
-    tone === "error"
-      ? "border-red-500/20 bg-red-500/5 text-red-300"
-      : "border-border-soft bg-panel-soft text-text-muted";
-
-  return (
-    <section className={`rounded-[28px] border p-8 text-center ${toneClass}`}>
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
-      <p className="mt-2 text-sm leading-[1.6]">{detail}</p>
-    </section>
-  );
 }
 
 const toneClasses = {
@@ -48,9 +34,10 @@ function StatusPill({ children, tone = "default", className = "" }) {
 }
 
 
-function PositionRow({ position, accountName, currency }) {
+function PositionRow({ position, accountName}) {
   const pnl = Number(position.unrealized_pnl);
   const isNegative = pnl < 0;
+  const currency = position.asset.currency
   const pnlFormatted = position.unrealized_pnl 
     ? `${formatMoney(pnl, currency)}` 
     : "-";
@@ -110,6 +97,7 @@ export function PortfolioPositions({account_distribution}) {
   const [positionsData, setPositionsData] = useState([]);
   const [page, setPage] = useState(0);
   const limit = 10;
+  const isAccount_distribution_empty = account_distribution === undefined || account_distribution.length === 0;
 
   const [loadingPositions, setLoadingPositions] = useState(false);
   const [updatingPositions, setUpdatingPositions] = useState(false);
@@ -152,10 +140,14 @@ export function PortfolioPositions({account_distribution}) {
   }
 
   // Mapa rápido para obtener el nombre de la cuenta para la tabla
-  const accountMap = account_distribution.reduce((acc, curr) => {
-    acc[curr.account_id] = [curr.name, curr.currency];
-    return acc;
-  }, {});
+  let accountMap = null
+  if(!isAccount_distribution_empty){
+      accountMap = account_distribution.reduce((acc, curr) => {
+      acc[curr.account_id] = curr.name;
+      return acc;
+    }, {});
+  }
+  
 
   return (
     <div>
@@ -195,17 +187,16 @@ export function PortfolioPositions({account_distribution}) {
                 <tbody className={loadingPositions ? "opacity-50" : ""}>
                   {positionsData.map((position) => (
                     <PositionRow 
-                      key={`${position.account_id}-${position.symbol}`} 
+                      key={`${position.account_id}-${position.asset_id}`} 
                       position={position} 
-                      accountName={accountMap[position.account_id][0]}
-                      currency={accountMap[position.account_id][1]}
+                      accountName={isAccount_distribution_empty ? "" : accountMap[position.account_id]}
                     />
                   ))}
                 </tbody>
               </table>
               
               {/* Controles de Paginación */}
-              <div className="p-6 sticky bottom-0 z-30 bg-panel flex items-center justify-between border-t border-border-soft pt-4">
+              <div className="p-6 sticky bottom-0 z-30 w-full min-w-[1030px] bg-panel flex items-center justify-between border-t border-border-soft pt-4">
                 <span className="text-sm text-text-muted">
                   Página {page + 1}
                 </span>

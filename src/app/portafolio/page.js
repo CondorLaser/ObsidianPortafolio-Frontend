@@ -32,7 +32,7 @@ export default async function PortfolioPage() {
       actions={
         <>
           <QuickAction href="/alertas" label="Ver alertas" muted />
-          <QuickAction href="/perfil" label="Actualizar datos" />
+          <QuickAction href="/perfil" label="Subir/Actualizar Datos" />
         </>
       }
     >

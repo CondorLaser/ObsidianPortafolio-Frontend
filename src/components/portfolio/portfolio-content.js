@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MetricCard } from "@/src/components/metric-card";
 import { useAppAuth} from "@/src/lib/client-auth";
 import dynamic from "next/dynamic";
 import { PortfolioPositions } from "./portfolio-positions";
 import { PortfolioSummary } from "./portfolio-summary";
+import { FeedbackCard } from "../feedback-card";
 
 const PortfolioTrend = dynamic(
   () => import("./portfolio-trend").then((mod) => mod.PortfolioTrend),
@@ -29,20 +29,6 @@ function formatMoney(amount, currency = "USD") {
     currency: currency,
     maximumFractionDigits: currency === "CLP" ? 0 : 2,
   }).format(numAmount);
-}
-
-function FeedbackCard({ title, detail, tone = "default" }) {
-  const toneClass =
-    tone === "error"
-      ? "border-red-500/20 bg-red-500/5 text-red-300"
-      : "border-border-soft bg-panel-soft text-text-muted";
-
-  return (
-    <section className={`rounded-[28px] border p-8 text-center ${toneClass}`}>
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
-      <p className="mt-2 text-sm leading-[1.6]">{detail}</p>
-    </section>
-  );
 }
 
 function DistributionRow({ item }) {
@@ -93,9 +79,10 @@ export function PortfolioContent() {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
         }})
-        if (!res.ok) throw new Error("Error al cargar el summary");
+        if (!res.ok) setError(true);
         const data = await res.json();
         setSummaryData(data);
+
       } catch (err) {
         console.error("Fetch Summary Error:", err);
         setError(true);
@@ -111,18 +98,43 @@ export function PortfolioContent() {
     return <FeedbackCard title="Cargando portafolio..." detail="Obteniendo el resumen de tu cuenta." />;
   }
 
-  if (error || !summaryData) {
+  const { summary, account_distribution } = summaryData;
+  if (account_distribution != undefined && account_distribution.lenght == 0) {
     return (
-      <FeedbackCard
-        title="No se pudo cargar el portafolio"
-        detail="Por favor, revisa la conexión con el backend."
-        tone="error"
-      />
-    );
+      <div>
+        <FeedbackCard
+            title="No se pudo cargar la distribución a lo largo de tus cuentas"
+            detail="Por favor, intenta más tarde o revisa tu conexión."
+            tone="alert"
+          />
+      </div>
+    )
   }
 
-  const { summary, account_distribution } = summaryData;
-  console.log(summary)
+  if (summary.active_positions === 0){
+    return (
+      <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
+        <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h3 className="text-base font-semibold text-white">
+          No tienes datos disponibles aún
+        </h3>
+        <div className="text-left">
+          <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+            Por favor, sube tus Certificados de Transacciones en la pestaña de Perfil/Mis datos o clickeando el botón "Subir/Actualizar Datos"
+          </li>
+          <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+            Recuerda que puedes crear Cuentas donde vincular tus datos en la pestaña de Cuentas
+          </li>
+        </div>
+        
+      </div>
+    )
+  }
+  
   return (
     <>
       <PortfolioSummary summaryData={summaryData} loading={loading} error={error}></PortfolioSummary>
@@ -135,10 +147,22 @@ export function PortfolioContent() {
           <p className="mt-2 text-[14px] text-text-muted">Desglose de capital total distribuido.</p>
 
           <div className="mt-10 space-y-5">
-            {account_distribution.map((item) => (
-              <DistributionRow key={item.account_id} item={item} />
-            ))}
-          </div>
+            {account_distribution === undefined ? (
+              <div>
+                <FeedbackCard
+                  title="No se pudo cargar la distribución a lo largo de tus cuentas"
+                  detail="Por favor, intenta más tarde o revisa tu conexión."
+                  tone="error"
+                />
+              </div>
+            ): (
+              <div>
+                {account_distribution.map((item) => (
+                  <DistributionRow key={item.account_id} item={item} />
+                ))}
+              </div>
+            )}
+          </div> 
         </section>
           
         <PortfolioPositions account_distribution={account_distribution}></PortfolioPositions>

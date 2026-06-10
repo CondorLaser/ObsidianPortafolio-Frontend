@@ -106,7 +106,7 @@ export function PortfolioTrend() {
         if (!res.ok) throw new Error("Error al cargar la tendencia");
         const data = await res.json();
         
-        // Mapeamos los valores a números nativos para que Recharts los grafique correctamente
+        // Mapear los valores a números nativos para que Recharts los grafique correctamente
         const parsedData = data.map(item => ({
           date: item.date,
           value: Number(item.value)
@@ -204,7 +204,7 @@ export function PortfolioTrend() {
           ):(
             <div>
               {/* Msg de caso de datos insuficientes */}
-                <div className="flex h-full w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
+              <div className="flex h-full w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />

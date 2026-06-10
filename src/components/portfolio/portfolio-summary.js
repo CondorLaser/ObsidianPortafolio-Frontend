@@ -1,5 +1,6 @@
 "use client";
 import { MetricCard } from "@/src/components/metric-card";
+import { FeedbackCard } from "../feedback-card";
 
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
@@ -30,117 +31,121 @@ function formatMoney(amount, currency = "USD") {
   }).format(numAmount);
 }
 
-function FeedbackCard({ title, detail, tone = "default" }) {
-  const toneClass =
-    tone === "error"
-      ? "border-red-500/20 bg-red-500/5 text-red-300"
-      : "border-border-soft bg-panel-soft text-text-muted";
-
-  return (
-    <section className={`rounded-[28px] border p-8 text-center ${toneClass}`}>
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
-      <p className="mt-2 text-sm leading-[1.6]">{detail}</p>
-    </section>
-  );
-}
-
 
 export function PortfolioSummary({summaryData, loading, error}) {
   if (loading) {
-    return <FeedbackCard title="Cargando portafolio..." detail="Obteniendo el resumen de tu cuenta." />;
+    return (
+      <div className="rounded-[28px] border border-border-soft p-6 flex flex-col gap-4 ">
+        <FeedbackCard title="Cargando resumen del portafolio..." detail="Obteniendo los datos de tu portafolio." />;
+      </div>
+    )
   }
 
   if (error || !summaryData) {
     return (
-      <FeedbackCard
-        title="No se pudo cargar el portafolio"
-        detail="Por favor, revisa la conexión con el backend."
-        tone="error"
-      />
+      <div className="rounded-[28px] border border-border-soft p-6 flex flex-col gap-4 ">
+        <FeedbackCard
+          title="No se pudo cargar el resumen de tu portafolio"
+          detail="Por favor, intenta más tarde o revisa tu conexión."
+          tone="error"
+        />
+      </div>
+      
     );
   }
   const { summary, account_distribution } = summaryData;
   return (
     <div className="rounded-[28px] border border-border-soft p-6 flex flex-col gap-4 ">
-      <div>
-        <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
-          <div className="flex flex-col gap-4">
-            {/*Valores totales por moneda*/}
-            {summary.total_value_by_currency.USD !== undefined && (
-              <MetricCard
-                label="Valor total USD"
-                value={formatMoney(summary.total_value_by_currency.USD, "USD")}
-                helper={`Solo inversiones en USD`}
-                hero
-              />
-            )}
-            {summary.total_value_by_currency.CLP !== undefined && (
-              <MetricCard
-                label="Valor total CLP"
-                value={`CLP${formatMoney(summary.total_value_by_currency.CLP, "CLP")}`}
-                helper={`Solo inversiones en CLP`}
-                hero
-              />
-            )}
-          </div>
-          <div className="flex flex-col gap-4">
-            {/*Montos Invertidos por moneda*/}
-            {summary.total_invested_by_currency.USD !== undefined && (
-              <MetricCard
-                label="Monto invertido (USD)"
-                value={formatMoney(summary.total_invested_by_currency.USD, "USD")}
-                helper={`A lo largo de todas tus cuentas USD`}
-                helperTone="muted"
-                hero
-              />
-            )}
-            {summary.total_invested_by_currency.CLP !== undefined && (
-              <MetricCard
-                label="Monto invertido (CLP)"
-                value={`CLP${formatMoney(summary.total_invested_by_currency.CLP, "CLP")}`}
-                helper={`A lo largo de todas tus cuentas CLP`}
-                helperTone="muted"
-                hero
-              />
-            )}
-          </div>
-          <div className="flex flex-col gap-4">
-            {/*Retorno no realizado (PNL) por moneda*/}
-            {summary.unrealized_pnl_by_currency.USD !== undefined && (
-              <MetricCard
-                label="Retorno no realizado USD"
-                value={formatMoney(summary.unrealized_pnl_by_currency.USD, "USD")}
-                helper={`Solo inversiones en USD`}
-                helperTone="muted"
-                hero
-              />
-            )}
-            {summary.unrealized_pnl_by_currency.CLP !== undefined && (
-              <MetricCard
-                label="Retorno no realizado CLP"
-                value={`CLP${formatMoney(summary.unrealized_pnl_by_currency.CLP, "CLP")}`}
-                helper={`Solo inversiones en CLP`}
-                helperTone="muted"
-                hero
-              />
-            )}
-          </div>
-          
-          <MetricCard
-            label="N° de Cuentas"
-            value={summary.linked_accounts}
-            helper="Que conforman tu portafolio"
-            helperTone="muted"
-          />
-
-          <MetricCard
-            label="N° de Posiciones"
-            value={summary.active_positions}
-            helper="Sobre activos en tu portafolio a lo largo de las cuentas"
-            helperTone="muted"
-          />
+      {false ? (
+        <div>
+{/*           <FeedbackCard
+            title="No se pudo cargar el portafolio"
+            detail="Por favor, revisa la conexión con el backend."
+            tone="error"
+          /> */}
         </div>
-      </div>
+      ) : (
+          <div>
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
+            <div className="flex flex-col gap-4">
+              {/*Valores totales por moneda*/}
+              {summary.total_value_by_currency.USD !== undefined && (
+                <MetricCard
+                  label="Valor total USD"
+                  value={formatMoney(summary.total_value_by_currency.USD, "USD")}
+                  helper={`Solo inversiones en USD`}
+                  hero
+                />
+              )}
+              {summary.total_value_by_currency.CLP !== undefined && (
+                <MetricCard
+                  label="Valor total CLP"
+                  value={`CLP${formatMoney(summary.total_value_by_currency.CLP, "CLP")}`}
+                  helper={`Solo inversiones en CLP`}
+                  hero
+                />
+              )}
+            </div>
+            <div className="flex flex-col gap-4">
+              {/*Montos Invertidos por moneda*/}
+              {summary.total_invested_by_currency.USD !== undefined && (
+                <MetricCard
+                  label="Monto invertido (USD)"
+                  value={formatMoney(summary.total_invested_by_currency.USD, "USD")}
+                  helper={`A lo largo de todas tus cuentas USD`}
+                  helperTone="muted"
+                  hero
+                />
+              )}
+              {summary.total_invested_by_currency.CLP !== undefined && (
+                <MetricCard
+                  label="Monto invertido (CLP)"
+                  value={`CLP${formatMoney(summary.total_invested_by_currency.CLP, "CLP")}`}
+                  helper={`A lo largo de todas tus cuentas CLP`}
+                  helperTone="muted"
+                  hero
+                />
+              )}
+            </div>
+            <div className="flex flex-col gap-4">
+              {/*Retorno no realizado (PNL) por moneda*/}
+              {summary.unrealized_pnl_by_currency.USD !== undefined && (
+                <MetricCard
+                  label="Retorno no realizado USD"
+                  value={formatMoney(summary.unrealized_pnl_by_currency.USD, "USD")}
+                  helper={`Solo inversiones en USD`}
+                  helperTone="muted"
+                  hero
+                />
+              )}
+              {summary.unrealized_pnl_by_currency.CLP !== undefined && (
+                <MetricCard
+                  label="Retorno no realizado CLP"
+                  value={`CLP${formatMoney(summary.unrealized_pnl_by_currency.CLP, "CLP")}`}
+                  helper={`Solo inversiones en CLP`}
+                  helperTone="muted"
+                  hero
+                />
+              )}
+            </div>
+            
+            <MetricCard
+              label="N° de Cuentas"
+              value={summary.linked_accounts}
+              helper="Que conforman tu portafolio"
+              helperTone="muted"
+            />
+
+            <MetricCard
+              label="N° de Posiciones"
+              value={summary.active_positions}
+              helper="Sobre activos en tu portafolio a lo largo de las cuentas"
+              helperTone="muted"
+            />
+          </div>
+        </div>
+      )}
+      
       
       <StatusPill className="w-60" tone="accent">{`Última actualización: ${summary.last_snapshot_date}`}</StatusPill>
     </div>
