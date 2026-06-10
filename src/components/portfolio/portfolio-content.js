@@ -5,6 +5,7 @@ import { MetricCard } from "@/src/components/metric-card";
 import { useAppAuth} from "@/src/lib/client-auth";
 import dynamic from "next/dynamic";
 import { PortfolioPositions } from "./portfolio-positions";
+import { PortfolioSummary } from "./portfolio-summary";
 
 const PortfolioTrend = dynamic(
   () => import("./portfolio-trend").then((mod) => mod.PortfolioTrend),
@@ -121,35 +122,10 @@ export function PortfolioContent() {
   }
 
   const { summary, account_distribution } = summaryData;
+  console.log(summary)
   return (
     <>
-      <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">
-        <MetricCard
-          label="Valor total del portafolio"
-          value={formatMoney(summary.total_value, "USD")}
-          helper={`Datos actualizados: ${summary.last_snapshot_date}`}
-          helperTone="pill"
-          hero
-        />
-        <MetricCard
-          label="Retorno no realizado"
-          value={formatMoney(summary.unrealized_pnl, "USD")}
-          helper={`${Number(summary.total_return_pct).toFixed(2)}%`}
-          helperTone="pill"
-        />
-        <MetricCard
-          label="Posiciones activas"
-          value={summary.active_positions}
-          helper="Activos en portafolio"
-          helperTone="muted"
-        />
-        <MetricCard
-          label="Cuentas vinculadas"
-          value={summary.linked_accounts}
-          helper="Operativas"
-          helperTone="muted"
-        />
-      </div>
+      <PortfolioSummary summaryData={summaryData} loading={loading} error={error}></PortfolioSummary>
 
       <div className="mt-6 flex flex-col gap-6">
         <PortfolioTrend></PortfolioTrend>

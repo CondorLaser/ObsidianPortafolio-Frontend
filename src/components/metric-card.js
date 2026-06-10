@@ -14,7 +14,7 @@ export function MetricCard({ label, value, helper, hero = false, helperTone = "s
           : "bg-panel-soft"
       }`}
     >
-      <p className="text-sm text-text-muted">{label}</p>
+      <p className="text-sm text-text-muted font-bold">{label}</p>
       <p
         className={`mt-3 font-semibold tracking-[-0.02em] ${
           hero ? "font-mono text-[28px] leading-[1.1]" : "text-[28px] leading-[1.1]"

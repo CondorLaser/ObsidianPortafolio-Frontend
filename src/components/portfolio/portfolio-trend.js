@@ -33,7 +33,7 @@ function getTrendDates(range) {
   const to = new Date();
   const from = new Date();
   
-  if (range === "1W") from.setDate(to.getDate() - 7);
+  if (range === "3M") from.setMonth(to.getMonth() - 3);
   if (range === "1M") from.setMonth(to.getMonth() - 1);
   if (range === "1Y") from.setFullYear(to.getFullYear() - 1);
 
@@ -128,8 +128,8 @@ export function PortfolioTrend() {
   const xAxisTickFormatter = useMemo(() => {
     return (tickItem) => {
       const dateObj = new Date(tickItem + "T00:00:00");
-      if (trendRange === "1W") {
-        return dateObj.toLocaleDateString("es-CL", { day: "numeric" });
+      if (trendRange === "3M") {
+        return dateObj.toLocaleDateString("es-CL", { day: "numeric", month: "short" });
       }
       if (trendRange === "1M") {
         return dateObj.toLocaleDateString("es-CL", { day: "numeric", month: "short" });
@@ -164,7 +164,7 @@ export function PortfolioTrend() {
         <div>
           <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Evolución del portafolio</h2>
           <div className="mt-3 flex gap-2">
-            {["1W", "1M", "1Y"].map((range) => (
+            {["1M", "3M", "1Y"].map((range) => (
               <button
                 key={range}
                 onClick={() => {
@@ -178,7 +178,7 @@ export function PortfolioTrend() {
                     : "bg-surface border border-border-soft text-text-muted hover:text-white"
                 }`}
               >
-                {range === "1W" ? "1 Semana" : range === "1M" ? "1 Mes" : "1 Año"}
+                {range === "1M" ? "1 Mes" : range === "3M" ? "3 Meses" : "1 Año"}
               </button>
             ))}
           </div>
@@ -246,7 +246,7 @@ export function PortfolioTrend() {
                 tickLine={false}
                 axisLine={false}
                 dy={10}
-                interval={trendRange === "1W" ? 0 : trendRange === "1M" ? 1 : 5}
+                interval={trendRange === "3M" ? 4 : trendRange === "1M" ? 1 : 14}
                 angle={-45}
                 textAnchor="end"
                 height={60}
