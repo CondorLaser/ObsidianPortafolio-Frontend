@@ -79,7 +79,7 @@ export function PortfolioContent() {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
         }})
-        if (!res.ok) setError(true);
+        if (!res.ok) throw new Error("Error al cargar los datos del portafolio");
         const data = await res.json();
         setSummaryData(data);
 
@@ -98,19 +98,19 @@ export function PortfolioContent() {
     return <FeedbackCard title="Cargando portafolio..." detail="Obteniendo el resumen de tu cuenta." />;
   }
 
-  const { summary, account_distribution } = summaryData;
-  if (account_distribution != undefined && account_distribution.lenght == 0) {
+  if (summaryData == null) {
     return (
       <div>
         <FeedbackCard
-            title="No se pudo cargar la distribución a lo largo de tus cuentas"
+            title="No se pudo cargar los datos de tu portafolio"
             detail="Por favor, intenta más tarde o revisa tu conexión."
-            tone="alert"
+            tone="error"
           />
       </div>
     )
   }
 
+  const { summary, account_distribution } = summaryData;
   if (summary.active_positions === 0){
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">

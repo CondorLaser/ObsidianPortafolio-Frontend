@@ -114,7 +114,7 @@ export function PortfolioPositions({account_distribution}) {
         setError(false);
         const token = await getToken();
         const skip = page * limit;
-        const res = await fetch(`${baseUrl}/positions?skip=${skip}&limit=${limit}`,{
+        const res = await fetch(`${baseUrl}/positions/portfolio?skip=${skip}&limit=${limit}`,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
