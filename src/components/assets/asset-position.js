@@ -1,6 +1,17 @@
 "use-client"
 import {useRouter} from "next/navigation";
 
+function getValueColor(value){
+  if(Number(value)< 0) return "text-danger"
+  if(Number(value) === 0) return "text-text-muted"
+  return "text-success"
+}
+function getValueColorFees(value){
+  if(Number(value)> 0) return "text-danger"
+  if(Number(value) === 0) return "text-text-muted"
+  return "text-success"
+}
+
 function formatMoney(amount, currency = "USD") {
   if (amount === null || amount === undefined) return "-";
   const numAmount = Number(amount);
@@ -18,10 +29,7 @@ export function PositionAssetRow({ position, accountName}) {
     router.push(`/activos/${position.asset.symbol}`);
   };
   
-
   const pnl = Number(position.realized_pnl);
-  const avg_cost = Number(position.avg_cost);
-  console.log(avg_cost, Number(null))
   const isNegative = pnl < 0;
   const last_transaction_date = position.last_transaction_at ? new Date(position.last_transaction_at).toLocaleString("es-CL", {
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
@@ -56,21 +64,21 @@ export function PositionAssetRow({ position, accountName}) {
       </td>
       {/* Costo Promedio (avg_cost)*/}
       <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold">
-        <div className="">
+        <div className={"text-warning"}>
           {currency === "CLP" && position.avg_cost !== null? "CLP" : ""}{formatMoney(position.avg_cost, currency)}
         </div>
         
       </td>
       {/* PNL Realizado (realized_pnl)*/}
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColor(pnl)}`}>
         {pnlWithCurrency}
       </td>
       {/* Dividendos Totales (total_dividends)*/}
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColor(position.total_dividends)}`}>
         {position.total_dividends ? formatMoney(position.total_dividends, currency) : "-"}
       </td>
       {/* Cargos totales (total_fees)*/}
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColorFees(position.total_fees)}`}>
         {position.total_fees ? formatMoney(position.total_fees, currency) : "-"}
       </td>
       {/* Última Transacción (last_transaction_at)*/}
