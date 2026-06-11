@@ -10,6 +10,7 @@ import { SectionCard } from "@/src/components/section-card";
 import { SimpleChart } from "@/src/components/simple-chart";
 import { assetDetailConfigs } from "@/src/lib/asset-detail-config";
 import { FeedbackCard } from "../feedback-card";
+import { useAppAuth} from "@/src/lib/client-auth";
 
 function DetailPill({ label, value, tone = "default" }) {
   const toneClass =
@@ -27,23 +28,41 @@ function DetailPill({ label, value, tone = "default" }) {
   );
 }
 
-export function AssetDetailContent({ symbol }) {
+function formatMoney(amount, currency = "USD") {
+  if (amount === null || amount === undefined) return "-";
+  const numAmount = Number(amount);
+  
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: currency === "CLP" ? 0 : 2,
+  }).format(numAmount);
+}
+
+export function AssetDetailContent({ asset_id }) {
+  const { getToken } = useAppAuth();
   const [position, setPosition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
 
   useEffect(() => {
     async function loadPosition() {
       try {
         setLoading(true);
         setError(false);
-
-        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
-        const response = await fetch(`${baseUrl}/positions/${encodeURIComponent(symbol)}`);
-
+        const token = await getToken();
+        const response = await fetch(`${baseUrl}/positions/asset/${encodeURIComponent(asset_id)}`,{
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error("Error al cargar el activo");
-
         const data = await response.json();
+        // console.log(data)
         setPosition(data);
       } catch (fetchError) {
         console.error("Fetch Asset Detail Error:", fetchError);
@@ -54,7 +73,7 @@ export function AssetDetailContent({ symbol }) {
     }
 
     loadPosition();
-  }, [symbol]);
+  }, [asset_id]);
 
   if (loading) {
     return (
@@ -83,16 +102,28 @@ export function AssetDetailContent({ symbol }) {
   }
 
   const asset = position.asset;
-  const config = assetDetailConfigs[position.symbol] ?? assetDetailConfigs.SPY;
+/*   const config = assetDetailConfigs[position.symbol] ?? assetDetailConfigs.SPY;
   const chartData = asset?.priceHistory ?? config.chartData;
   const chartLabels = config.chartLabels;
   const dailyMetrics = asset?.dailyMetrics;
-  const monthlyMetrics = asset?.monthlyMetrics;
-  const quantityLabel = position.type === "Liquidez" ? position.quantity : `${position.quantity} unidades`;
+  const monthlyMetrics = asset?.monthlyMetrics; */
+  const last_transaction_date = position.last_transaction_at ? new Date(position.last_transaction_at).toLocaleString("es-CL", {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+  }) : "-"
+  const currency = position.asset.currency
+  const pnl = Number(position.realized_pnl);
+  const isNegative = pnl < 0;
+  const pnlFormatted = position.realized_pnl
+    ? `${formatMoney(pnl, currency)}` 
+    : "-";
+  const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
+  const isStock = position.asset.kind === "stock";
+  const isEtf = position.asset.kind === "etf";
+
 
   return (
     <DashboardShell
-      title={`${position.symbol} · ${position.name}`}
+      title={`${position.asset.symbol} · ${position.asset.name}`}
       description="Vista específica del activo seleccionado, con su evolución de mercado y los datos que tiene el usuario en su cuenta."
       actions={
         <>
@@ -112,13 +143,25 @@ export function AssetDetailContent({ symbol }) {
       }
     >
 
-      <p className="mb-6 text-sm uppercase tracking-[0.25em] text-accent">Detalle de activo</p>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Valor invertido" value={position.totalValue} helper={`${position.weight} del portafolio`} />
-        <MetricCard label="Cantidad" value={quantityLabel} helper={`Costo prom. ${position.avgCost}`} />
-        <MetricCard label="Precio actual" value={asset?.currentPrice ?? position.currentPrice} helper={asset?.priceSource ?? position.source} />
-        <MetricCard label="Cuenta asociada" value={position.account} helper={position.returnPct} />
+        {/* <MetricCard label="Valor invertido" value={position.totalValue} helper={`${position.weight} del portafolio`} /> */}
+        <MetricCard label="Cantidad" value={Number(position.quantity).toFixed(4)} />
+        <MetricCard label="Costo Promedio" value={currency === "CLP" && position.avg_cost !== null? `CLP${formatMoney(position.avg_cost, currency)}` : `${formatMoney(position.avg_cost, currency)}`} />
+        <MetricCard hero label="Tipo de Activo" value={
+          <span className={`inline-block rounded-md py-[30px] text-center w-full text-[10px] font-bold uppercase tracking-wider ${
+          isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
+          isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
+          "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+        }`}>
+          <div className="text-xl font-bold">
+            {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF" : "Fondo"}
+          </div>
+          
+        </span>
+        }></MetricCard>
+        {/* <MetricCard label="Precio actual" value={asset?.currentPrice ?? position.currentPrice} helper={asset?.priceSource ?? position.source} /> */}
+        {/* <MetricCard label="Cuenta asociada" value={position.account} helper={position.returnPct} /> */}
       </div>
 
       <div className="mt-7 grid gap-7">
@@ -127,24 +170,20 @@ export function AssetDetailContent({ symbol }) {
           description="Información propia de este activo dentro del portafolio: resultado, dividendos, costos y última transacción."
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <DetailPill label="P&L no realizado" value={position.unrealizedPnl} tone={position.unrealizedPnl.startsWith("-") ? "negative" : "positive"} />
-            <DetailPill label="P&L realizado" value={position.realizedPnl} />
-            <DetailPill label="Dividendos" value={position.totalDividends} />
-            <DetailPill label="Comisiones" value={position.totalFees} />
+            {/* <DetailPill label="P&L no realizado" value={position.unrealizedPnl} tone={position.unrealizedPnl.startsWith("-") ? "negative" : "positive"} /> */}
+            <DetailPill label="P&L realizado" value={pnlWithCurrency} />
+            <DetailPill label="Dividendos" value={position.total_dividends ? formatMoney(position.total_dividends, currency) : "-"} />
+            <DetailPill label="Comisiones" value={position.total_fees ? formatMoney(position.total_fees, currency) : "-"} />
           </div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <article className="rounded-[22px] border border-border-soft bg-surface/55 p-5">
-              <p className="text-[12px] uppercase tracking-[0.14em] text-text-muted">Última transacción</p>
-              <p className="mt-2 text-[18px] font-semibold text-white">{position.lastTransactionAt}</p>
-            </article>
-            <article className="rounded-[22px] border border-border-soft bg-surface/55 p-5">
               <p className="text-[12px] uppercase tracking-[0.14em] text-text-muted">Última actualización</p>
-              <p className="mt-2 text-[18px] font-semibold text-white">{position.updatedAt}</p>
+              <p className="mt-2 text-[18px] font-semibold text-white">{last_transaction_date}</p>
             </article>
           </div>
         </SectionCard>
 
-        <SectionCard
+        {/* <SectionCard
           title="Métricas del activo"
           description="Datos generales del instrumento de mercado para entender su comportamiento más allá de esta cuenta."
         >
@@ -154,9 +193,9 @@ export function AssetDetailContent({ symbol }) {
             <DetailPill label="Retorno mensual" value={monthlyMetrics?.absoluteReturn ?? position.returnPct} tone={position.returnPct.startsWith("-") ? "negative" : "positive"} />
             <DetailPill label="Volatilidad diaria" value={dailyMetrics?.volatility ?? "Sin dato"} />
           </div>
-        </SectionCard>
+        </SectionCard> */}
 
-        <SectionCard
+        {/* <SectionCard
           title="Evolución del activo"
           description="Serie de precio del activo en el tiempo para seguir su tendencia reciente."
         >
@@ -170,21 +209,7 @@ export function AssetDetailContent({ symbol }) {
             labels={chartLabels}
             className="h-[420px] rounded-[22px] border-border-soft/80 bg-surface"
           />
-        </SectionCard>
-
-        <SectionCard
-          title="Acciones disponibles"
-          description="Acciones contextuales para este activo, no acciones genéricas del dashboard."
-        >
-          <div className="grid gap-5">
-            <ActionItem title="Recomendación" detail={config.recommendationDetail} />
-            <ActionItem title="Alertas" detail={config.alertDetail} />
-            <ActionItem
-              title="Datos"
-              detail={`Revisar ${position.source}, última transacción ${position.lastTransactionAt}.`}
-            />
-          </div>
-        </SectionCard>
+        </SectionCard> */}
       </div>
     </DashboardShell>
   );

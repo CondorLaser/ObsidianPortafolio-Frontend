@@ -5,17 +5,6 @@ import { useAppAuth} from "@/src/lib/client-auth";
 import { FeedbackCard } from "../feedback-card";
 import { PositionRow } from "../positions/position-row";
 
-function formatMoney(amount, currency = "USD") {
-  if (amount === null || amount === undefined) return "-";
-  const numAmount = Number(amount);
-  
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: currency,
-    maximumFractionDigits: currency === "CLP" ? 0 : 2,
-  }).format(numAmount);
-}
-
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
   success: "border-emerald-500/20 bg-emerald-500/10 text-success",

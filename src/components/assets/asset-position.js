@@ -26,7 +26,7 @@ function formatMoney(amount, currency = "USD") {
 export function PositionAssetRow({ position, accountName}) {
   const router = useRouter();
   const handleRowClick = () => {
-    router.push(`/activos/${position.asset.symbol}`);
+    router.push(`/activos/${position.asset_id}`);
   };
   
   const pnl = Number(position.realized_pnl);
