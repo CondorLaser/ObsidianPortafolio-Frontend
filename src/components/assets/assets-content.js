@@ -152,9 +152,9 @@ export function AssetsContent() {
                 <th className="w-[44%] px-3 pb-4 pt-5 text-center font-semibold">Cuenta</th>
                 <th className="w-[8%] px-3 pb-4 pt-5 text-center font-semibold">Cantidad</th>
                 <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Costo Promedio</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">PnL Realizado</th>
+                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">P&L Realizado</th>
                 <th className="w-[8%] px-3 pb-4 pt-5 text-center font-semibold">Dividendos Totales</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Cargos totales</th>
+                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Comisiones Totales</th>
                 <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Última transacción</th>
               </tr>
             </thead>

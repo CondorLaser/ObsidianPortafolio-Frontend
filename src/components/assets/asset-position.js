@@ -39,7 +39,8 @@ export function PositionAssetRow({ position, accountName}) {
     ? `${formatMoney(pnl, currency)}` 
     : "-";
   const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
-
+  const isStock = position.asset.kind === "stock";
+  const isEtf = position.asset.kind === "etf";
   
 
   return (
@@ -53,37 +54,45 @@ export function PositionAssetRow({ position, accountName}) {
           </div>
       </td>
       {/* Kind */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">{position.asset.kind}</td>
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">
+        <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+          isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
+          isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
+          "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+        }`}>
+          {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF" : "Fondo"}
+        </span>
+      </td>
       {/* Nombre de Cuenta */}
       <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
         {accountName || "No disponible"}
       </td>
       {/* Cantidad (quantity)*/}
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className="whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold text-white">
         {Number(position.quantity).toFixed(4)}
       </td>
       {/* Costo Promedio (avg_cost)*/}
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold">
+      <td className="whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold">
         <div className={"text-warning"}>
           {currency === "CLP" && position.avg_cost !== null? "CLP" : ""}{formatMoney(position.avg_cost, currency)}
         </div>
         
       </td>
       {/* PNL Realizado (realized_pnl)*/}
-      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColor(pnl)}`}>
+      <td className={`whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold ${getValueColor(pnl)}`}>
         {pnlWithCurrency}
       </td>
       {/* Dividendos Totales (total_dividends)*/}
-      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColor(position.total_dividends)}`}>
+      <td className={`whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold ${getValueColor(position.total_dividends)}`}>
         {position.total_dividends ? formatMoney(position.total_dividends, currency) : "-"}
       </td>
       {/* Cargos totales (total_fees)*/}
-      <td className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold ${getValueColorFees(position.total_fees)}`}>
+      <td className={`whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold ${getValueColorFees(position.total_fees)}`}>
         {position.total_fees ? formatMoney(position.total_fees, currency) : "-"}
       </td>
       {/* Última Transacción (last_transaction_at)*/}
       
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className="whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold text-white">
         {last_transaction_date}
       </td>
       
