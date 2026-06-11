@@ -102,10 +102,10 @@ export function PortfolioContent() {
     return (
       <div>
         <FeedbackCard
-            title="No se pudo cargar los datos de tu portafolio"
-            detail="Por favor, intenta más tarde o revisa tu conexión."
-            tone="error"
-          />
+          title="No se pudo cargar los datos de tu portafolio"
+          detail="Por favor, intenta más tarde o revisa tu conexión."
+          tone="error"
+        />
       </div>
     )
   }
