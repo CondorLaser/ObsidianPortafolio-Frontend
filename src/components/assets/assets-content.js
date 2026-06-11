@@ -167,16 +167,7 @@ export function AssetsContent() {
   
   return (
     <div>
-      <div className="mt-6">
-        <section className="rounded-[28px] border border-border-soft bg-panel-soft p-7">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Activos principales</h2>
-              <p className="mt-2 mb-2 text-[14px] text-text-muted">
-                Revisa tus posiciones en los activos que conforman tu portafolio.
-              </p>
-            </div>
-          </div>
+      <div className="mt-6 bg-red-500 p-1">        
           {error ? (
             <div>
               <div className="flex h-60 w-full flex flex-col items-center justify-center rounded-[28px] border border-red-500/20 bg-red-500/5 p-6 text-center text-red-300">
@@ -241,7 +232,7 @@ export function AssetsContent() {
               </div>
             </div>
           )}
-        </section>
+        
       </div>
     </div>
   );
