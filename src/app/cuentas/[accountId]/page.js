@@ -8,6 +8,8 @@ import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
 import { SimpleChart } from "@/src/components/simple-chart";
 import { CollapsableShell } from "@/src/components/collapsable-shell";
+import { AccountPositions } from "@/src/components/accounts/account-positions";
+import { AccountDividends } from "@/src/components/accounts/account-dividends";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
@@ -16,9 +18,7 @@ export default function AccountDetailPage({ params }) {
 
   const [account, setAccount] = useState(null);
   const [metrics, setMetrics] = useState(null);
-  const [positions, setPositions] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [dividends, setDividends] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,7 +34,7 @@ export default function AccountDetailPage({ params }) {
         const token = await getToken();
 
         // Hace las request en paralelo
-        const [resAccount, resMetrics, resPositions, resTransactions, resDividends] = await Promise.all([
+        const [resAccount, resMetrics, resTransactions] = await Promise.all([
           fetch(`${baseUrl}/accounts/${accountId}`, {
             method: "GET",
             headers: {
@@ -47,42 +47,24 @@ export default function AccountDetailPage({ params }) {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
           }}),
-          fetch(`${baseUrl}/accounts/positions/${accountId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-          }}),
           fetch(`${baseUrl}/accounts/transactions/${accountId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
           }}),
-          fetch(`${baseUrl}/accounts/dividends/${accountId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-          }})
         ]);
 
-        if (!resAccount.ok || !resMetrics.ok || !resPositions.ok || !resTransactions.ok || !resDividends.ok) {
+        if (!resAccount.ok || !resMetrics.ok  || !resTransactions.ok) {
           throw new Error("Error al obtener los desgloses distribuidos de la cuenta");
         }
         const dataAccount = await resAccount.json();
         const dataMetrics = await resMetrics.json();
         const dataTransactions = await resTransactions.json();
-        const dataPositions = await resPositions.json();
-        const dataDividends = await resDividends.json();
 
         const normalizedTransactions = Array.isArray(dataTransactions) ? dataTransactions : (dataTransactions.transactions ?? []);
-        const normalizedPositions = Array.isArray(dataPositions) ? dataPositions : (dataPositions.positions ?? []);
-        const normalizedDividends = Array.isArray(dataDividends) ? dataDividends : (dataDividends.dividends ?? []);
         const assetIds = [...new Set([
           ...normalizedTransactions.map(tx => tx.asset_id),
-          ...normalizedPositions.map(pos => pos.asset_id),
-          ...normalizedDividends.map(div => div.asset_id),
         ].filter(Boolean))];
 
         const assetResults = await Promise.all(
@@ -98,12 +80,9 @@ export default function AccountDetailPage({ params }) {
         const map = {};
         assetResults.filter(Boolean).forEach(a => { map[a.id] = a; });
         setAssetsMap(map);
-
         setAccount(dataAccount);
         setMetrics(dataMetrics);
         setTransactions(normalizedTransactions);
-        setPositions(normalizedPositions);
-        setDividends(normalizedDividends);
       } catch (err) {
         console.error("Fetch Account Detail Error:", err);
         setError(true);
@@ -164,7 +143,6 @@ export default function AccountDetailPage({ params }) {
     ? `${latestDaily.pnl >= 0 ? "+" : ""}${Number(latestDaily.pnl).toFixed(2)} ${account.currency}` 
     : `0.00 ${account.currency}`;
 
-  const totalDividendsNet = dividends.reduce((sum, div) => sum + Number(div.net_amount || 0), 0);
   const dividendsValue = `${totalDividendsNet.toFixed(2)} ${account.currency}`;
 
   const getTransactionType = (transaction) => (
@@ -195,7 +173,7 @@ export default function AccountDetailPage({ params }) {
       {/* 1. Métricas Generales */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Último P&L Diario" value={pnlValue} />
-        <MetricCard label="Posiciones Activas" value={positions.length.toString()} />
+        {/* <MetricCard label="Posiciones Activas" value={positions.length.toString()} /> */}
         <MetricCard label="Dividendos Netos Recibidos" value={dividendsValue} />
         <MetricCard label="Última Operación" value={lastTxLabel} />
       </div>
@@ -234,59 +212,7 @@ export default function AccountDetailPage({ params }) {
           title="Posiciones de la Cuenta"
           description="Activos vigentes en esta cuenta con su costo promedio ponderado y retornos realizados."
         >
-          {positions.length === 0 ? (
-            <p className="text-sm text-text-muted py-4">No se registran posiciones de activos abiertas en esta cuenta</p>
-          ) : (
-            <div className="overflow-x-auto rounded-2xl border border-border-soft bg-surface/45">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border-soft bg-panel-soft/60 text-xs font-[760] uppercase tracking-[0.12em] text-text-muted">
-                    <th className="p-4">Activo</th>
-                    <th className="p-4">Tipo</th>
-                    <th className="p-4 text-right">Cantidad</th>
-                    <th className="p-4 text-right">Costo Promedio</th>
-                    <th className="p-4 text-right">P&L Realizado</th>
-                    <th className="p-4 text-right">Dividendos Totales</th>
-                    <th className="p-4 text-right">Comisiones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-soft/40 text-sm text-white">
-                  {positions.map((pos) => {
-                    const asset = assetsMap[pos.asset_id] || {};
-                    const isStock = asset.kind === "stock";
-                    const isEtf = asset.kind === "etf";
-                    
-                    return (
-                      <tr key={pos.id} className="hover:bg-panel/30 transition-colors">
-                        <td className="p-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-white text-base tracking-tight">{asset.symbol || "N/D"}</span>
-                            <span className="text-xs text-text-muted truncate max-w-[180px]">{asset.name || "Desconocido"}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                            isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
-                            isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                            "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                          }`}>
-                            {asset.kind === "stock" ? "Acción" : asset.kind === "etf" ? "ETF" : "Fondo"}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right text-text-muted font-medium">{Number(pos.quantity).toFixed(4)}</td>
-                        <td className="p-4 text-right font-medium">{Number(pos.avg_cost).toFixed(2)} {account.currency}</td>
-                        <td className={`p-4 text-right font-bold ${Number(pos.realized_pnl) >= 0 ? "text-success" : "text-danger"}`}>
-                          {Number(pos.realized_pnl) >= 0 ? "+" : ""}{Number(pos.realized_pnl).toFixed(2)}
-                        </td>
-                        <td className="p-4 text-right text-emerald-400 font-medium">+{Number(pos.total_dividends).toFixed(2)}</td>
-                        <td className="p-4 text-right text-text-muted">{Number(pos.total_fees).toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <AccountPositions accountId={accountId} />
         </SectionCard>
       </div>
   
@@ -349,46 +275,7 @@ export default function AccountDetailPage({ params }) {
           title="Historial de Dividendos"
           description="Flujos de caja corporativos detallados por concepto de distribuciones recibidas y retenciones fiscales"
         >
-          {dividends.length === 0 ? (
-            <p className="text-sm text-text-muted py-4">No hay pagos de dividendos asociados a esta cuenta</p>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-border-soft bg-surface/20 mt-2">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border-soft text-xs font-[760] uppercase tracking-[0.12em] text-text-muted bg-panel-soft/30">
-                    <th className="p-3">Fecha de Pago</th>
-                    <th className="p-3">Activo</th>
-                    <th className="p-3 text-right">Monto Bruto</th>
-                    <th className="p-3 text-right">Impuesto / Retención</th>
-                    <th className="p-3 text-right">Monto Neto Recibido</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-soft/20 text-s text-white">
-                  {dividends.map((div) => {
-                    const asset = assetsMap[div.asset_id] || {};
-                    return (
-                      <tr key={div.id} className="hover:bg-panel/20 transition-colors">
-                        <td className="p-3 text-text-muted">{new Date(div.date).toLocaleDateString("es-CL")}</td>
-                        <td className="p-3">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-white">{asset.symbol || "N/D"}</span>
-                            <span className="text-[10px] text-text-muted max-w-[140px] truncate">{asset.name || ""}</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-right text-text-muted">{Number(div.gross_amount)}</td>
-                        <td className="p-3 text-right text-danger font-medium">
-                          {Number(div.tax_amount) > 0 ? "-" : ""}{Number(div.tax_amount).toFixed(2)}
-                        </td>
-                        <td className="p-3 text-right font-semibold text-emerald-400">
-                          +{Number(div.net_amount).toFixed(2)} {account.currency}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <AccountDividends accountId={accountId} />
         </CollapsableShell>
         
       </div>
