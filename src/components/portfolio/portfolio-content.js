@@ -36,19 +36,19 @@ function DistributionRow({ item }) {
   const isUSD = item.currency === "USD";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-4">
       <div className="flex items-center justify-between gap-4">
         <p className="text-[18px] font-semibold text-white">{item.name}</p>
-        <div className="flex min-w-[210px] items-center gap-4">
+        <div className="flex min-w-[250px] items-center gap-4">
           <div className="h-3 flex-1 rounded-full bg-[#2d374c]">
             <div className="h-full rounded-full bg-accent" style={{ width: widthPct }} />
           </div>
-          <span className="text-[18px] font-bold text-white">{widthPct}</span>
+          <span className="text-[18px] font-bold text-white">{widthPct} de {item.currency}</span>
         </div>
       </div>
-      <div className="rounded-[20px] border border-border-soft bg-surface px-6 py-6">
-        <p className="text-sm text-text-muted">{isUSD ? "Acciones y ETFs (USD)" : "Fondos mutuos (CLP)"}</p>
-        <p className="mt-3 font-mono text-[18px] font-bold tracking-[-0.02em] text-white">
+      <div className="rounded-[20px] border border-border-soft bg-panel px-6 py-6 flex flex-row gap-10">
+        <p className=" text-text-muted">{isUSD ? "Acciones y ETFs (USD)" : "Fondos mutuos (CLP)"}</p>
+        <p className="text-[18px] font-bold tracking-[-0.02em] text-accent">
           {formatMoney(item.amount, item.currency)}
         </p>
       </div>
@@ -111,6 +111,7 @@ export function PortfolioContent() {
   }
 
   const { summary, account_distribution } = summaryData;
+  // console.log(account_distribution)
   if (summary.active_positions === 0){
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
@@ -144,7 +145,8 @@ export function PortfolioContent() {
 
         <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6">
           <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Distribución por cuenta</h2>
-          <p className="mt-2 text-[14px] text-text-muted">Desglose de capital total distribuido.</p>
+          <p className="mt-2 text-[14px] text-text-muted">Desglose de capital total distribuido según tipo de moneda (CLP o USD).</p>
+          <p className="mt-2 text-[14px] text-text-muted"><b>*Nota:</b> Los porcentajes mostrados aquí representan el % total de cada moneda, no del capital total del portafolio cuando hay cuentas de varias monedas.</p>
 
           <div className="mt-10 space-y-5">
             {account_distribution === undefined ? (

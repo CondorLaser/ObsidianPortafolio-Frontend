@@ -55,7 +55,7 @@ export function PositionAssetRow({ position, accountName}) {
       </td>
       {/* Kind */}
       <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">
-        <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+        <span className={`inline-block rounded-md px-2 py-0.5 text-[12px] font-bold uppercase ${
           isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
           isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
           "bg-purple-500/10 text-purple-400 border border-purple-500/20"

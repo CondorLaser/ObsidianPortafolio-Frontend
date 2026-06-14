@@ -97,7 +97,7 @@ export async function YourDataCard({
                                     </p>
 
                                     <p className="mt-0 text-sm text-[#9fd1c0]">
-                                        Nota: Esto puede requerir que inicies
+                                        <b>*Nota:</b> Esto puede requerir que inicies
                                         sesión nuevamente
                                     </p>
                                 </div>

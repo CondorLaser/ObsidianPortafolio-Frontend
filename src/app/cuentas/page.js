@@ -10,7 +10,7 @@ import { CreateAccountForm } from "@/src/components/accounts/create-account-form
 async function fetchAccounts(getToken) {
   const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
   const token = await getToken();
-  const response = await fetch(`${baseUrl}/accounts`, {
+  const response = await fetch(`${baseUrl}/accounts/with-counters`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -158,7 +158,7 @@ export default function AccountsPage() {
           <div className="grid gap-5 md:grid-cols-2">
             {accounts.map((account) => (
               <AccountCard
-                key={account.id}
+                key={account.account.id}
                 account={account}
               />
             ))}

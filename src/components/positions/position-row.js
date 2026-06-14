@@ -18,6 +18,8 @@ export function PositionRow({ position, accountName}) {
     ? `${formatMoney(pnl, currency)}` 
     : "-";
   const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
+  const isStock = position.asset.kind === "stock";
+  const isEtf = position.asset.kind === "etf";
 
   return (
     <tr className="border-t border-border-soft align-middle transition hover:bg-accent/5 first:border-t-0">
@@ -35,14 +37,22 @@ export function PositionRow({ position, accountName}) {
           </div>
         </Link>
       </td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">{position.asset.kind}</td>
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">
+        <span className={`inline-block rounded-md px-2 py-0.5 uppercase ${
+          isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
+          isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
+          "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+        }`}>
+          {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF" : "Fondo"}
+        </span>
+      </td>
       <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
         {accountName || "No disponible"}
       </td>
       <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
         {Number(position.quantity).toFixed(4)}
       </td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
+      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-warning">
         {currency === "CLP" && position.last_price !== null? "CLP" : ""}{formatMoney(position.last_price, currency)}
       </td>
       <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">

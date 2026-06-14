@@ -1,13 +1,14 @@
 import Link from "next/link";
 
-export function AccountCard({ account }) {
-  const {
-    broker = "Broker no especificado",
-    total_positions = 10,
-    stock_count = 4,
-    etf_count = 2,
-    fund_count = 1
-  } = account;
+export function AccountCard(account_data_raw ) {
+  const account_data = account_data_raw.account
+  const account = account_data.account || {};
+  const n_stock_positions = account_data.stock_positions || 0;
+  const n_etf_positions = account_data.etf_positions || 0;
+  const n_fund_positions = account_data.fund_positions || 0;
+  const total_positions = n_stock_positions + n_etf_positions + n_fund_positions;
+  const broker = "Fintual" 
+
   return (
     <Link
       href={`/cuentas/${account.id}`}
@@ -23,7 +24,7 @@ export function AccountCard({ account }) {
             {account.name}
           </h2>
         </div>
-        <span className="rounded-xl bg-accent px-3 py-1.5 text-xs font-extrabold tracking-wider text-black shadow-md uppercase">
+        <span className="rounded-xl bg-accent px-3 py-1.5 text-m font-bold tracking-wider text-black shadow-md uppercase">
           {account.currency}
         </span>
       </div>
@@ -36,24 +37,24 @@ export function AccountCard({ account }) {
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {stock_count > 0 && (
+          {n_stock_positions > 0 && (
             <span className="rounded-lg bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[11px] text-blue-300">
-              <span className="font-semibold text-blue-100">{stock_count}</span>{" "}
-              {stock_count === 1 ? "Acción" : "Acciones"}
+              <span className="font-semibold text-blue-100">{n_stock_positions}</span>{" "}
+              {n_stock_positions === 1 ? "Acción" : "Acciones"}
             </span>
           )}
 
-          {etf_count > 0 && (
+          {n_etf_positions > 0 && (
             <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[11px] text-emerald-300">
-              <span className="font-semibold text-emerald-100">{etf_count}</span>{" "}
-              {etf_count === 1 ? "ETF" : "ETFs"}
+              <span className="font-semibold text-emerald-100">{n_etf_positions}</span>{" "}
+              {n_etf_positions === 1 ? "ETF" : "ETFs"}
             </span>
           )}
 
-          {fund_count > 0 && (
+          {n_fund_positions > 0 && (
             <span className="rounded-lg bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 text-[11px] text-purple-300">
-              <span className="font-semibold text-purple-100">{fund_count}</span>{" "}
-              {fund_count === 1 ? "Fondo Mutuo" : "Fondos Mutuos"}
+              <span className="font-semibold text-purple-100">{n_fund_positions}</span>{" "}
+              {n_fund_positions === 1 ? "Fondo Mutuo" : "Fondos Mutuos"}
             </span>
           )}
         </div>

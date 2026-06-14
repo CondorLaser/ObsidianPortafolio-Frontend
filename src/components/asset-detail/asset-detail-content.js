@@ -21,7 +21,7 @@ function DetailPill({ label, value, tone = "default" }) {
         : "text-white";
 
   return (
-    <article className="rounded-[22px] border border-border-soft bg-surface/55 p-5">
+    <article className="rounded-[22px] border border-border-soft bg-surface/55 p-5 mr-3 mb-4">
       <p className="text-[12px] uppercase tracking-[0.14em] text-text-muted">{label}</p>
       <p className={`mt-2 text-[22px] font-semibold tracking-[-0.02em] ${toneClass}`}>{value}</p>
     </article>
@@ -101,7 +101,6 @@ export function AssetDetailContent({ asset_id }) {
     );
   }
 
-  const asset = position.asset;
 /*   const config = assetDetailConfigs[position.symbol] ?? assetDetailConfigs.SPY;
   const chartData = asset?.priceHistory ?? config.chartData;
   const chartLabels = config.chartLabels;
@@ -110,7 +109,7 @@ export function AssetDetailContent({ asset_id }) {
   const last_transaction_date = position.last_transaction_at ? new Date(position.last_transaction_at).toLocaleString("es-CL", {
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
   }) : "-"
-  const currency = position.asset.currency
+  const currency = position.asset.currency != undefined? (position.asset.currency === "CPL"? "CLP": position.asset.currency) : ""
   const pnl = Number(position.realized_pnl);
   const isNegative = pnl < 0;
   const pnlFormatted = position.realized_pnl
@@ -119,12 +118,12 @@ export function AssetDetailContent({ asset_id }) {
   const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
   const isStock = position.asset.kind === "stock";
   const isEtf = position.asset.kind === "etf";
-
+  const isFund = position.asset.kind === "fund";
 
   return (
     <DashboardShell
       title={`${position.asset.symbol} · ${position.asset.name}`}
-      description="Vista específica del activo seleccionado, con su evolución de mercado y los datos que tiene el usuario en su cuenta."
+      description="Observa los datos y la evolución de este activo específico, junto a sus métricas."
       actions={
         <>
         <Link
@@ -133,49 +132,47 @@ export function AssetDetailContent({ asset_id }) {
         >
           Volver a activos
         </Link>
-        <Link
-          href="/recomendaciones"
-          className="inline-flex min-h-[44px] items-center justify-center rounded-[18px] border border-transparent bg-accent px-[18px] text-[14px] font-semibold text-app transition hover:brightness-105"
-        >
-          Ver recomendación
-        </Link>
         </>
       }
     >
 
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {/* <MetricCard label="Valor invertido" value={position.totalValue} helper={`${position.weight} del portafolio`} /> */}
-        <MetricCard label="Cantidad" value={Number(position.quantity).toFixed(4)} />
-        <MetricCard label="Costo Promedio" value={currency === "CLP" && position.avg_cost !== null? `CLP${formatMoney(position.avg_cost, currency)}` : `${formatMoney(position.avg_cost, currency)}`} />
-        <MetricCard hero label="Tipo de Activo" value={
-          <span className={`inline-block rounded-md py-[30px] text-center w-full text-[10px] font-bold uppercase tracking-wider ${
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">      
+        <span className={`inline-block rounded-md py-[50px] text-lg text-center w-full font-bold uppercase ${
           isStock ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
           isEtf ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
           "bg-purple-500/10 text-purple-400 border border-purple-500/20"
         }`}>
-          <div className="text-xl font-bold">
-            {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF" : "Fondo"}
-          </div>
-          
+            {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF (Exchange Traded Fund)" : "Fondo Mutuo"}
         </span>
-        }></MetricCard>
-        {/* <MetricCard label="Precio actual" value={asset?.currentPrice ?? position.currentPrice} helper={asset?.priceSource ?? position.source} /> */}
-        {/* <MetricCard label="Cuenta asociada" value={position.account} helper={position.returnPct} /> */}
+        <MetricCard label="Costo Promedio" value={currency === "CLP" && position.avg_cost !== null? `CLP${formatMoney(position.avg_cost, currency)}` : `${formatMoney(position.avg_cost, currency)}`} />
+        
       </div>
 
       <div className="mt-7 grid gap-7">
         <SectionCard
-          title="Datos del usuario"
-          description="Información propia de este activo dentro del portafolio: resultado, dividendos, costos y última transacción."
+          title="Datos sobre tu inversión"
+          description={
+            <>
+              Información propia de este activo dentro del portafolio: resultado, dividendos, costos y última transacción. <br></br>
+              <b>*Nota:</b> Solo se muestra aquella información pertinente, por ejemplo si para un activo no hay dividendos, no se muestran dividendos
+            </>
+          }
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          
+          <div className="grid md:grid-cols-2 xl:grid-cols-4">
             {/* <DetailPill label="P&L no realizado" value={position.unrealizedPnl} tone={position.unrealizedPnl.startsWith("-") ? "negative" : "positive"} /> */}
-            <DetailPill label="P&L realizado" value={pnlWithCurrency} />
-            <DetailPill label="Dividendos" value={position.total_dividends ? formatMoney(position.total_dividends, currency) : "-"} />
-            <DetailPill label="Comisiones" value={position.total_fees ? formatMoney(position.total_fees, currency) : "-"} />
+            <DetailPill label={isFund? `Cantidad de Cuotas`: "Cantidad de Acciones"} value={Number(position.quantity).toFixed(4)} />
+            <DetailPill label="P&L realizado" value={pnlWithCurrency} tone={isNegative ? "negative" : "positive"}/>
+            {Number(position.total_dividends) === 0 ? 
+              (<div></div>) :
+              (<DetailPill label="Dividendos Totales" value={position.total_dividends ? formatMoney(position.total_dividends, currency) : "-"} />)}
+            {Number(position.total_fees) === 0 ? 
+              (<div></div>) :
+              (<DetailPill label="Comisiones" value={position.total_fees ? formatMoney(position.total_fees, currency) : "-"} />)}
+            
           </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className=" grid gap-4 md:grid-cols-2">
             <article className="rounded-[22px] border border-border-soft bg-surface/55 p-5">
               <p className="text-[12px] uppercase tracking-[0.14em] text-text-muted">Última actualización</p>
               <p className="mt-2 text-[18px] font-semibold text-white">{last_transaction_date}</p>
