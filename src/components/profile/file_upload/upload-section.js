@@ -15,6 +15,11 @@ export function UploadSection({ finantial_file_type } = {}) {
 
   const { getToken } = useAppAuth();
 
+  const filteredAccounts = finantial_file_type === "mutual_funds"
+  ? accounts.filter(account => account.currency !== "USD")
+  : accounts.filter(account => account.currency === "USD")
+
+
   // Cargar cuentas del usuario
   useEffect(() => {
     const accountsEndpoint = `${API_BASE_URL}/accounts` // debedía ser `${API_BASE_URL}/user/accounts_names` segpun en contrato
@@ -23,12 +28,6 @@ export function UploadSection({ finantial_file_type } = {}) {
       try {
         setLoadingAccounts(true)
         const token = await getToken();
-
-        /* console.log("[UploadSection] Fetching accounts", {
-          endpoint: accountsEndpoint,
-          hasToken: Boolean(token),
-          realUpload: process.env.NEXT_PUBLIC_REAL_UPLOAD === "true",
-        }) */
 
         const response = await fetch(
           accountsEndpoint, {
@@ -40,28 +39,17 @@ export function UploadSection({ finantial_file_type } = {}) {
           }
         )
 
-        /* console.log("[UploadSection] Accounts response", {
-          endpoint: accountsEndpoint,
-          ok: response.ok,
-          status: response.status,
-        }) */
-
         if (!response.ok) {
           const errorMessage = await response.text()
           throw new Error(`Error ${response.status}: ${errorMessage || "Error obteniendo cuentas"}`)
         }
         // Por si viene como [] o [{}]
         const data = await response.json()
+        
         const accountsList = Array.isArray(data)
           ? data
           : data.accounts || []
-        const normalizedAccounts = accountsList
-          .filter((account) => account?.id && account?.name)
-          .map((account) => ({
-            id: account.id,
-            name: account.name,
-          }))
-        setAccounts(normalizedAccounts)
+        setAccounts(accountsList)
       } catch (error) {
         console.error("[UploadSection] Error fetching accounts", {
           endpoint: accountsEndpoint,
@@ -103,15 +91,6 @@ export function UploadSection({ finantial_file_type } = {}) {
         ? `${API_BASE_URL}/pdf/extract_mutual_funds`
         : `${API_BASE_URL}/pdf/extract_stocks_etf_1`
 
-      /* console.log("[UploadSection] Uploading PDF", {
-        endpoint,
-        fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        accountId: selectedAccountId,
-        uploadType: finantial_file_type || "stocks_etf",
-        hasToken: Boolean(token),
-      }) */
-
       // Llamar al backend (TODO: Revisar Endpoint respecto implementado)
       const response = await fetch(
         endpoint,
@@ -124,20 +103,11 @@ export function UploadSection({ finantial_file_type } = {}) {
         }
       )
       const data = await response.json()
-      console.log(data)
-
-      /* console.log("[UploadSection] Upload response", {
-        endpoint,
-        ok: response.ok,
-        status: response.status,
-      }) */
 
       if (!response.ok) {
         const errorMessage = await response.text()
         throw new Error(`Error ${response.status}: ${errorMessage || response.statusText}`)
       }
-      // const data = await response.json()
-      //console.log("Archivo subido correctamente:", data)
       alert(data.message)
 
       // Reseteo formulario
@@ -164,7 +134,7 @@ export function UploadSection({ finantial_file_type } = {}) {
           Cuenta
         </p>
         <p className=" mb-3 text-sm text-text-muted ">
-          Indica a qué cuenta vas a asociar tus datos
+          Indica a qué cuenta vas a asociar tus datos <br></br> 
         </p>
 
         <div className="relative">
@@ -174,7 +144,7 @@ export function UploadSection({ finantial_file_type } = {}) {
             className="flex w-full items-center justify-between rounded-xl border border-accent/30 bg-panel px-4 py-3 text-left text-white outline-none transition focus:border-accent"
           >
             <span className={!selectedAccountId ? "text-text-muted" : "text-white"}>
-              {accounts.find((acc) => acc.id === selectedAccountId)?.name || "Selecciona una cuenta"}
+              {filteredAccounts.find((acc) => acc.id === selectedAccountId)?.name || "Selecciona una cuenta"}
             </span>
             <svg
               className={`h-5 w-5 text-white/50 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
@@ -188,7 +158,7 @@ export function UploadSection({ finantial_file_type } = {}) {
 
           {isDropdownOpen && (
             <ul className="absolute z-50 mt-1 max-h-[180px] w-full overflow-y-auto rounded-xl border border-accent/30 bg-panel shadow-2xl">
-              {accounts.map((account) => (
+              {filteredAccounts.map((account) => (
                 <li
                   key={account.id}
                   onClick={() => {
@@ -199,7 +169,7 @@ export function UploadSection({ finantial_file_type } = {}) {
                     selectedAccountId === account.id ? "bg-accent/30 font-bold text-accent" : ""
                   }`}
                 >
-                  {account.name}
+                  {account.name} <b>({account.currency})</b>
                 </li>
               ))}
             </ul>
