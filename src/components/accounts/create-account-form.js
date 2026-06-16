@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const defaultForm = {
   name: "",
-  broker: "",
+  broker: "Fintual",
   currency: "USD",
 };
 
@@ -70,6 +70,10 @@ export function CreateAccountForm({ onCancel, onCreate }) {
         <p className="text-sm leading-[1.6] text-text-muted">
           Registra una cuenta para empezar a asociar posiciones, transacciones y cargas de certificados.
         </p>
+        <p className="text-sm leading-[1.6] text-text-muted">
+          <b>*Nota:</b> Considera que Fondos Mutuos solo se pueden asociar a cuentas en CLP, mientras que todos los otros tipos de activos 
+          (Stocks y ETFs) solo se pueden asociar a cuentas USD
+        </p>
       </div>
 
       <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
@@ -89,10 +93,11 @@ export function CreateAccountForm({ onCancel, onCreate }) {
             <span className="text-sm font-medium text-white">Broker</span>
             <input
               type="text"
-              value={form.broker}
+              value={"Fintual"}
               onChange={(event) => setForm((current) => ({ ...current, broker: event.target.value }))}
-              placeholder="Ej: Fintual"
-              className="rounded-2xl border border-border-soft bg-panel px-4 py-3 text-white outline-none transition focus:border-accent"
+              placeholder="Fintual"
+              disabled
+              className="rounded-2xl border  bg-panel px-4 py-3 text-white outline-none transition border-accent"
             />
           </label>
         </div>

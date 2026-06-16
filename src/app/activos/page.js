@@ -11,7 +11,7 @@ export default async function AssetsPage() {
   return (
     <DashboardShell
       title="Activos"
-      description="Lista de activos presentes en el portafolio del usuario, considerando todas sus cuentas vinculadas."
+      description="Revisa los detalles de cantidad, cuenta asociada, valor y retorno de cada uno de los activos que conforman tu portafolio."
     >
       <AssetsContent />
     </DashboardShell>

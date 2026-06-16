@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAppAuth} from "@/src/lib/client-auth";
 import { FeedbackCard } from "../feedback-card";
-import { PositionAssetRow } from "./asset-position";
+import { PositionAssetRow } from "../assets/asset-position";
 
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
@@ -22,11 +22,11 @@ function StatusPill({ children, tone = "default", className = "" }) {
   );
 }
 
-export function AssetsContent() {
+export function AccountPositions({accountId}) {
   const { getToken } = useAppAuth();
   const [positions, setPositions] = useState([]);
   const [page, setPage] = useState(0);
-  const limit = 10;
+  const limit = 5;
   const [loading, setLoading] = useState(true);
   const [updatingPositions, setUpdatingPositions] = useState(false);
   const [error, setError] = useState(false);
@@ -45,7 +45,7 @@ export function AssetsContent() {
         setError(false);
         const token = await getToken();
         const skip = page * limit;
-        const res = await fetch(`${baseUrl}/positions?skip=${skip}&limit=${limit}`,{
+        const res = await fetch(`${baseUrl}/accounts/positions/${accountId}?skip=${skip}&limit=${limit}`,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
