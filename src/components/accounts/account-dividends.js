@@ -124,7 +124,7 @@ export function AccountDividends({accountId}) {
           </table>
           
           
-          <div className="p-6 sticky bottom-0 z-30 w-full min-w-[1030px] bg-panel flex items-center justify-between border-t border-border-soft pt-4">
+          <div className="p-6 sticky bottom-0 z-30 w-[995px] bg-panel flex items-center justify-between border-t border-border-soft pt-4">
             <span className="text-sm text-text-muted">
               Página {page + 1}
             </span>

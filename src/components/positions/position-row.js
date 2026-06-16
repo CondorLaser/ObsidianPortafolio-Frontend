@@ -33,7 +33,7 @@ export function PositionRow({ position, accountName}) {
           </div>
           <div className="min-w-0 max-w-[260px]">
             <p className="text-[15px] font-semibold leading-[1.2] text-white">{position.asset.symbol}</p>
-            <p className="mt-[3px] truncate text-[13px] leading-[1.35] text-text-muted">{position.name}</p>
+            <p className="mt-[3px] truncate text-[13px] leading-[1.35] text-text-muted">{position.name.slice(0, 16) + "..."}</p>
           </div>
         </Link>
       </td>

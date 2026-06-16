@@ -65,7 +65,7 @@ export function PositionAssetRow({ position, accountName}) {
       </td>
       {/* Nombre de Cuenta */}
       <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
-        {accountName || "No disponible"}
+        {accountName.slice(0, 15) + "..." || "No disponible"}
       </td>
       {/* Cantidad (quantity)*/}
       <td className="whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold text-white">
