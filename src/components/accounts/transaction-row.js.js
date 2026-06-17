@@ -33,7 +33,8 @@ export function TransactionRow({ transaction }) {
       <td className="px-5 py-5 align-middle">
           <div className="flex flex-col">
             <span className="font-semibold text-white">{symbol}</span>
-            <span className="text-[10px] text-text-muted truncate">{name.slice(0, 15)}</span>
+            <span className="text-[10px] text-text-muted truncate">
+              {(name.length > 15) ? name.slice(0, 15) + "..." : name}</span>
           </div>
       </td>
       {/* Tipo de Activo */}
@@ -47,25 +48,25 @@ export function TransactionRow({ transaction }) {
         </span>
       </td>
       {/* Tipo de Transacción */}
-      <td className={`whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase truncate max-w-[120px] ${
+      <td className={`whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase max-w-[120px] ${
         transaction_kind === "buy" ? "bg-warning/60" : "bg-accent/60"
       }`}>
         {transaction_kind}
       </td>
       {/* Fecha de Ejecución */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]">
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white max-w-[120px]">
         {executed_at}
       </td>
       {/* Cantidad */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]">
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white max-w-[120px]">
         {Number(quantity).toFixed(4)}
       </td>
       {/* Precio */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-accent truncate max-w-[120px]">
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-accent max-w-[120px]">
         {price ? formatMoney(price, currency) : "-"}
       </td>
       {/* Impuesto / Retención */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-danger truncate max-w-[120px]">
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-danger max-w-[120px]">
          {fee ? formatMoney(fee, currency) : "-"}
       </td>   
     </tr>

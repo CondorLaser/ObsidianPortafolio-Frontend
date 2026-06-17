@@ -41,7 +41,7 @@ export function PositionAssetRow({ position, accountName}) {
   const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
   const isStock = position.asset.kind === "stock";
   const isEtf = position.asset.kind === "etf";
-  
+  const actual_account_name = accountName || "No disponible" 
 
   return (
     <tr
@@ -64,8 +64,8 @@ export function PositionAssetRow({ position, accountName}) {
         </span>
       </td>
       {/* Nombre de Cuenta */}
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
-        {accountName.slice(0, 15) + "..." || "No disponible"}
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" >
+        {(actual_account_name.length > 15) ? actual_account_name.slice(0, 15) + "..." : actual_account_name || "No disponible"}
       </td>
       {/* Cantidad (quantity)*/}
       <td className="whitespace-nowrap px-3 py-5 text-centert text-[14px] font-semibold text-white">

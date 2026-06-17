@@ -50,7 +50,6 @@ export function AccountTransactions({accountId}) {
         });
         if (!res.ok) throw new Error("Error al cargar las transactions");
         const data = await res.json();
-        console.log("Trans: ", data)
         setTransactions(data);
       } catch (fetchError) {
         console.error("Fetch Assets Error:", fetchError);

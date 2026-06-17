@@ -20,6 +20,8 @@ export function PositionRow({ position, accountName}) {
   const pnlWithCurrency = `${isNegative ? "" : "+"}${currency === "CLP" && position.last_price !== null? "CLP" : ""}${pnlFormatted}` 
   const isStock = position.asset.kind === "stock";
   const isEtf = position.asset.kind === "etf";
+  const position_name = position.name || ""
+  const actual_account_name = accountName || "No disponible" 
 
   return (
     <tr className="border-t border-border-soft align-middle transition hover:bg-accent/5 first:border-t-0">
@@ -33,7 +35,9 @@ export function PositionRow({ position, accountName}) {
           </div>
           <div className="min-w-0 max-w-[260px]">
             <p className="text-[15px] font-semibold leading-[1.2] text-white">{position.asset.symbol}</p>
-            <p className="mt-[3px] truncate text-[13px] leading-[1.35] text-text-muted">{position.name.slice(0, 16) + "..."}</p>
+            <p className="mt-[3px] truncate text-[13px] leading-[1.35] text-text-muted">
+              {(position_name.length > 15) ? position_name.slice(0, 15) + "..." : position_name}
+            </p>
           </div>
         </Link>
       </td>
@@ -46,8 +50,8 @@ export function PositionRow({ position, accountName}) {
           {position.asset.kind === "stock" ? "Acción" : position.asset.kind === "etf" ? "ETF" : "Fondo"}
         </span>
       </td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" title={"accountName"}>
-        {accountName || "No disponible"}
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" >
+        {(actual_account_name.length > 15) ? actual_account_name.slice(0, 15) + "..." : actual_account_name || "No disponible"}
       </td>
       <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">
         {Number(position.quantity).toFixed(4)}

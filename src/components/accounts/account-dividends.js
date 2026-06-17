@@ -109,6 +109,7 @@ export function AccountDividends({accountId}) {
             <thead className="sticky top-0 z-20 bg-app">
               <tr className="bg-panel border-b border-border text-[12px] uppercase tracking-[0.1em] text-text-muted shadow-sm">
                 <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Activo</th>
+                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Tipo Activo</th>
                 <th className="w-[20%] px-3 pb-4 pt-5 text-center font-semibold">Fecha de Pago</th>
                 <th className="w-[34%] px-3 pb-4 pt-5 text-center font-semibold">Monto Bruto</th>
                 <th className="w-[48%] px-3 pb-4 pt-5 text-center font-semibold">Impuesto / Retención</th>
