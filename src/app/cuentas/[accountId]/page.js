@@ -10,6 +10,7 @@ import { SimpleChart } from "@/src/components/simple-chart";
 import { CollapsableShell } from "@/src/components/collapsable-shell";
 import { AccountPositions } from "@/src/components/accounts/account-positions";
 import { AccountDividends } from "@/src/components/accounts/account-dividends";
+import { AccountTransactions } from "@/src/components/accounts/account-transactions";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
@@ -47,42 +48,15 @@ export default function AccountDetailPage({ params }) {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
           }}),
-          fetch(`${baseUrl}/accounts/transactions/${accountId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-          }}),
         ]);
 
-        if (!resAccount.ok || !resMetrics.ok  || !resTransactions.ok) {
+        if (!resAccount.ok || !resMetrics.ok) {
           throw new Error("Error al obtener los desgloses distribuidos de la cuenta");
         }
         const dataAccount = await resAccount.json();
         const dataMetrics = await resMetrics.json();
-        const dataTransactions = await resTransactions.json();
-
-        const normalizedTransactions = Array.isArray(dataTransactions) ? dataTransactions : (dataTransactions.transactions ?? []);
-        const assetIds = [...new Set([
-          ...normalizedTransactions.map(tx => tx.asset_id),
-        ].filter(Boolean))];
-
-        const assetResults = await Promise.all(
-          assetIds.map(id =>
-            fetch(`${baseUrl}/assets/${id}`, {
-              headers: { "Authorization": `Bearer ${token}` }
-            })
-              .then(r => r.ok ? r.json() : null)
-              .catch(() => null)
-          )
-        );
-
-        const map = {};
-        assetResults.filter(Boolean).forEach(a => { map[a.id] = a; });
-        setAssetsMap(map);
         setAccount(dataAccount);
         setMetrics(dataMetrics);
-        setTransactions(normalizedTransactions);
       } catch (err) {
         console.error("Fetch Account Detail Error:", err);
         setError(true);
@@ -143,27 +117,17 @@ export default function AccountDetailPage({ params }) {
     ? `${latestDaily.pnl >= 0 ? "+" : ""}${Number(latestDaily.pnl).toFixed(2)} ${account.currency}` 
     : `0.00 ${account.currency}`;
 
-  const dividendsValue = `${totalDividendsNet.toFixed(2)} ${account.currency}`;
+  // const dividendsValue = `${totalDividendsNet.toFixed(2)} ${account.currency}`;
 
-  const getTransactionType = (transaction) => (
-    transaction.transaction_type || transaction.kind || ""
-  ).toString().toUpperCase();
 
-  let lastTxLabel = "Ninguna";
-  if (transactions.length > 0) {
-    const sortedTx = [...transactions].sort(
-      (a, b) => new Date(b.executed_at || b.date) - new Date(a.executed_at || a.date)
-    );
-    const lastTx = sortedTx[0];
-    const lastTxType = getTransactionType(lastTx) === "BUY" ? "Compra" : "Venta";
-    lastTxLabel = `${lastTxType} (${new Date(lastTx.executed_at || lastTx.date).toLocaleDateString("es-CL")})`;
-  }
+
+
 
   // Mapeo adaptativo para el componente de gráficos
-  const chartData = dailyMetrics.map((m) => m.pnl);
+  /* const chartData = dailyMetrics.map((m) => m.pnl);
   const chartLabels = dailyMetrics.map((m) => 
     new Date(m.date).toLocaleDateString("es-CL", { day: "numeric", month: "short" })
-  );
+  ); */
 
   return (
     <DashboardShell
@@ -174,8 +138,8 @@ export default function AccountDetailPage({ params }) {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Último P&L Diario" value={pnlValue} />
         {/* <MetricCard label="Posiciones Activas" value={positions.length.toString()} /> */}
-        <MetricCard label="Dividendos Netos Recibidos" value={dividendsValue} />
-        <MetricCard label="Última Operación" value={lastTxLabel} />
+        {/* <MetricCard label="Dividendos Netos Recibidos" value={dividendsValue} /> */}
+        {/* <MetricCard label="Última Operación" value={lastTxLabel} /> */}
       </div>
 
       {/* 2. Métricas Mensuales / Riesgo de la cuenta */}
@@ -193,7 +157,7 @@ export default function AccountDetailPage({ params }) {
       )}
 
       {/* 3. Gráfico de evolución del P&L basada en métricas diarias */}
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <SectionCard
           title="Evolución del P&L Diario"
           description="Monitoreo histórico del rendimiento acumulado para la cuenta."
@@ -204,7 +168,7 @@ export default function AccountDetailPage({ params }) {
             <SimpleChart data={chartData} labels={chartLabels} />
           )}
         </SectionCard>
-      </div>
+      </div> */}
       
       {/* 4. Posiciones (tabla) */}
       <div className="mt-6">
@@ -225,49 +189,7 @@ export default function AccountDetailPage({ params }) {
           title="Historial de Transacciones"
           description="Registro de todas las compras y ventas ejecutadas de manera cronológica en la cuenta"
         >
-          {transactions.length === 0 ? (
-            <p className="text-sm text-text-muted py-4">No se registran transacciones operadas.</p>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-border-soft bg-surface/20 mt-2">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border-soft text-xs font-[760] uppercase tracking-[0.12em] text-text-muted bg-panel-soft/30">
-                    <th className="p-3">Fecha</th>
-                    <th className="p-3">Tipo</th>
-                    <th className="p-3">Activo</th>
-                    <th className="p-3 text-right">Cantidad</th>
-                    <th className="p-3 text-right">Precio Ejecución</th>
-                    <th className="p-3 text-right">Comisión</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-soft/20 text-s text-white">
-                  {transactions.map((tx) => {
-                    const asset = assetsMap[tx.asset_id] || {};
-                    const txType = getTransactionType(tx);
-                    return (
-                      <tr key={tx.id} className="hover:bg-panel/20 transition-colors">
-                        <td className="p-3 text-text-muted">{new Date(tx.executed_at).toLocaleDateString("es-CL")}</td>
-                        <td className="p-3">
-                          <span className={`rounded px-2 py-0.5 font-bold text-[10px] uppercase ${txType === "BUY" ? "bg-blue-500/10 text-blue-400" : "bg-orange-500/10 text-orange-400"}`}>
-                            {txType === "BUY" ? "Compra" : "Venta"}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-white">{asset.symbol || "N/D"}</span>
-                            <span className="text-[10px] text-text-muted max-w-[140px] truncate">{asset.name || ""}</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-right font-medium">{Number(tx.quantity)}</td>
-                        <td className="p-3 text-right font-medium"> {tx.price !== null ? `${Number(tx.price)} ${account.currency}` : "-"}</td>
-                        <td className="p-3 text-right text-text-muted">{Number(tx.fee || 0).toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <AccountTransactions accountId={accountId}></AccountTransactions>
         </CollapsableShell>
 
         {/* Historial de Dividendos */}

@@ -116,7 +116,7 @@ export function AccountPositions({accountId}) {
     );
   }
 
-  if (positions.length === 0 && !updatingPositions) {
+  if (positions.length === 0 && !updatingPositions && page === 0) {
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
         <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
