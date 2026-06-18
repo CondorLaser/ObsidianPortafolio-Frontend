@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAppAuth} from "@/src/lib/client-auth";
 import { FeedbackCard } from "../feedback-card";
-import { DividendAssetRow } from "./dividend-row.js";
+import { TransactionRow } from "./transaction-row.js";
 
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
@@ -22,62 +22,62 @@ function StatusPill({ children, tone = "default", className = "" }) {
   );
 }
 
-export function AccountDividends({accountId}) {
+export function AccountTransactions({accountId}) {
   const { getToken } = useAppAuth();
-  const [dividends, setDividens] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(0);
   const limit = 5;
   const [loading, setLoading] = useState(true);
-  const [updatingDividends, setUpdatingDividends] = useState(false);
+  const [updatingTransactions, setUpdatingTransactions] = useState(false);
   const [error, setError] = useState(false);
 
   const baseUrl = process.env.NEXT_PUBLIC_URL_BE || ""; 
 
   useEffect(() => {
-    async function loadDividends() {
+    async function loadTransactions() {
       try {
-        if(dividends.length === 0 && !updatingDividends && page === 0) setLoading(true);
-        setUpdatingDividends(true);
+        if(transactions.length === 0 && !updatingTransactions && page === 0) setLoading(true);
+        setUpdatingTransactions(true);
         setError(false);
         const token = await getToken();
         const skip = page * limit;
-        const res = await fetch(`${baseUrl}/accounts/dividends/${accountId}?skip=${skip}&limit=${limit}`,{
+        const res = await fetch(`${baseUrl}/accounts/transactions/${accountId}?skip=${skip}&limit=${limit}`,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           }
         });
-        if (!res.ok) throw new Error("Error al cargar las dividends");
+        if (!res.ok) throw new Error("Error al cargar las transactions");
         const data = await res.json();
-        setDividens(data);
+        setTransactions(data);
       } catch (fetchError) {
         console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);
-        setUpdatingDividends(false);
+        setUpdatingTransactions(false);
       }
     }
-    loadDividends();
+    loadTransactions();
   }, [baseUrl, page, limit]);
 
 
   if (loading) {
-    return <FeedbackCard title="Cargando dividendos..." detail="Estamos obteniendo los dividendos de la cuenta." />;
+    return <FeedbackCard title="Cargando transaccioness..." detail="Estamos obteniendo las transacciones de la cuenta." />;
   }
 
   if (error) {
     return (
       <FeedbackCard
-        title="No se pudieron cargar los dividendos"
+        title="No se pudieron cargar las transacciones"
         detail="Por favor, intenta más tarde o revisa tu conexión."
         tone="error"
       />
     );
   }
 
-  if (dividends.length === 0 && !updatingDividends && page === 0) {
+  if (transactions.length === 0 && !updatingTransactions && page === 0) {
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
         <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
@@ -105,21 +105,21 @@ export function AccountDividends({accountId}) {
     <div>
       <div className="bg-panel-soft  border border-border-soft p-1">        
         <div className={` overflow-x-auto max-h-[80vh] bg-app shadow-sm`}>
-          <table className={`w-full min-w-[980px] border-collapse ${updatingDividends ? "opacity-50" : "opacity-100"}`}>
+          <table className={`w-full min-w-[980px] border-collapse ${updatingTransactions ? "opacity-50" : "opacity-100"}`}>
             <thead className="sticky top-0 z-20 bg-app">
               <tr className="bg-panel border-b border-border text-[12px] uppercase tracking-[0.1em] text-text-muted shadow-sm">
-                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Activo</th>
-                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Tipo Activo</th>
-                <th className="w-[20%] px-3 pb-4 pt-5 text-center font-semibold">Fecha de Pago</th>
-                <th className="w-[34%] px-3 pb-4 pt-5 text-center font-semibold">Monto Bruto</th>
-                <th className="w-[48%] px-3 pb-4 pt-5 text-center font-semibold">Impuesto / Retención</th>
-                <th className="w-[30%] px-3 pb-4 pt-5 pr-10 text-center font-semibold">Monto Neto Recibido</th>
+                <th className="w-[34%] px-3 pb-4 pt-5 text-center font-semibold">Activo</th>
+                <th className="w-[34%] px-3 pb-4 pt-5 text-center font-semibold">Tipo Activo</th>
+                <th className="w-[20%] px-3 pb-4 pt-5 text-center font-semibold">Tipo Transacción</th>
+                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Fecha Ejecución</th>
+                <th className="w-[48%] px-3 pb-4 pt-5 text-center font-semibold">Cantidad</th>
+                <th className="w-[30%] px-3 pb-4 pt-5 pr-10 text-center font-semibold">Precio Ejecución</th>
+                <th className="w-[30%] px-3 pb-4 pt-5 pr-10 text-center font-semibold">Comisión</th>
               </tr>
             </thead>
             <tbody className={loading ? "opacity-50" : ""}>
-              {dividends.map((dividend) => (
-                <DividendAssetRow key={`${dividend.id}`} dividend={dividend}></DividendAssetRow>
-                
+              {transactions.map((transaction) => (
+                <TransactionRow key={`${transaction.id}`} transaction={transaction}></TransactionRow>
               ))}
             </tbody>
           </table>
@@ -130,7 +130,7 @@ export function AccountDividends({accountId}) {
               Página {page + 1}
             </span>
             <div className="flex gap-2">
-              {updatingDividends && (
+              {updatingTransactions && (
                 <StatusPill tone="accent" className="animate-pulse">
                   Actualizando...
                 </StatusPill>
@@ -144,7 +144,7 @@ export function AccountDividends({accountId}) {
               </button>
               <button
                 onClick={() => setPage((p) => p + 1)}
-                disabled={dividends.length < limit || loading}
+                disabled={transactions.length < limit || loading}
                 className="rounded-lg border border-border-soft bg-surface px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-accent/10 transition-colors"
               >
                 Siguiente

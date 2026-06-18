@@ -24,7 +24,9 @@ export function AccountCard(account_data_raw ) {
             {account.name}
           </h2>
         </div>
-        <span className="rounded-xl bg-accent px-3 py-1.5 text-m font-bold tracking-wider text-black shadow-md uppercase">
+        <span className={`rounded-xl px-3 py-1.5 text-m font-bold tracking-wider text-black shadow-md uppercase ${
+          account.currency === "USD" ? "bg-blue-500" : "bg-accent"
+        }`}>
           {account.currency}
         </span>
       </div>
