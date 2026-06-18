@@ -136,23 +136,31 @@ export default function AccountsPage() {
           
           //CASO 3: usuario sin cuentas
           accounts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-border-soft bg-surface/35 p-12 text-center">
-              <div className="max-w-md">
-                <h3 className="text-lg font-semibold text-white">No se encontraron cuentas activas</h3>
-                <p className="mt-2 text-sm leading-[1.6] text-text-muted">
-                  Para reconstruir tu portafolio y ver tus cuentas, es necesario que primero cargues tus Certificados de Transacciones en la plataforma.
-                </p>
-                
-                <div className="mt-6">
-                  <Link
-                    href="/perfil"
-                    className="inline-flex items-center justify-center rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02]"
-                  >
-                    Ir a Perfil / Mis Datos
-                  </Link>
+            <>
+              <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-panel p-8 text-center">
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
                 </div>
+                <h3 className="text-base font-semibold text-white">
+                  Parece que aún no tienes cuentas creadas
+                </h3>
+                <h3 className="text-base font-semibold text-text-muted">
+                  Por favor crea una cuenta nueva para poder vincular tus datos
+                </h3>
+                <div className="text-left">
+                  <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+                    Una vez creada tu cuenta, accede a la pestaña <b>Perfil</b> para poder asociar los datos de tus Certificados de Transacciones a la cuenta
+                  </li>
+                  <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+                    Considera que cuentas en dólares (USD) solo admiten asociar activos de tipos <b>Stocks</b>  y <b>ETF</b>, mientras que las en pesos chilenos (CLP) solo permiten <b>Funds</b> (fondos mutuos)
+                  </li>
+                </div>
+              
               </div>
-            </div>
+            </>
+            
           ) : (
           //CASO 4: Despliegue de las cuentas mockeadas
           <div className="grid gap-5 md:grid-cols-2">

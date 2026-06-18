@@ -71,8 +71,7 @@ export function CreateAccountForm({ onCancel, onCreate }) {
           Registra una cuenta para empezar a asociar posiciones, transacciones y cargas de certificados.
         </p>
         <p className="text-sm leading-[1.6] text-text-muted">
-          <b>*Nota:</b> Considera que Fondos Mutuos solo se pueden asociar a cuentas en CLP, mientras que todos los otros tipos de activos 
-          (Stocks y ETFs) solo se pueden asociar a cuentas USD
+          Considera que cuentas en dólares (USD) solo admiten asociar activos de tipos <b>Stocks</b>  y <b>ETF</b>, mientras que las en pesos chilenos (CLP) solo permiten <b>Funds</b> (fondos mutuos)
         </p>
       </div>
 
