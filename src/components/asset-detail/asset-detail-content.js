@@ -60,6 +60,18 @@ function formatPercentRatio(value) {
   return `${numericValue > 0 ? "+" : ""}${(numericValue * 100).toFixed(2)}%`;
 }
 
+function formatNumber(value, maximumFractionDigits = 2) {
+  if (value === null || value === undefined) return "-";
+
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "-";
+
+  return new Intl.NumberFormat("es-CL", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits
+  }).format(numericValue);
+}
+
 function formatDate(value) {
   if (!value) return "-";
 
@@ -99,6 +111,11 @@ export function AssetDetailContent({ asset_id }) {
   const [metricLoading, setMetricLoading] = useState(false);
   const [metricError, setMetricError] = useState(false);
   const [metricUnavailable, setMetricUnavailable] = useState(false);
+  const [assetDailyMetric, setAssetDailyMetric] = useState(null);
+  const [assetMonthlyMetric, setAssetMonthlyMetric] = useState(null);
+  const [assetMetricsLoading, setAssetMetricsLoading] = useState(false);
+  const [assetMetricsError, setAssetMetricsError] = useState(false);
+  const [assetMetricsUnavailable, setAssetMetricsUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -183,6 +200,76 @@ export function AssetDetailContent({ asset_id }) {
     loadPositionMetric();
   }, [position?.id, baseUrl, getToken]);
 
+  useEffect(() => {
+    if (!asset_id) {
+      setAssetDailyMetric(null);
+      setAssetMonthlyMetric(null);
+      setAssetMetricsLoading(false);
+      setAssetMetricsError(false);
+      setAssetMetricsUnavailable(false);
+      return;
+    }
+
+    async function loadAssetMetrics() {
+      try {
+        setAssetMetricsLoading(true);
+        setAssetMetricsError(false);
+        setAssetMetricsUnavailable(false);
+        const token = await getToken();
+
+        const [dailyResponse, monthlyResponse] = await Promise.all([
+          fetch(`${baseUrl}/assets/metrics/daily/${encodeURIComponent(asset_id)}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          }),
+          fetch(`${baseUrl}/assets/metrics/monthly/${encodeURIComponent(asset_id)}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          })
+        ]);
+
+        const dailyMissing = dailyResponse.status === 404;
+        const monthlyMissing = monthlyResponse.status === 404;
+
+        if (dailyMissing && monthlyMissing) {
+          setAssetDailyMetric(null);
+          setAssetMonthlyMetric(null);
+          setAssetMetricsUnavailable(true);
+          return;
+        }
+
+        if (!dailyMissing && !dailyResponse.ok) {
+          throw new Error("Error al cargar métricas diarias del activo");
+        }
+
+        if (!monthlyMissing && !monthlyResponse.ok) {
+          throw new Error("Error al cargar métricas mensuales del activo");
+        }
+
+        const dailyData = dailyMissing ? null : await dailyResponse.json();
+        const monthlyData = monthlyMissing ? null : await monthlyResponse.json();
+
+        setAssetDailyMetric(dailyData ?? null);
+        setAssetMonthlyMetric(monthlyData ?? null);
+      } catch (fetchError) {
+        console.error("Fetch Asset Metrics Error:", fetchError);
+        setAssetDailyMetric(null);
+        setAssetMonthlyMetric(null);
+        setAssetMetricsError(true);
+      } finally {
+        setAssetMetricsLoading(false);
+      }
+    }
+
+    loadAssetMetrics();
+  }, [asset_id, baseUrl, getToken]);
+
   if (loading) {
     return (
       <DashboardShell
@@ -229,6 +316,9 @@ export function AssetDetailContent({ asset_id }) {
   const isFund = position.asset.kind === "fund";
   const positionMetricDate = formatDate(positionMetric?.date);
   const personalReturn = getPersonalReturn(positionMetric, position);
+  const hasAssetMetrics = Boolean(assetDailyMetric || assetMonthlyMetric);
+  const assetDailyMetricDate = formatDate(assetDailyMetric?.date);
+  const assetMonthlyMetricDate = formatDate(assetMonthlyMetric?.date);
 
   return (
     <DashboardShell
@@ -303,6 +393,49 @@ export function AssetDetailContent({ asset_id }) {
         </SectionCard>
 
         <SectionCard
+          title="Comportamiento del activo"
+          description="Métricas del instrumento en el mercado, separadas del desempeño de tu posición personal."
+        >
+          {assetMetricsLoading ? (
+            <FeedbackCard
+              title="Cargando métricas del activo"
+              detail="Estamos consultando la información de mercado más reciente para este instrumento."
+            />
+          ) : assetMetricsError ? (
+            <FeedbackCard
+              title="No se pudieron cargar las métricas del activo"
+              detail="La posición está disponible, pero el bloque de métricas del activo falló al consultar el backend."
+              tone="error"
+            />
+          ) : assetMetricsUnavailable || !hasAssetMetrics ? (
+            <FeedbackCard
+              title="Métricas del activo no disponibles"
+              detail="El backend todavía no está entregando métricas de mercado para este activo."
+            />
+          ) : (
+            <div className="grid md:grid-cols-2 xl:grid-cols-4">
+              <DetailPill
+                label="Retorno absoluto"
+                value={formatPercentRatio(assetDailyMetric?.absolute_return)}
+                tone={getMetricTone(assetDailyMetric?.absolute_return)}
+              />
+              <DetailPill
+                label="Volatilidad"
+                value={formatPercentRatio(assetDailyMetric?.volatility)}
+              />
+              <DetailPill
+                label="Max drawdown"
+                value={formatPercentRatio(assetDailyMetric?.max_drawdown)}
+                tone={getMetricTone(assetDailyMetric?.max_drawdown)}
+              />
+              <DetailPill label="Beta" value={formatNumber(assetMonthlyMetric?.beta, 4)} />
+              <DetailPill label="Última métrica diaria" value={assetDailyMetricDate} />
+              <DetailPill label="Última métrica mensual" value={assetMonthlyMetricDate} />
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard
           title="Datos sobre tu inversión"
           description={
             <>
@@ -331,18 +464,6 @@ export function AssetDetailContent({ asset_id }) {
             </article>
           </div>
         </SectionCard>
-
-        {/* <SectionCard
-          title="Métricas del activo"
-          description="Datos generales del instrumento de mercado para entender su comportamiento más allá de esta cuenta."
-        >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <DetailPill label="Mercado" value={asset?.market ?? "Sin dato"} />
-            <DetailPill label="Moneda" value={asset?.currency ?? "Sin dato"} />
-            <DetailPill label="Retorno mensual" value={monthlyMetrics?.absoluteReturn ?? position.returnPct} tone={position.returnPct.startsWith("-") ? "negative" : "positive"} />
-            <DetailPill label="Volatilidad diaria" value={dailyMetrics?.volatility ?? "Sin dato"} />
-          </div>
-        </SectionCard> */}
 
         {/* <SectionCard
           title="Evolución del activo"

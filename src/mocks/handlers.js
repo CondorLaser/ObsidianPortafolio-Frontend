@@ -226,6 +226,34 @@ export const handlers = [
     return HttpResponse.json(asset_data)
   }),
 
+  http.get(`${API_URL}/assets/metrics/daily/:asset_id`, ({ params }) => {
+    const { asset_id } = params
+    const metric = getAssetDailyMetrics(asset_id)
+
+    if (!metric) {
+      return HttpResponse.json(
+        { error: "No daily metrics found for this asset", code: "ASSET_DAILY_METRIC_NOT_FOUND" },
+        { status: 404 }
+      )
+    }
+
+    return HttpResponse.json(metric)
+  }),
+
+  http.get(`${API_URL}/assets/metrics/monthly/:asset_id`, ({ params }) => {
+    const { asset_id } = params
+    const metric = getAssetMonthlyMetrics(asset_id)
+
+    if (!metric) {
+      return HttpResponse.json(
+        { error: "No monthly metrics found for this asset", code: "ASSET_MONTHLY_METRIC_NOT_FOUND" },
+        { status: 404 }
+      )
+    }
+
+    return HttpResponse.json(metric)
+  }),
+
   http.get(`${API_URL}/assets/:asset_id`, ({ params }) => {
     const { asset_id } = params
     const asset = getAssetById(asset_id)
