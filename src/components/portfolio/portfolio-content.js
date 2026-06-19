@@ -7,6 +7,7 @@ import { PortfolioPositions } from "./portfolio-positions";
 import { PortfolioSummary } from "./portfolio-summary";
 import { FeedbackCard } from "../feedback-card";
 import { PortfolioDailyMetrics } from "./portfolio-daily_metrics";
+import { PortfolioMonthlyMetrics } from "./portfolio-monthly_metrics";
 
 const PortfolioTrend = dynamic(
   () => import("./portfolio-trend").then((mod) => mod.PortfolioTrend),
@@ -142,6 +143,7 @@ export function PortfolioContent() {
       <PortfolioSummary summaryData={summaryData} loading={loading} error={error}></PortfolioSummary>
 
       <PortfolioDailyMetrics></PortfolioDailyMetrics>
+      <PortfolioMonthlyMetrics></PortfolioMonthlyMetrics>
 
       <div className="mt-6 flex flex-col gap-6">
         <PortfolioTrend></PortfolioTrend>

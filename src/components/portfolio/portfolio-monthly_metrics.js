@@ -1,8 +1,10 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import { useAppAuth} from "@/src/lib/client-auth";
 import { MetricCard } from "@/src/components/metric-card";
 import { FeedbackCard } from "../feedback-card";
+
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
   success: "border-emerald-500/20 bg-emerald-500/10 text-success",
@@ -18,19 +20,8 @@ function StatusPill({ children, tone = "default", className = "" }) {
     </span>
   );
 }
-// Formatear dinero según divisa (CLP o USD)
-function formatMoney(amount, currency = "USD") {
-  if (amount === null || amount === undefined) return "-";
-  const numAmount = Number(amount);
-  
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: currency,
-    maximumFractionDigits: currency === "CLP" ? 0 : 2,
-  }).format(numAmount);
-}
 
-export function PortfolioDailyMetrics() {
+export function PortfolioMonthlyMetrics() {
   const { getToken } = useAppAuth();
   const [metricsData, setMetricsData] = useState([]);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
@@ -45,7 +36,7 @@ export function PortfolioDailyMetrics() {
         setError(false);
         setHasMetrics(true)
         const token = await getToken();
-        const res = await fetch(`${baseUrl}/portfolio/metrics/daily`,{
+        const res = await fetch(`${baseUrl}/portfolio/metrics/monthly`,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -59,7 +50,6 @@ export function PortfolioDailyMetrics() {
         if (!res.ok) throw new Error("Error al cargar las métricas diarias");
         const data = await res.json();
         setMetricsData(data);
-        console.log(data)
       } catch (err) {
         console.error("Fetch Daily Metrics Error:", err);
         setError(true);
@@ -73,7 +63,7 @@ export function PortfolioDailyMetrics() {
   if (loadingMetrics) {
     return (
       <div className="rounded-[28px] mt-6 border border-border-soft p-6 flex flex-col gap-4 ">
-        <FeedbackCard title="Cargando métricas diarias del portafolio..." detail="Obteniendo los datos de las métricas de tu portafolio." />
+        <FeedbackCard title="Cargando métricas mensuales del portafolio..." detail="Obteniendo los datos de las métricas de tu portafolio." />
       </div>
     )
   }
@@ -81,7 +71,7 @@ export function PortfolioDailyMetrics() {
     return (
       <div className="rounded-[28px] mt-6 border border-border-soft p-6 flex flex-col gap-4 ">
         <FeedbackCard
-          title="No se pudo cargar las métricas diarias de tu portafolio"
+          title="No se pudo cargar las métricas mensuales de tu portafolio"
           detail="Por favor, intenta más tarde o revisa tu conexión."
           tone="error"
         />
@@ -97,55 +87,40 @@ export function PortfolioDailyMetrics() {
           </svg>
         </div>
         <h3 className="text-base font-semibold text-white">
-          Parece que aún no tienes métricas diarias de tu portafolio
+          Parece que aún no tienes métricas mensuales de tu portafolio
         </h3>
         <div>
           <p className="text-left text-text-muted">
-            Por favor intenta mañana, durante la noche se calcularán tus métricas diarias
+            Por favor intenta mañana, durante la noche se calcularán tus métricas mensuales
           </p>
         </div>
       </div>
     )
   }
   const metrics_date = new Date(metricsData.date).toLocaleDateString("es-CL") || "No Disponible"
-  const pnl = Number(metricsData.pnl) || 0
-  const max_drawdown = Number(metricsData.max_drawdown) || 0
-  const volatility = Number(metricsData.volatility) || 0
+  const twr = Number(metricsData.twr) *100 || 0
+  const metric_var = Number(metricsData.var) *100 || 0
   return (
     <div className="rounded-[28px] border border-border-soft p-6 mt-6 flex flex-col gap-4">
       <div>
         <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
-            {/*Ganancia/Pérdida del día*/}
-            {metricsData.pnl !== undefined && (
+            {/*TWR*/}
+            {metricsData.twr!== undefined && (
               <MetricCard
-                label="Ganancia/Pérdida del día (P&L)"
-                value={`${formatMoney(pnl, "CLP")} CLP`}
-                helper={`Cuánto dinero ganó o perdió tu portafolio durante el día`}
-                hero
+                label="Rentabilidad Mensual (TWR)"
+                value={`${twr.toFixed(2)} %`}
+                helper={`Rendiemiento mensual del portafolio`}
                 helperTone="muted"
-                numeric_value={pnl}
               />
             )}
 
-            {/*Max Drawdown*/}
-            {metricsData.max_drawdown !== undefined && (
+            {/*VAR*/}
+            {metricsData.var !== undefined && (
               <MetricCard
-                label="Max Drawdown"
-                value={`${max_drawdown.toFixed(2)} %`}
-                helper={`% de la mayor caída desde un máximo alcanzado en la jornada`}
+                label="Riesgo estimado (VaR)"
+                value={`${metric_var.toFixed(2)} %`}
+                helper={`Pérdida máxima esperada mensualmente`}
                 helperTone="muted"
-                numeric_value={max_drawdown}
-              />
-            )}
-
-            {/*Retorno no realizado (PNL) por moneda*/}
-            {metricsData.volatility !== undefined && (
-              <MetricCard
-                label="Volatilidad diaria"
-                value={volatility.toFixed(2)}
-                helper={`Qué tanto fluctuó el valor del portafolio durante el día`}
-                helperTone="muted"
-                
               />
             )}
         </div>
