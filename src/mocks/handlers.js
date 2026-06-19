@@ -8,6 +8,7 @@ import accounts_daily_metrics from "./data/metrics/account_daily.json"
 import accounts_monthly_metrics from "./data/metrics/account_monthly.json"
 import asset_daily_metrics from "./data/metrics/asset_daily.json"
 import asset_monthly_metrics from "./data/metrics/asset_monthly.json"
+import position_daily_metrics from "./data/metrics/position_metrics.daily.json"
 import user_preferences from "./data/user_preferences.json"
 import asset_prices from "./data/asset_prices.json"
 import portfolio_snapshot from "./data/portfolio_snapshot.json"
@@ -156,6 +157,16 @@ const getPositionBySymbol = (symbol) => {
   return getPositionsWithAssets().find((position) => position.symbol.toUpperCase() === normalizedSymbol)
 }
 
+const getPositionByAssetId = (assetId) => (
+  positions_data.find((position) => position.asset_id === assetId)
+)
+
+const getPositionDailyMetrics = (positionId) => (
+  position_daily_metrics
+    .filter((metric) => metric.position_id === positionId)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+)
+
 const getPortfolioTrend = () => (
   portfolio_snapshot.map((snapshot) => ({
     label: new Date(snapshot.date).toLocaleDateString("es-CL", { day: "2-digit", month: "short" }),
@@ -262,6 +273,48 @@ export const handlers = [
   }),
 
   // Vista detalle activo
+  http.get(`${API_URL}/positions/asset/:asset_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { asset_id } = params
+      const position = getPositionByAssetId(asset_id)
+
+      if (!position) {
+        return HttpResponse.json(
+          { error: "Activo no encontrado", code: "POSITION_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(position)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
+  http.get(`${API_URL}/positions/metrics/daily/:position_id`, ({ params }) => {
+    if (REQUEST_SUCCESSFUL) {
+      const { position_id } = params
+      const metric = getPositionDailyMetrics(position_id)[0]
+
+      if (!metric) {
+        return HttpResponse.json(
+          { error: "No daily metrics found for this position", code: "POSITION_DAILY_METRIC_NOT_FOUND" },
+          { status: 404 }
+        )
+      }
+
+      return HttpResponse.json(metric)
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
   http.get(`${API_URL}/positions/:symbol`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {
       const { symbol } = params

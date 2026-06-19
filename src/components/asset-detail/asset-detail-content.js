@@ -39,9 +39,66 @@ function formatMoney(amount, currency = "USD") {
   }).format(numAmount);
 }
 
+function formatSignedMoney(amount, currency = "USD") {
+  if (amount === null || amount === undefined) return "-";
+
+  const numericAmount = Number(amount);
+  if (Number.isNaN(numericAmount)) return "-";
+
+  const formatted = formatMoney(numericAmount, currency);
+  if (numericAmount === 0) return formatted;
+
+  return `${numericAmount > 0 ? "+" : ""}${formatted}`;
+}
+
+function formatPercentRatio(value) {
+  if (value === null || value === undefined) return "-";
+
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "-";
+
+  return `${numericValue > 0 ? "+" : ""}${(numericValue * 100).toFixed(2)}%`;
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  return new Date(`${value}T00:00:00`).toLocaleDateString("es-CL", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+}
+
+function getMetricTone(value) {
+  if (value === null || value === undefined) return "default";
+
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue) || numericValue === 0) return "default";
+
+  return numericValue < 0 ? "negative" : "positive";
+}
+
+function getPersonalReturn(metric, position) {
+  if (metric?.personal_return !== null && metric?.personal_return !== undefined) {
+    return metric.personal_return;
+  }
+
+  const invested = Number(position?.avg_cost) * Number(position?.quantity);
+  const totalPnl = Number(metric?.total_pnl);
+
+  if (!invested || Number.isNaN(invested) || Number.isNaN(totalPnl)) return null;
+
+  return totalPnl / invested;
+}
+
 export function AssetDetailContent({ asset_id }) {
   const { getToken } = useAppAuth();
   const [position, setPosition] = useState(null);
+  const [positionMetric, setPositionMetric] = useState(null);
+  const [metricLoading, setMetricLoading] = useState(false);
+  const [metricError, setMetricError] = useState(false);
+  const [metricUnavailable, setMetricUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -73,7 +130,58 @@ export function AssetDetailContent({ asset_id }) {
     }
 
     loadPosition();
-  }, [asset_id]);
+  }, [asset_id, baseUrl, getToken]);
+
+  useEffect(() => {
+    if (!position?.id) {
+      setPositionMetric(null);
+      setMetricLoading(false);
+      setMetricError(false);
+      setMetricUnavailable(false);
+      return;
+    }
+
+    async function loadPositionMetric() {
+      try {
+        setMetricLoading(true);
+        setMetricError(false);
+        setMetricUnavailable(false);
+        const token = await getToken();
+        const response = await fetch(
+          `${baseUrl}/positions/metrics/daily/${encodeURIComponent(position.id)}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          }
+        );
+
+        if (response.status === 404) {
+          setPositionMetric(null);
+          setMetricUnavailable(true);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Error al cargar las métricas de la posición");
+        }
+
+        const data = await response.json();
+        setPositionMetric(data ?? null);
+        setMetricUnavailable(!data);
+      } catch (fetchError) {
+        console.error("Fetch Position Metric Error:", fetchError);
+        setPositionMetric(null);
+        setMetricError(true);
+      } finally {
+        setMetricLoading(false);
+      }
+    }
+
+    loadPositionMetric();
+  }, [position?.id, baseUrl, getToken]);
 
   if (loading) {
     return (
@@ -119,6 +227,8 @@ export function AssetDetailContent({ asset_id }) {
   const isStock = position.asset.kind === "stock";
   const isEtf = position.asset.kind === "etf";
   const isFund = position.asset.kind === "fund";
+  const positionMetricDate = formatDate(positionMetric?.date);
+  const personalReturn = getPersonalReturn(positionMetric, position);
 
   return (
     <DashboardShell
@@ -150,6 +260,48 @@ export function AssetDetailContent({ asset_id }) {
       </div>
 
       <div className="mt-7 grid gap-7">
+        <SectionCard
+          title="Cómo va tu inversión"
+          description="Última lectura disponible de las métricas de esta posición dentro de tu portafolio."
+        >
+          {metricLoading ? (
+            <FeedbackCard
+              title="Cargando métricas de la posición"
+              detail="Estamos consultando el último estado de rendimiento para este activo."
+            />
+          ) : metricError ? (
+            <FeedbackCard
+              title="No se pudieron cargar las métricas"
+              detail="El detalle del activo sí está disponible, pero las métricas de posición fallaron al consultar el backend."
+              tone="error"
+            />
+          ) : metricUnavailable || !positionMetric ? (
+            <FeedbackCard
+              title="Sin métricas disponibles"
+              detail="Todavía no hay una métrica diaria registrada para esta posición."
+            />
+          ) : (
+            <div className="grid md:grid-cols-2 xl:grid-cols-4">
+              <DetailPill
+                label="P&L no realizado"
+                value={formatSignedMoney(positionMetric.unrealized_pnl, currency || "USD")}
+                tone={getMetricTone(positionMetric.unrealized_pnl)}
+              />
+              <DetailPill
+                label="P&L total"
+                value={formatSignedMoney(positionMetric.total_pnl, currency || "USD")}
+                tone={getMetricTone(positionMetric.total_pnl)}
+              />
+              <DetailPill
+                label="Retorno personal"
+                value={formatPercentRatio(personalReturn)}
+                tone={getMetricTone(personalReturn)}
+              />
+              <DetailPill label="Última métrica" value={positionMetricDate} />
+            </div>
+          )}
+        </SectionCard>
+
         <SectionCard
           title="Datos sobre tu inversión"
           description={
