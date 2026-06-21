@@ -81,7 +81,7 @@ function EmptyAlerts() {
       </div>
       <h3 className="text-base font-semibold text-white">No tienes alertas activas</h3>
       <p className="mt-2 max-w-sm text-sm leading-[1.6] text-text-muted">
-        Cuando el backend detecte eventos importantes del portafolio, apareceran aqui.
+        Cuando se detecten eventos importantes dentro de tus inversiones, apareceran aqui, vuelve en otro momento.
       </p>
     </div>
   );
@@ -217,14 +217,14 @@ export function AlertsContent() {
   }
 
   if (loading) {
-    return <FeedbackCard title="Cargando alertas..." detail="Estamos obteniendo los eventos detectados en tu portafolio." />;
+    return <FeedbackCard title="Cargando alertas..." detail="Estamos obteniendo las alertas generadas por la evolución de tu portafolio." />;
   }
 
   if (error) {
     return (
       <FeedbackCard
-        title="No se pudieron cargar las alertas"
-        detail="Revisa que el backend este disponible y que NEXT_PUBLIC_URL_BE apunte a la API correcta."
+        title="No se pudieron cargar tus alertas"
+        detail="Por favor, intenta más tarde o revisa tu conexión"
         tone="error"
       />
     );
@@ -240,7 +240,7 @@ export function AlertsContent() {
       </div>
 
       <div className="mt-6">
-        <SectionCard title="Alertas del sistema" description="Eventos generados por los umbrales y reglas configuradas en el backend.">
+        <SectionCard title="Alertas de tu Portafolio" description="Revisa las alertas sobre el comportamiento de tu portafolio, cuentas y activos dadas por si sus evoluciones cruzan los umbrales definidos en tus Preferencias de Perfil">
           {updateError ? (
             <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm font-semibold text-red-300">
               {updateError}
