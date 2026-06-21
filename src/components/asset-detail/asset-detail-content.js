@@ -62,7 +62,6 @@ export function AssetDetailContent({ asset_id }) {
         });
         if (!response.ok) throw new Error("Error al cargar el activo");
         const data = await response.json();
-        // console.log(data)
         setPosition(data);
       } catch (fetchError) {
         console.error("Fetch Asset Detail Error:", fetchError);
