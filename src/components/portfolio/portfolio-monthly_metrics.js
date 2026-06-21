@@ -97,36 +97,76 @@ export function PortfolioMonthlyMetrics() {
       </div>
     )
   }
-  const metrics_date = new Date(metricsData.date).toLocaleDateString("es-CL") || "No Disponible"
-  const twr = Number(metricsData.twr) *100 || 0
-  const metric_var = Number(metricsData.var) *100 || 0
-  return (
-    <div className="rounded-[28px] border border-border-soft p-6 mt-6 flex flex-col gap-4">
-      <div>
-        <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
-            {/*TWR*/}
-            {metricsData.twr!== undefined && (
-              <MetricCard
-                label="Rentabilidad Mensual (TWR)"
-                value={`${twr.toFixed(2)} %`}
-                helper={`Rendiemiento mensual del portafolio`}
-                helperTone="muted"
-              />
-            )}
+  if(metricsData.length !== 0){
+    const metrics_date = new Date(metricsData.date).toLocaleDateString("es-CL") || "No Disponible"
+    const twr_CLP = (metricsData.twr.CLP !== undefined) ? Number(metricsData.twr.CLP) *100 : 0
+    const twr_USD = (metricsData.twr.USD !== undefined) ? Number(metricsData.twr.USD) *100 : 0
+    const metric_var_CLP = (metricsData.var.CLP !== undefined) ? Number(metricsData.var.CLP) *100 : 0
+    const metric_var_USD = (metricsData.var.USD !== undefined) ? Number(metricsData.var.USD) *100 : 0
+    return (
+      <div className="rounded-[28px] border border-border-soft p-6 mt-6 flex flex-col gap-4">
+        <div className="flex flex-col items-center justify-center gap-4">
+          
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">  
+              {metricsData.twr.CLP !== undefined ? 
+                <div className={`min-h-[132px] rounded-[20px] border border-border-soft p-[18px] bg-accent flex items-center justify-center`} >
+                  <p className={`mt-3 font-semibold tracking-[-0.02em font-mono text-[28px] leading-[1.1]`}>CLP</p>
+                </div>
+              : <p></p>}      
+              
+              {/*TWR*/}
+              {metricsData.twr.CLP!== undefined && (
+                <MetricCard
+                  label="Rentabilidad Mensual (TWR)"
+                  value={`${twr_CLP.toFixed(2)} %`}
+                  helper={`Rendiemiento mensual del portafolio`}
+                  helperTone="muted"
+                />
+              )}
 
-            {/*VAR*/}
-            {metricsData.var !== undefined && (
-              <MetricCard
-                label="Riesgo estimado (VaR)"
-                value={`${metric_var.toFixed(2)} %`}
-                helper={`Pérdida máxima esperada mensualmente`}
-                helperTone="muted"
-              />
-            )}
+              {/*VAR*/}
+              {metricsData.var.CLP !== undefined && (
+                <MetricCard
+                  label="Riesgo estimado (VaR)"
+                  value={`${metric_var_CLP.toFixed(2)} %`}
+                  helper={`Pérdida máxima esperada mensualmente`}
+                  helperTone="muted"
+                />
+              )}
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
+              {metricsData.twr.USD !== undefined ? 
+                <div className={`min-h-[132px] rounded-[20px] border border-border-soft p-[18px] bg-blue-500 flex items-center justify-center`} >
+                  <p className={`mt-3 font-semibold tracking-[-0.02em font-mono text-[28px] leading-[1.1]`}>USD</p>
+                </div>
+              : <p></p>} 
+              {/*TWR*/}
+              {metricsData.twr.USD!== undefined && (
+                <MetricCard
+                  label="Rentabilidad Mensual (TWR)"
+                  value={`${twr_USD.toFixed(2)} %`}
+                  helper={`Rendiemiento mensual del portafolio`}
+                  helperTone="muted"
+                />
+              )}
+
+              {/*VAR*/}
+              {metricsData.var.USD !== undefined && (
+                <MetricCard
+                  label="Riesgo estimado (VaR)"
+                  value={`${metric_var_USD.toFixed(2)} %`}
+                  helper={`Pérdida máxima esperada mensualmente`}
+                  helperTone="muted"
+                />
+              )}
+          </div>
+  
         </div>
+        
+        <StatusPill className="w-60" tone={`${metrics_date === "No Disponible" ? "text-text-muted" : "accent"}`}>{`Última actualización: ${metrics_date}`}</StatusPill>
       </div>
-      
-      <StatusPill className="w-60" tone={`${metrics_date === "No Disponible" ? "text-text-muted" : "accent"}`}>{`Última actualización: ${metrics_date}`}</StatusPill>
-    </div>
-  );
+    );
+  }
+
 }

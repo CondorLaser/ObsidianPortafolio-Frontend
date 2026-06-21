@@ -59,7 +59,7 @@ export function PortfolioDailyMetrics() {
         if (!res.ok) throw new Error("Error al cargar las métricas diarias");
         const data = await res.json();
         setMetricsData(data);
-        console.log(data)
+        console.log("AAAA", data)
       } catch (err) {
         console.error("Fetch Daily Metrics Error:", err);
         setError(true);
@@ -107,51 +107,100 @@ export function PortfolioDailyMetrics() {
       </div>
     )
   }
-  const metrics_date = new Date(metricsData.date).toLocaleDateString("es-CL") || "No Disponible"
-  const pnl = Number(metricsData.pnl) || 0
-  const max_drawdown = Number(metricsData.max_drawdown) || 0
-  const volatility = Number(metricsData.volatility) || 0
-  return (
-    <div className="rounded-[28px] border border-border-soft p-6 mt-6 flex flex-col gap-4">
-      <div>
-        <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(2,minmax(0,1fr))]">        
-            {/*Ganancia/Pérdida del día*/}
-            {metricsData.pnl !== undefined && (
-              <MetricCard
-                label="Ganancia/Pérdida del día (P&L)"
-                value={`${formatMoney(pnl, "CLP")} CLP`}
-                helper={`Cuánto dinero ganó o perdió tu portafolio durante el día`}
-                hero
-                helperTone="muted"
-                numeric_value={pnl}
-              />
-            )}
+  if(metricsData.length !== 0){
+    const metrics_date = new Date(metricsData.date).toLocaleDateString("es-CL") || "No Disponible"
+    const pnl_CLP = (metricsData.pnl.CLP !== undefined) ? Number(metricsData.pnl.CLP) : 0
+    const pnl_USD = (metricsData.pnl.USD !== undefined) ? Number(metricsData.pnl.USD) : 0
+    const max_drawdown_CLP = (metricsData.max_drawdown.CLP !== undefined) ? Number(metricsData.max_drawdown.CLP) : 0
+    const max_drawdown_USD = (metricsData.max_drawdown.USD !== undefined) ? Number(metricsData.max_drawdown.USD) : 0
+    const volatility_CLP = (metricsData.volatility.CLP !== undefined) ? Number(metricsData.volatility.CLP) : 0
+    const volatility_USD = (metricsData.volatility.USD !== undefined) ? Number(metricsData.volatility.USD) : 0
+    
+    return (
+      <div className="rounded-[28px] border border-border-soft p-6 mt-6 flex flex-col gap-4">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">     
+            {metricsData.pnl.CLP !== undefined ? 
+              <div className={`min-h-[132px] rounded-[20px] border border-border-soft p-[18px] bg-accent flex items-center justify-center`} >
+                <p className={`mt-3 font-semibold tracking-[-0.02em font-mono text-[28px] leading-[1.1]`}>CLP</p>
+              </div>
+            : <p></p>}   
+              {/*Ganancia/Pérdida del día*/}
+              {metricsData.pnl.CLP !== undefined && (
+                <MetricCard
+                  label="Ganancia/Pérdida del día (P&L)"
+                  value={`${formatMoney(pnl_CLP, "CLP")} CLP`}
+                  helper={`Cuánto dinero ganó o perdió tu portafolio durante el día`}
+                  hero
+                  helperTone="muted"
+                  numeric_value={pnl_CLP}
+                />
+              )}
 
-            {/*Max Drawdown*/}
-            {metricsData.max_drawdown !== undefined && (
-              <MetricCard
-                label="Max Drawdown"
-                value={`${max_drawdown.toFixed(2)} %`}
-                helper={`% de la mayor caída desde un máximo alcanzado en la jornada`}
-                helperTone="muted"
-                numeric_value={max_drawdown}
-              />
-            )}
+              {/*Max Drawdown*/}
+              {metricsData.max_drawdown.CLP !== undefined && (
+                <MetricCard
+                  label="Max Drawdown"
+                  value={`${Math.abs(max_drawdown_CLP).toFixed(2) * 100} %`}
+                  helper={`% de la mayor caída desde un máximo alcanzado en la jornada`}
+                  helperTone="muted"
+                />
+              )}
 
-            {/*Retorno no realizado (PNL) por moneda*/}
-            {metricsData.volatility !== undefined && (
-              <MetricCard
-                label="Volatilidad diaria"
-                value={volatility.toFixed(2)}
-                helper={`Qué tanto fluctuó el valor del portafolio durante el día`}
-                helperTone="muted"
-                
-              />
-            )}
+              {/*Retorno no realizado (PNL) por moneda*/}
+              {metricsData.volatility.CLP !== undefined && (
+                <MetricCard
+                  label="Volatilidad diaria"
+                  value={`${volatility_CLP.toFixed(2) * 100} %`}
+                  helper={`Qué tanto fluctuó el valor del portafolio durante el día`}
+                  helperTone="muted"
+                />
+              )}
+          </div>
+          
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">     
+            {metricsData.pnl.USD !== undefined ? 
+              <div className={`min-h-[132px] rounded-[20px] border border-border-soft p-[18px] bg-blue-500 flex items-center justify-center`} >
+                <p className={`mt-3 font-semibold tracking-[-0.02em font-mono text-[28px] leading-[1.1]`}>USD</p>
+              </div>
+            : <p></p>}  
+              {/*Ganancia/Pérdida del día*/}
+              {metricsData.pnl.USD !== undefined && (
+                <MetricCard
+                  label="Ganancia/Pérdida del día (P&L)"
+                  value={`${formatMoney(pnl_USD, "USD")}`}
+                  helper={`Cuánto dinero ganó o perdió tu portafolio durante el día`}
+                  hero
+                  helperTone="muted"
+                  numeric_value={pnl_USD}
+                />
+              )}
+
+              {/*Max Drawdown*/}
+              {metricsData.max_drawdown.USD !== undefined && (
+                <MetricCard
+                  label="Max Drawdown"
+                  value={`${Math.abs(max_drawdown_USD).toFixed(2)*100} %`}
+                  helper={`% de la mayor caída desde un máximo alcanzado en la jornada`}
+                  helperTone="muted"
+                />
+              )}
+
+              {/*Retorno no realizado (PNL) por moneda*/}
+              {metricsData.volatility.USD !== undefined && (
+                <MetricCard
+                  label="Volatilidad diaria"
+                  value={`${volatility_USD.toFixed(2)*100} %`}
+                  helper={`Qué tanto fluctuó el valor del portafolio durante el día`}
+                  helperTone="muted"
+                />
+              )}
+          </div>
         </div>
+        
+        <StatusPill className="w-60" tone={`${metrics_date === "No Disponible" ? "text-text-muted" : "accent"}`}>{`Última actualización: ${metrics_date}`}</StatusPill>
       </div>
-      
-      <StatusPill className="w-60" tone={`${metrics_date === "No Disponible" ? "text-text-muted" : "accent"}`}>{`Última actualización: ${metrics_date}`}</StatusPill>
-    </div>
-  );
+    );
+  }
+  
 }
