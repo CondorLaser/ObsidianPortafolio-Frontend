@@ -27,7 +27,7 @@ export function PositionRow({ position, accountName}) {
     <tr className="border-t border-border-soft align-middle transition hover:bg-accent/5 first:border-t-0">
       <td className="px-5 py-5 align-middle">
         <Link
-          href={`/activos/${encodeURIComponent(position.symbol)}`}
+          href={`/activos/${encodeURIComponent(position.asset_id)}`}
           className="inline-flex max-w-full items-center gap-3 rounded-[14px] outline-offset-4"
         >
           <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] border border-border-soft bg-surface font-mono text-xs font-extrabold text-white">

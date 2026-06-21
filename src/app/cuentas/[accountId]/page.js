@@ -11,15 +11,13 @@ import { CollapsableShell } from "@/src/components/collapsable-shell";
 import { AccountPositions } from "@/src/components/accounts/account-positions";
 import { AccountDividends } from "@/src/components/accounts/account-dividends";
 import { AccountTransactions } from "@/src/components/accounts/account-transactions";
+import { AccountMetrics } from "@/src/components/accounts/account-metrics";
 
 export default function AccountDetailPage({ params }) {
   const { accountId } = React.use(params);
   const { getToken } = useAppAuth();
-  const [assetsMap, setAssetsMap] = useState({});
 
   const [account, setAccount] = useState(null);
-  const [metrics, setMetrics] = useState(null);
-  const [transactions, setTransactions] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -35,28 +33,18 @@ export default function AccountDetailPage({ params }) {
         const token = await getToken();
 
         // Hace las request en paralelo
-        const [resAccount, resMetrics, resTransactions] = await Promise.all([
-          fetch(`${baseUrl}/accounts/${accountId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-          }}),
-          fetch(`${baseUrl}/accounts/metrics/${accountId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-          }}),
-        ]);
-
-        if (!resAccount.ok || !resMetrics.ok) {
+        const resAccount = await fetch(`${baseUrl}/accounts/${accountId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }}
+        )
+        if (!resAccount.ok ) {
           throw new Error("Error al obtener los desgloses distribuidos de la cuenta");
         }
         const dataAccount = await resAccount.json();
-        const dataMetrics = await resMetrics.json();
         setAccount(dataAccount);
-        setMetrics(dataMetrics);
       } catch (err) {
         console.error("Fetch Account Detail Error:", err);
         setError(true);
@@ -98,63 +86,19 @@ export default function AccountDetailPage({ params }) {
             Hubo un error de red al intentar consultar la información detallada de la cuenta
           </p>
           <p className="mt-2 text-xs text-text-muted">
-            Por favor, vuelve a intentarlo más tarde
+            Por favor, vuelve a intentarlo más tarde o revisa tu conexión
           </p>
         </div>
       </DashboardShell>
     );
   }
-
-  // Separa métricas según sea diarias o mensuales
-  const dailyMetrics = metrics?.daily || [];
-  const monthlyMetrics = metrics?.monthly || [];
-
-  const latestDaily = dailyMetrics[dailyMetrics.length - 1];
-  const latestMonthly = monthlyMetrics[monthlyMetrics.length - 1];
-
-  // Cálculo e inyección dinámica de métricas principales
-  const pnlValue = latestDaily 
-    ? `${latestDaily.pnl >= 0 ? "+" : ""}${Number(latestDaily.pnl).toFixed(2)} ${account.currency}` 
-    : `0.00 ${account.currency}`;
-
-  // const dividendsValue = `${totalDividendsNet.toFixed(2)} ${account.currency}`;
-
-
-
-
-
-  // Mapeo adaptativo para el componente de gráficos
-  /* const chartData = dailyMetrics.map((m) => m.pnl);
-  const chartLabels = dailyMetrics.map((m) => 
-    new Date(m.date).toLocaleDateString("es-CL", { day: "numeric", month: "short" })
-  ); */
-
   return (
     <DashboardShell
       title={`Cuenta: ${account.name}`}
       actions={actions}
     >
-      {/* 1. Métricas Generales */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Último P&L Diario" value={pnlValue} />
-        {/* <MetricCard label="Posiciones Activas" value={positions.length.toString()} /> */}
-        {/* <MetricCard label="Dividendos Netos Recibidos" value={dividendsValue} /> */}
-        {/* <MetricCard label="Última Operación" value={lastTxLabel} /> */}
-      </div>
-
-      {/* 2. Métricas Mensuales / Riesgo de la cuenta */}
-      {latestMonthly && (
-        <div>
-          <h2 className="text-lg font-semibold mt-3">Métricas mensuales</h2>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard label="Retorno TWR Mensual" value={`${(Number(latestMonthly.twr) * 100).toFixed(2)}%`} />
-            <MetricCard label="Sharpe Ratio (Riesgo)" value={Number(latestMonthly.sharpe_ratio).toFixed(2)} />
-            <MetricCard label="Value at Risk (VaR)" value={`${Number(latestMonthly.value_at_risk).toFixed(2)} ${account.currency}`} />
-            <MetricCard label="Max Drawdown Histórico" value={latestDaily ? `${(Number(latestDaily.max_drawdown) * 100).toFixed(2)}%` : "N/D"} />
-          </div>
-        </div>
-        
-      )}
+      {/* Métricas  */}
+      <AccountMetrics account_id={account.id} currency={account.currency}></AccountMetrics>
 
       {/* 3. Gráfico de evolución del P&L basada en métricas diarias */}
       {/* <div className="mt-6">
