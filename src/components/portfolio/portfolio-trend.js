@@ -68,7 +68,7 @@ function GraphPointDetailTooltip({ active, payload }) {
           })}
         </p>
         <p className="mt-1 font-mono text-sm font-bold text-accent">
-          {formatMoney(data.value, "USD")}
+          {formatMoney(data.value, "CLP")}
         </p>
       </div>
     );
@@ -76,10 +76,28 @@ function GraphPointDetailTooltip({ active, payload }) {
   return null;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function PortfolioTrend() {
   const { getToken } = useAppAuth();
 
   const [trendData, setTrendData] = useState([]);
+  const [trendUSDData, setTrendUSDData] = useState([]);
+  const [trendCLPData, setTrendCLPData] = useState([]);
   const [trendRange, setTrendRange] = useState("1M");
   const [loadingTrend, setLoadingTrend] = useState(true); // Carga inicial
   const [isUpdating, setIsUpdating] = useState(false);    // Cargas de rango posteriores
@@ -93,6 +111,8 @@ export function PortfolioTrend() {
         if (trendData.length === 0 && !isUpdating) setLoadingTrend(true);
         setIsUpdating(true);
         setError(false);
+        setTrendCLPData([])
+        setTrendUSDData([])
         const token = await getToken();
 
         const { trend_from, trend_to } = getTrendDates(trendRange);
@@ -105,14 +125,33 @@ export function PortfolioTrend() {
         });
         if (!res.ok) throw new Error("Error al cargar la tendencia");
         const data = await res.json();
-        
-        // Mapear los valores a números nativos para que Recharts los grafique correctamente
-        const parsedData = data.map(item => ({
-          date: item.date,
-          value: Number(item.value)
-        }));
 
+        // Mapear los valores a números nativos para que Recharts los grafique correctamente
+        let parsedData = []
+        let parsedUSDData = []
+        let parsedCLPData = []
+
+        if (data[0].value !== null) {
+          parsedData = data.map(item => ({
+            date: item.date,
+            value: Number(item.value)
+          }));
+        } else {
+          parsedUSDData = data.map(item => ({
+            date: item.date,
+            value: Number(item.values_by_currency.USD)
+          }));
+          
+          parsedCLPData = data.map(item => ({
+            date: item.date,
+            value: Number(item.values_by_currency.CLP)
+          }));
+          parsedData = data;
+        }
+        
         setTrendData(parsedData);
+        setTrendCLPData(parsedCLPData)
+        setTrendUSDData(parsedUSDData)
       } catch (err) {
         console.error("Fetch Trend Error:", err);
         setError(true);
@@ -142,7 +181,15 @@ export function PortfolioTrend() {
   }, [trendRange]);
 
   // Formateador simplificado para los montos del Eje Y (ej: $1.500)
-  const yAxisTickFormatter = (value) => {
+  const yAxisTickFormatterCLP = (value) => {
+    return new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  const yAxisTickFormatterUSD = (value) => {
     return new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "USD",
@@ -157,6 +204,7 @@ export function PortfolioTrend() {
       </div>
     );
   }
+
 
   return (
     <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6 relative">
@@ -191,7 +239,7 @@ export function PortfolioTrend() {
       </div>
 
       {/* Contenedor del Gráfico Reactivo (+ caso de error) */}
-      <div className={`h-[380px] w-full transition-opacity duration-200 ${isUpdating ? "opacity-50" : "opacity-100"}`}>
+      <div className={`${trendData[0].value === null ? "h-[680px]": "h-[380px]"} w-full transition-opacity duration-200 ${isUpdating ? "opacity-50" : "opacity-100"}`}>
         {error || trendData.length === 0 ? (
           error ? (
             <div>
@@ -220,59 +268,177 @@ export function PortfolioTrend() {
             </div>
           )
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={trendData}
-              margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
+          trendData[0].value !== null ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={trendData}
+                margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
 
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                vertical={false} 
-                stroke="#2d374c" 
-              />
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  vertical={false} 
+                  stroke="#2d374c" 
+                />
 
-              <XAxis
-                dataKey="date"
-                tickFormatter={xAxisTickFormatter}
-                stroke="#7d8ea7"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                dy={10}
-                interval={trendRange === "3M" ? 4 : trendRange === "1M" ? 1 : 14}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={xAxisTickFormatter}
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                  interval={trendRange === "3M" ? 4 : trendRange === "1M" ? 1 : 14}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
 
-              <YAxis
-                stroke="#7d8ea7"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={yAxisTickFormatter}
-                domain={["auto", "auto"]}
-              />
+                <YAxis
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={yAxisTickFormatterCLP}
+                  domain={["auto", "auto"]}
+                  width={45}
+                />
 
-              <Tooltip content={<GraphPointDetailTooltip />} cursor={{ stroke: "#475569", strokeWidth: 1 }} />
+                <Tooltip content={<GraphPointDetailTooltip />} cursor={{ stroke: "#475569", strokeWidth: 1 }} />
 
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="var(--accent, #3b82f6)"
-                strokeWidth={2.5}
-                fillOpacity={1}
-                fill="url(#colorValue)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="var(--accent, #3b82f6)"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+
+          ) : (
+            <div className="flex flex-col h-full w-full items-center justify-center text-text-muted">
+            USD
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={trendUSDData}
+                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  vertical={false} 
+                  stroke="#2d394c" 
+                />
+
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={xAxisTickFormatter}
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                  interval={trendRange === "3M" ? 4 : trendRange === "1M" ? 1 : 14}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+
+                <YAxis
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={yAxisTickFormatterUSD}
+                  domain={["auto", "auto"]}
+                />
+
+                <Tooltip content={<GraphPointDetailTooltip />} cursor={{ stroke: "#475569", strokeWidth: 1 }} />
+
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="var(--accent, #3b82f6)"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+
+            CLP
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={trendCLPData}
+                margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--accent, #3b82f6)" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  vertical={false} 
+                  stroke="#2d374c" 
+                />
+
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={xAxisTickFormatter}
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                  interval={trendRange === "3M" ? 4 : trendRange === "1M" ? 1 : 14}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+
+                <YAxis
+                  stroke="#7d8ea7"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={yAxisTickFormatterCLP}
+                  domain={["auto", "auto"]}
+                  width={45}
+                />
+
+                <Tooltip content={<GraphPointDetailTooltip />} cursor={{ stroke: "#475569", strokeWidth: 1 }} />
+
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="var(--accent, #3b82f6)"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            </div>
+          )
+
         )}
       </div>
     </section>

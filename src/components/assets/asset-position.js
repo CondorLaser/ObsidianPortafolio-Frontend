@@ -48,10 +48,8 @@ export function PositionAssetRow({ position, accountName}) {
       onClick={handleRowClick} 
       className="border-t border-border-soft align-middle text-center transition hover:bg-accent/5 first:border-t-0">
       {/* Symbol */}
-      <td className="px-5 py-5 align-middle">
-          <div className="grid h-[50px] w-[50px] place-items-center rounded-[12px] border border-border-soft bg-surface font-mono text-xs font-extrabold text-white">
-            {position.asset.symbol}
-          </div>
+      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white truncate max-w-[120px]" >
+        {(position.asset.name.length > 18) ? position.asset.name.slice(0, 18) + "..." : position.asset.name || "No disponible"}
       </td>
       {/* Kind */}
       <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white uppercase">
