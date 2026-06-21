@@ -22,6 +22,36 @@ const REQUEST_SUCCESSFUL = true
 const USE_REAL_UPLOAD = process.env.NEXT_PUBLIC_REAL_UPLOAD === "true"
 let accountsStore = [...accounts_data]
 let userPreferencesStore = { ...user_preferences }
+let warningsStore = [
+  {
+    id: "00000000-0000-4000-8000-000000000001",
+    user_id: "e2e-user",
+    type: "drawdown",
+    trigger_field: "max_drawdown",
+    trigger_value: "-0.128",
+    threshold_value: "-0.1",
+    msg: "El portafolio supero el umbral configurado de drawdown.",
+    is_read: false,
+    created_at: new Date().toISOString(),
+    notified_at: null,
+    last_triggered: new Date().toISOString().slice(0, 10),
+    is_active: true
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000002",
+    user_id: "e2e-user",
+    type: "weight",
+    trigger_field: "asset_weight",
+    trigger_value: "0.42",
+    threshold_value: "0.35",
+    msg: "Un activo sobrepaso el peso maximo configurado.",
+    is_read: true,
+    created_at: new Date().toISOString(),
+    notified_at: null,
+    last_triggered: new Date().toISOString().slice(0, 10),
+    is_active: true
+  }
+]
 
 const formatCurrency = (value, currency = "USD") => {
   const number = Number(value || 0)
@@ -362,6 +392,59 @@ export const handlers = [
         { status: 500 }
       )
     }
+  }),
+
+  http.get(`${API_URL}/warnings`, ({ request }) => {
+    if (!REQUEST_SUCCESSFUL) {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+
+    const { searchParams } = new URL(request.url)
+    const isRead = searchParams.get("is_read")
+    const isActive = searchParams.get("is_active")
+
+    const warnings = warningsStore.filter((warning) => {
+      const matchesRead = isRead === null || warning.is_read === (isRead === "true")
+      const matchesActive = isActive === null || warning.is_active === (isActive === "true")
+      return matchesRead && matchesActive
+    })
+
+    return HttpResponse.json(warnings)
+  }),
+
+  http.patch(`${API_URL}/warnings/:alert_id`, async ({ params, request }) => {
+    if (!REQUEST_SUCCESSFUL) {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+
+    const { alert_id } = params
+    const payload = await request.json()
+    const warning = warningsStore.find((item) => item.id === alert_id)
+
+    if (!warning) {
+      return HttpResponse.json(
+        { detail: "Warning not found" },
+        { status: 404 }
+      )
+    }
+
+    const updatedWarning = {
+      ...warning,
+      ...(payload.is_read !== undefined ? { is_read: payload.is_read } : {}),
+      ...(payload.is_active !== undefined ? { is_active: payload.is_active } : {})
+    }
+
+    warningsStore = warningsStore.map((item) => (
+      item.id === alert_id ? updatedWarning : item
+    ))
+
+    return HttpResponse.json(updatedWarning)
   }),
 
   // Vista perfil ===============================================

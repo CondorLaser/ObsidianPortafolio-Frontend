@@ -14,6 +14,7 @@ const mockedApiPrefixes = [
   "/pdf",
   "/profile",
   "/preferences",
+  "/warnings",
   "/accounts",
   "/user",
 ]
