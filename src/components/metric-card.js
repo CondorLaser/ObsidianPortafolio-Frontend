@@ -1,10 +1,12 @@
-export function MetricCard({ label, value, helper, hero = false, helperTone = "success" }) {
+export function MetricCard({ label, value, helper, hero = false, helperTone = "success", numeric_value }) {
   const helperClass =
     helperTone === "muted"
       ? "text-text-muted"
       : helperTone === "pill"
         ? "inline-flex rounded-full bg-green-attention px-3 py-1.5 font-mono text-xs font-extrabold text-success"
         : "text-success";
+
+  const text_color = numeric_value < 0 ? "text-danger" : numeric_value > 0 ? "text-accent" : "text-accent" 
 
   return (
     <article
@@ -14,9 +16,9 @@ export function MetricCard({ label, value, helper, hero = false, helperTone = "s
           : "bg-panel-soft"
       }`}
     >
-      <p className="text-sm text-text-muted">{label}</p>
+      <p className="text-sm text-text-muted font-bold">{label}</p>
       <p
-        className={`mt-3 font-semibold tracking-[-0.02em] ${
+        className={`mt-3 font-semibold tracking-[-0.02em] ${numeric_value ? `${text_color}`: "text-white"} ${
           hero ? "font-mono text-[28px] leading-[1.1]" : "text-[28px] leading-[1.1]"
         }`}
       >

@@ -3,7 +3,7 @@ import { Sidebar } from "@/src/components/sidebar";
 export function DashboardShell({ title, description, children, actions }) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#152846_0%,#08111f_55%)] px-4 py-6 lg:px-6">
-      <div className="mx-auto grid max-w-[1440px] gap-6 lg:grid-cols-[288px_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-[1440px] gap-6 lg:grid-cols-[auto_minmax(0,1fr)]">
         <Sidebar />
 
         <main className="rounded-[28px] border border-border-soft bg-panel p-[26px]">

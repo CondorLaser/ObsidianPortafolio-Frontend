@@ -1,256 +1,177 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useAppAuth} from "@/src/lib/client-auth";
+import dynamic from "next/dynamic";
+import { PortfolioPositions } from "./portfolio-positions";
+import { PortfolioSummary } from "./portfolio-summary";
+import { FeedbackCard } from "../feedback-card";
+import { PortfolioDailyMetrics } from "./portfolio-daily_metrics";
+import { PortfolioMonthlyMetrics } from "./portfolio-monthly_metrics";
 
-import { MetricCard } from "@/src/components/metric-card";
-import { SimpleChart } from "@/src/components/simple-chart";
+const PortfolioTrend = dynamic(
+  () => import("./portfolio-trend").then((mod) => mod.PortfolioTrend),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[490px] w-full flex-col items-center justify-center rounded-[28px] border border-border-soft bg-panel-soft p-6 text-center">
+        <p className="text-lg font-semibold text-white animate-pulse">Cargando evolución del portafolio...</p>
+      </div>
+    )
+  }
+);
 
-const toneClasses = {
-  accent: "border-accent/20 bg-accent/10 text-accent",
-  success: "border-emerald-500/20 bg-emerald-500/10 text-success",
-  warning: "border-amber-500/20 bg-amber-500/10 text-warning",
-  default: "border-border-soft bg-panel text-white/70"
-};
-
-const defaultDashboardData = {
-  summary: null,
-  accountDistribution: [],
-  certificateStatus: [],
-  trend: [],
-  positions: []
-};
-
-function StatusPill({ children, tone = "default", className = "" }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.02em] ${toneClasses[tone] ?? toneClasses.default} ${className}`}
-    >
-      {children}
-    </span>
-  );
+// Formatear dinero según divisa (CLP o USD)
+function formatMoney(amount, currency = "USD") {
+  if (amount === null || amount === undefined) return "-";
+  const numAmount = Number(amount);
+  
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: currency === "CLP" ? 0 : 2,
+  }).format(numAmount);
 }
 
-function FeedbackCard({ title, detail, tone = "default" }) {
-  const toneClass =
-    tone === "error"
-      ? "border-red-500/20 bg-red-500/5 text-red-300"
-      : "border-border-soft bg-panel-soft text-text-muted";
+function DistributionRow({ item }) {
+  const widthPct = `${(Number(item.percentage) * 100).toFixed(1)}%`;
+  const isUSD = item.currency === "USD";
 
   return (
-    <section className={`rounded-[28px] border p-8 text-center ${toneClass}`}>
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
-      <p className="mt-2 text-sm leading-[1.6]">{detail}</p>
-    </section>
-  );
-}
-
-function DistributionRow({ item, certificateStatus }) {
-  const certificate = certificateStatus.find((status) => status.title === item.name);
-
-  return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-4">
       <div className="flex items-center justify-between gap-4">
         <p className="text-[18px] font-semibold text-white">{item.name}</p>
-        <div className="flex min-w-[210px] items-center gap-4">
+        <div className="flex min-w-[250px] items-center gap-4">
           <div className="h-3 flex-1 rounded-full bg-[#2d374c]">
-            <div className="h-full rounded-full bg-accent" style={{ width: item.value }} />
+            <div className="h-full rounded-full bg-accent" style={{ width: widthPct }} />
           </div>
-          <span className="text-[18px] font-bold text-white">{item.value}</span>
+          <span className="text-[18px] font-bold text-white">{widthPct} de {item.currency}</span>
         </div>
       </div>
-      <div className="rounded-[20px] border border-border-soft bg-surface px-6 py-6">
-        <p className="text-sm text-text-muted">{item.name.includes("USD") ? "Acciones y ETFs" : "Fondos mutuos"}</p>
-        <p className="mt-3 font-mono text-[18px] font-bold tracking-[-0.02em] text-white">
-          {certificate?.status} {certificate?.detail}
+      <div className="rounded-[20px] border border-border-soft bg-panel px-6 py-6 flex flex-row gap-10">
+        <p className=" text-text-muted">{isUSD ? "Acciones y ETFs (USD)" : "Fondos mutuos (CLP)"}</p>
+        <p className="text-[18px] font-bold tracking-[-0.02em] text-accent">
+          {formatMoney(item.amount, item.currency)}
         </p>
       </div>
     </div>
   );
 }
 
-function PositionRow({ position }) {
-  return (
-    <tr className="border-t border-border-soft align-middle transition hover:bg-accent/5 first:border-t-0">
-      <td className="px-5 py-5 align-middle">
-        <Link
-          href={`/activos/${encodeURIComponent(position.symbol)}`}
-          className="inline-flex max-w-full items-center gap-3 rounded-[14px] outline-offset-4"
-        >
-          <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] border border-border-soft bg-surface font-mono text-xs font-extrabold text-white">
-            {position.symbol}
-          </div>
-          <div className="min-w-0 max-w-[260px]">
-            <p className="text-[15px] font-semibold leading-[1.2] text-white">{position.symbol}</p>
-            <p className="mt-[3px] text-[13px] leading-[1.35] text-text-muted">{position.name}</p>
-          </div>
-        </Link>
-      </td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white">{position.type}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-[14px] font-semibold text-white">{position.account}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.quantity}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.currentPrice}</td>
-      <td className="whitespace-nowrap px-3 py-5 text-right text-[14px] font-semibold text-white">{position.totalValue}</td>
-      <td
-        className={`whitespace-nowrap px-3 py-5 text-right text-[14px] font-bold ${
-          position.returnPct.startsWith("-") ? "text-danger" : "text-success"
-        }`}
-      >
-        {position.returnPct}
-      </td>
-      <td className="px-3 py-5 text-right">
-        <Link
-          href={`/activos/${encodeURIComponent(position.symbol)}`}
-          className="inline-flex min-h-[34px] min-w-[110px] items-center justify-center whitespace-nowrap rounded-full border border-border-soft px-[10px] text-[12px] font-semibold text-white transition hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
-        >
-          Ver detalle
-        </Link>
-      </td>
-    </tr>
-  );
-}
-
 export function PortfolioContent() {
-  const [data, setData] = useState(defaultDashboardData);
+  const { getToken } = useAppAuth();
+
+  const [summaryData, setSummaryData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+
+  // Carga inicial del summary
   useEffect(() => {
-    async function loadDashboard() {
+    async function loadSummary() {
       try {
         setLoading(true);
         setError(false);
+        const token = await getToken();
 
-        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
-        const response = await fetch(`${baseUrl}/portfolio/dashboard`);
-
-        if (!response.ok) throw new Error("Error al cargar el dashboard");
-
-        const dashboardData = await response.json();
-        setData({ ...defaultDashboardData, ...dashboardData });
-      } catch (fetchError) {
-        console.error("Fetch Portfolio Dashboard Error:", fetchError);
+        const res = await fetch(`${baseUrl}/portfolio/summary`, {
+          method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+        }})
+        if (!res.ok) throw new Error("Error al cargar los datos del portafolio");
+        const data = await res.json();
+        setSummaryData(data);
+      } catch (err) {
+        console.error("Fetch Summary Error:", err);
         setError(true);
       } finally {
         setLoading(false);
       }
     }
+    loadSummary();
+  }, [baseUrl]);
 
-    loadDashboard();
-  }, []);
 
   if (loading) {
-    return <FeedbackCard title="Cargando portafolio..." detail="Estamos obteniendo los datos del dashboard." />;
+    return <FeedbackCard title="Cargando portafolio..." detail="Obteniendo el resumen de tu cuenta." />;
   }
 
-  if (error || !data.summary) {
+  if (summaryData == null) {
     return (
-      <FeedbackCard
-        title="No se pudo cargar el portafolio"
-        detail="Revisa la conexion con el backend o que los mocks de desarrollo esten activos."
-        tone="error"
-      />
-    );
+      <div>
+        <FeedbackCard
+          title="No se pudo cargar los datos de tu portafolio"
+          detail="Por favor, intenta más tarde o revisa tu conexión."
+          tone="error"
+        />
+      </div>
+    )
   }
 
-  const { summary, accountDistribution, certificateStatus, trend, positions } = data;
-
+  const { summary, account_distribution } = summaryData;
+  // console.log(account_distribution)
+  if (summary.active_positions === 0){
+    return (
+      <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
+        <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <h3 className="text-base font-semibold text-white">
+          No tienes datos disponibles aún
+        </h3>
+        <div className="text-left">
+          <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+            Por favor, sube tus Certificados de Transacciones en la pestaña de Perfil/Mis datos o clickeando el botón "Subir/Actualizar Datos"
+          </li>
+          <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+            Recuerda que puedes crear Cuentas donde vincular tus datos en la pestaña de Cuentas
+          </li>
+        </div>
+        
+      </div>
+    )
+  }
+  
   return (
     <>
-      <div className="grid gap-4 xl:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">
-        <MetricCard
-          label="Valor total del portafolio"
-          value={summary.totalValue}
-          helper={summary.dataFreshness}
-          helperTone="pill"
-          hero
-        />
-        <MetricCard
-          label="Retorno no realizado"
-          value={summary.totalReturn}
-          helper={summary.totalReturnPct}
-          helperTone="pill"
-        />
-        <MetricCard
-          label="Posiciones activas"
-          value={summary.activePositions}
-          helper="Activos visibles en tabla"
-          helperTone="muted"
-        />
-        <MetricCard
-          label="Cuentas vinculadas"
-          value={summary.linkedAccounts}
-          helper={summary.pendingItems}
-          helperTone="muted"
-        />
-      </div>
+      <PortfolioSummary summaryData={summaryData} loading={loading} error={error}></PortfolioSummary>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Evolución del portafolio</h2>
-              <p className="mt-2 text-[14px] text-text-muted">Serie visual de referencia hasta conectar histórico real.</p>
-            </div>
-            <StatusPill tone="accent" className="border-none bg-accent/12 px-4 py-2 font-mono text-sm normal-case">
-              request mock
-            </StatusPill>
-          </div>
+      <PortfolioDailyMetrics></PortfolioDailyMetrics>
+      <PortfolioMonthlyMetrics></PortfolioMonthlyMetrics>
 
-          <SimpleChart
-            className="h-[404px] rounded-[22px] border border-border-soft bg-surface"
-            data={trend.map((item) => item.value)}
-            labels={trend.map((item) => item.label)}
-          />
-        </section>
+      <div className="mt-6 flex flex-col gap-6">
+        <PortfolioTrend></PortfolioTrend>
 
         <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6">
-          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Distribución y frescura</h2>
-          <p className="mt-2 text-[14px] text-text-muted">Estado mínimo que faltaba en el dashboard actual.</p>
+          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Distribución por cuenta</h2>
+          <p className="mt-2 text-[14px] text-text-muted">Desglose de capital total distribuido según tipo de moneda (CLP o USD).</p>
+          <p className="mt-2 text-[14px] text-text-muted"><b>*Nota:</b> Los porcentajes mostrados aquí representan el % total de cada moneda, no del capital total del portafolio cuando hay cuentas de varias monedas.</p>
 
           <div className="mt-10 space-y-5">
-            {accountDistribution.map((item) => (
-              <DistributionRow key={item.name} item={item} certificateStatus={certificateStatus} />
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <div className="mt-6">
-        <section className="rounded-[28px] border border-border-soft bg-panel-soft p-7">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">Activos principales</h2>
-              <p className="mt-2 text-[14px] text-text-muted">
-                Activos principales del portafolio. Cada fila conserva el contexto de cuenta, cantidad y retorno, y
-                lleva a la ficha{" "}
-                <span className="rounded-full bg-accent/12 px-3 py-1 font-mono text-accent">/activos/[symbol]</span>.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-7 overflow-x-auto">
-            <table className="w-full min-w-[980px] border-separate border-spacing-0 text-left">
-              <thead>
-                <tr className="text-[12px] uppercase tracking-[0.1em] text-text-muted">
-                  <th className="w-[38%] px-5 pb-4 font-semibold">Activo</th>
-                  <th className="w-[10%] px-3 pb-4 font-semibold">Tipo</th>
-                  <th className="w-[14%] px-3 pb-4 font-semibold">Cuenta</th>
-                  <th className="w-[8%] px-3 pb-4 text-right font-semibold">Cantidad</th>
-                  <th className="w-[8%] px-3 pb-4 text-right font-semibold">Precio</th>
-                  <th className="w-[10%] px-3 pb-4 text-right font-semibold">Valor total</th>
-                  <th className="w-[6%] px-3 pb-4 text-right font-semibold">Retorno</th>
-                  <th className="w-[12%] px-3 pb-4 text-right font-semibold">Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {positions.map((position) => (
-                  <PositionRow key={`${position.account}-${position.symbol}`} position={position} />
+            {account_distribution === undefined ? (
+              <div>
+                <FeedbackCard
+                  title="No se pudo cargar la distribución a lo largo de tus cuentas"
+                  detail="Por favor, intenta más tarde o revisa tu conexión."
+                  tone="error"
+                />
+              </div>
+            ): (
+              <div>
+                {account_distribution.map((item) => (
+                  <DistributionRow key={item.account_id} item={item} />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            )}
+          </div> 
         </section>
+          
+        <PortfolioPositions account_distribution={account_distribution}></PortfolioPositions>
       </div>
     </>
   );

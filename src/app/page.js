@@ -1,23 +1,30 @@
 'use client'
 import { useUser } from "@clerk/nextjs";
-import { useAuth } from "@clerk/nextjs";
 import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAppAuth } from "@/src/lib/client-auth";
+import { PortfolioOverviewCard } from "../components/landing/overview-card";
 
 function SignedInHome() {
-  const { getToken } = useAuth()
+  const { getToken } = useAppAuth();
 
   useEffect(() => {
     const init = async () => {
-      const token = await getToken()
-      const res = await fetch(`${process.env.NEXT_PUBLIC_URL_BE}/accounts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      console.log("[init] accounts check", res.status)
-    }
-    init()
-  }, [])
+      try {
+        const token = await getToken();
+        const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+        const res = await fetch(`${baseUrl}/accounts`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("[init] accounts check", res.status);
+      } catch (error) {
+        console.error("[init] accounts check failed", error);
+      }
+    };
+
+    init();
+  }, [getToken]);
 
   return (
     <main className="min-h-screen px-4 lg:px-6">
@@ -40,25 +47,7 @@ function SignedInHome() {
             </Link>
           </div>
         </section>
-
-        <section className="rounded-[2rem] border border-border-soft bg-panel p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl bg-panel-soft p-5">
-              <p className="text-sm text-text-muted">Patrimonio total</p>
-              <p className="mt-3 text-3xl font-semibold">$93.591</p>
-            </div>
-            <div className="rounded-3xl bg-panel-soft p-5">
-              <p className="text-sm text-text-muted">Retorno no realizado</p>
-              <p className="mt-3 text-3xl font-semibold">$6.422</p>
-            </div>
-            <div className="rounded-3xl bg-panel-soft p-5 sm:col-span-2">
-              <p className="text-sm text-text-muted">Vistas listas para construir</p>
-              <p className="mt-3 text-lg font-semibold">
-                Portafolio, activos, cuentas, perfil, alertas y recomendaciones.
-              </p>
-            </div>
-          </div>
-        </section>
+        <PortfolioOverviewCard></PortfolioOverviewCard>
       </div>
     </main>
   );

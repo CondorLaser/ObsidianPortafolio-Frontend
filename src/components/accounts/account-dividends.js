@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppAuth} from "@/src/lib/client-auth";
 import { FeedbackCard } from "../feedback-card";
-import { PositionAssetRow } from "./asset-position";
+import { DividendAssetRow } from "./dividend-row.js";
 
 const toneClasses = {
   accent: "border-accent/20 bg-accent/10 text-accent",
@@ -22,101 +22,62 @@ function StatusPill({ children, tone = "default", className = "" }) {
   );
 }
 
-export function AssetsContent() {
+export function AccountDividends({accountId}) {
   const { getToken } = useAppAuth();
-  const [positions, setPositions] = useState([]);
+  const [dividends, setDividens] = useState([]);
   const [page, setPage] = useState(0);
-  const limit = 10;
+  const limit = 5;
   const [loading, setLoading] = useState(true);
-  const [updatingPositions, setUpdatingPositions] = useState(false);
+  const [updatingDividends, setUpdatingDividends] = useState(false);
   const [error, setError] = useState(false);
-
-  
-  const [accounts, setAccounts] = useState([]);
-  const [accountsError, setAccountsError] = useState(false);
 
   const baseUrl = process.env.NEXT_PUBLIC_URL_BE || ""; 
 
   useEffect(() => {
-    async function loadPositions() {
+    async function loadDividends() {
       try {
-        if(positions.length === 0 && !updatingPositions && page === 0) setLoading(true);
-        setUpdatingPositions(true);
+        if(dividends.length === 0 && !updatingDividends && page === 0) setLoading(true);
+        setUpdatingDividends(true);
         setError(false);
         const token = await getToken();
         const skip = page * limit;
-        const res = await fetch(`${baseUrl}/positions?skip=${skip}&limit=${limit}`,{
+        const res = await fetch(`${baseUrl}/accounts/dividends/${accountId}?skip=${skip}&limit=${limit}`,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           }
         });
-        if (!res.ok) throw new Error("Error al cargar las positions");
+        if (!res.ok) throw new Error("Error al cargar las dividends");
         const data = await res.json();
-        setPositions(data);
+        setDividens(data);
       } catch (fetchError) {
         console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);
-        setUpdatingPositions(false);
+        setUpdatingDividends(false);
       }
     }
-    loadPositions();
+    loadDividends();
   }, [baseUrl, page, limit]);
-
-  useEffect(() => {
-    async function loadAccounts() {
-      try {
-        setLoading(true);
-        setAccountsError(false);
-        const token = await getToken();
-        const res = await fetch(`${baseUrl}/accounts`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
-        });
-        
-        if (!res.ok) throw new Error("Error al cargar las cuentas");
-        const data = await res.json();
-        setAccounts(data);
-      } catch (fetchError) {
-        console.error("Fetch Accounts Error:", fetchError);
-        setAccountsError(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadAccounts();
-  }, []);
-
-  const accountMap = useMemo(() => {
-    const map = {};
-    accounts.forEach((account) => {
-      map[account.id] = account.name;
-    });
-    return map;
-  }, [accounts]);
 
 
   if (loading) {
-    return <FeedbackCard title="Cargando activos..." detail="Estamos obteniendo las posiciones del portafolio." />;
+    return <FeedbackCard title="Cargando dividendos..." detail="Estamos obteniendo los dividendos de la cuenta." />;
   }
 
   if (error) {
     return (
       <FeedbackCard
-        title="No se pudieron cargar los activos"
+        title="No se pudieron cargar los dividendos"
         detail="Por favor, intenta más tarde o revisa tu conexión."
         tone="error"
       />
     );
   }
 
-  if (positions.length === 0 && !updatingPositions && page === 0) {
+  if (dividends.length === 0 && !updatingDividends && page === 0) {
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
         <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 mb-4">
@@ -144,39 +105,32 @@ export function AssetsContent() {
     <div>
       <div className="bg-panel-soft  border border-border-soft p-1">        
         <div className={` overflow-x-auto max-h-[80vh] bg-app shadow-sm`}>
-          <table className={`w-full min-w-[980px] border-collapse ${updatingPositions ? "opacity-50" : "opacity-100"}`}>
+          <table className={`w-full min-w-[980px] border-collapse ${updatingDividends ? "opacity-50" : "opacity-100"}`}>
             <thead className="sticky top-0 z-20 bg-app">
               <tr className="bg-panel border-b border-border text-[12px] uppercase tracking-[0.1em] text-text-muted shadow-sm">
-                <th className="w-[20%] px-5 pb-4 pt-5 text-center font-semibold">Activo</th>
-                <th className="w-[20%] px-3 pb-4 pt-5 text-center font-semibold">Tipo</th>
-                <th className="w-[44%] px-3 pb-4 pt-5 text-center font-semibold">Cuenta</th>
-                <th className="w-[8%] px-3 pb-4 pt-5 text-center font-semibold">Cantidad</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Costo Promedio</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">P&L Realizado</th>
-                <th className="w-[8%] px-3 pb-4 pt-5 text-center font-semibold">Dividendos Totales</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Comisiones Totales</th>
-                <th className="w-[10%] px-3 pb-4 pt-5 text-center font-semibold">Última transacción</th>
+                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Activo</th>
+                <th className="w-[10%] px-5 pb-4 pt-5 text-center font-semibold">Tipo Activo</th>
+                <th className="w-[20%] px-3 pb-4 pt-5 text-center font-semibold">Fecha de Pago</th>
+                <th className="w-[34%] px-3 pb-4 pt-5 text-center font-semibold">Monto Bruto</th>
+                <th className="w-[48%] px-3 pb-4 pt-5 text-center font-semibold">Impuesto / Retención</th>
+                <th className="w-[30%] px-3 pb-4 pt-5 pr-10 text-center font-semibold">Monto Neto Recibido</th>
               </tr>
             </thead>
             <tbody className={loading ? "opacity-50" : ""}>
-              {positions.map((position) => (
-                <PositionAssetRow
-                  key={`${position.id}`} 
-                  position={position} 
-                  accountName={accountMap[position.account_id]}
-                />
+              {dividends.map((dividend) => (
+                <DividendAssetRow key={`${dividend.id}`} dividend={dividend}></DividendAssetRow>
                 
               ))}
             </tbody>
           </table>
           
           
-          <div className="p-6 sticky bottom-0 z-30 w-full min-w-[1030px] bg-panel flex items-center justify-between border-t border-border-soft pt-4">
+          <div className="p-6 sticky bottom-0 z-30 w-[995px] bg-panel flex items-center justify-between border-t border-border-soft pt-4">
             <span className="text-sm text-text-muted">
               Página {page + 1}
             </span>
             <div className="flex gap-2">
-              {updatingPositions && (
+              {updatingDividends && (
                 <StatusPill tone="accent" className="animate-pulse">
                   Actualizando...
                 </StatusPill>
@@ -190,7 +144,7 @@ export function AssetsContent() {
               </button>
               <button
                 onClick={() => setPage((p) => p + 1)}
-                disabled={positions.length < limit || loading}
+                disabled={dividends.length < limit || loading}
                 className="rounded-lg border border-border-soft bg-surface px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-accent/10 transition-colors"
               >
                 Siguiente

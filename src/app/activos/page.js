@@ -1,6 +1,7 @@
 import { AssetsContent } from "@/src/components/assets/assets-content";
 import { DashboardShell } from "@/src/components/dashboard-shell";
-import { getServerAuth, shouldRedirectToSignIn } from "@/src/lib/auth-mode";
+import { getServerAuth } from "@/src/lib/auth-mode";
+import { shouldRedirectToSignIn } from "@/src/lib/auth-mode-client";
 
 export default async function AssetsPage() {
   const { isAuthenticated, redirectToSignIn } = await getServerAuth();
@@ -10,7 +11,7 @@ export default async function AssetsPage() {
   return (
     <DashboardShell
       title="Activos"
-      description="Lista de activos presentes en el portafolio del usuario, considerando todas sus cuentas vinculadas."
+      description="Revisa los detalles de cantidad, cuenta asociada, valor y retorno de cada uno de los activos que conforman tu portafolio."
     >
       <AssetsContent />
     </DashboardShell>
