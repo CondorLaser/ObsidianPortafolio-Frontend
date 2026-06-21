@@ -83,6 +83,15 @@ const getAccountById = (accountId) => (
   accountsStore.find((account) => account.id === accountId)
 )
 
+const getAccountsWithCounters = () => (
+  accountsStore.map((account) => ({
+    account,
+    stock_positions: account.stock_count ?? 0,
+    fund_positions: account.fund_count ?? 0,
+    etf_positions: account.etf_count ?? 0
+  }))
+)
+
 const getAssetById = (assetId) => (
   asset_data.find((asset) => asset.id === assetId)
 )
@@ -506,6 +515,17 @@ export const handlers = [
   }),
 
   // Vista Cuentas 
+  http.get(`${API_URL}/accounts/with-counters`, () => {
+    if (REQUEST_SUCCESSFUL) {
+      return HttpResponse.json(getAccountsWithCounters())
+    } else {
+      return HttpResponse.json(
+        { error: "Internal Server Error", code: "ERR_500" },
+        { status: 500 }
+      )
+    }
+  }),
+
   // GET /accounts/:user_id <-------------
   http.get(`${API_URL}/accounts`, ({ params }) => {
     if (REQUEST_SUCCESSFUL) {

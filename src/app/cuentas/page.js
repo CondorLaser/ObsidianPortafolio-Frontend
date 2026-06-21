@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useAppAuth } from "@/src/lib/client-auth";
 import { DashboardShell } from "@/src/components/dashboard-shell";
 import { AccountCard } from "@/src/components/accounts/account-card";
@@ -30,6 +29,9 @@ export default function AccountsPage() {
   const [loading, setLoading] = useState(true);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [creationFeedback, setCreationFeedback] = useState(null);
+  const [feedbackTone, setFeedbackTone] = useState("success");
+  const [accountToDelete, setAccountToDelete] = useState(null);
+  const [deletingAccountId, setDeletingAccountId] = useState(null);
 
   const { getToken } = useAppAuth();
 
@@ -77,8 +79,54 @@ export default function AccountsPage() {
 
     const refreshedAccounts = await fetchAccounts(getToken);
     setAccounts(refreshedAccounts);
+    setFeedbackTone("success");
     setCreationFeedback(`Cuenta "${payload.name}" creada correctamente.`);
     setIsCreatingAccount(false);
+  }
+
+  async function confirmDeleteAccount() {
+    if (!accountToDelete?.id) return;
+
+    const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
+    const token = await getToken();
+    setDeletingAccountId(accountToDelete.id);
+
+    try {
+      const response = await fetch(`${baseUrl}/delete/accounts/${accountToDelete.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        let message = "No se pudo eliminar la cuenta.";
+
+        try {
+          const errorBody = await response.json();
+          message = errorBody.detail || errorBody.error || message;
+        } catch {
+          // Si el backend no responde JSON, dejamos el mensaje por defecto.
+        }
+
+        throw new Error(message);
+      }
+
+      setAccounts((currentAccounts) => (
+        Array.isArray(currentAccounts)
+          ? currentAccounts.filter((item) => item.account?.id !== accountToDelete.id)
+          : currentAccounts
+      ));
+      setFeedbackTone("success");
+      setCreationFeedback(`Cuenta "${accountToDelete.name}" eliminada correctamente.`);
+      setAccountToDelete(null);
+    } catch (error) {
+      setFeedbackTone("error");
+      setCreationFeedback(error.message || "No se pudo eliminar la cuenta.");
+    } finally {
+      setDeletingAccountId(null);
+    }
   }
 
   return (
@@ -90,6 +138,7 @@ export default function AccountsPage() {
           type="button"
           onClick={() => {
             setCreationFeedback(null);
+            setAccountToDelete(null);
             setIsCreatingAccount((current) => !current);
           }}
           className="rounded-2xl bg-accent px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02]"
@@ -103,9 +152,51 @@ export default function AccountsPage() {
     >
       <div className="grid gap-6">
           {creationFeedback ? (
-            <div className="rounded-[24px] border border-emerald-500/20 bg-emerald-500/8 p-4 text-sm text-emerald-300">
+            <div className={`rounded-[24px] border p-4 text-sm ${
+              feedbackTone === "error"
+                ? "border-red-500/20 bg-red-500/5 text-red-300"
+                : "border-emerald-500/20 bg-emerald-500/8 text-emerald-300"
+            }`}>
               {creationFeedback}
             </div>
+          ) : null}
+
+          {accountToDelete ? (
+            <section className="rounded-[24px] border border-red-500/20 bg-red-500/5 p-5">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs font-[760] uppercase tracking-[0.16em] text-red-300">
+                    Eliminar cuenta
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold text-white">
+                    {accountToDelete.name}
+                  </h2>
+                  <p className="mt-1 text-sm leading-[1.5] text-text-muted">
+                    Esta acción eliminará solo la cuenta seleccionada.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setAccountToDelete(null)}
+                    disabled={deletingAccountId === accountToDelete.id}
+                    className="rounded-2xl border border-border-soft px-5 py-3 text-sm font-semibold text-white transition hover:border-accent/40 hover:text-accent disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={confirmDeleteAccount}
+                    disabled={deletingAccountId === accountToDelete.id}
+                    className="rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {deletingAccountId === accountToDelete.id ? "Eliminando..." : "Eliminar cuenta"}
+                  </button>
+                </div>
+              </div>
+            </section>
           ) : null}
 
           {isCreatingAccount ? (
@@ -168,6 +259,12 @@ export default function AccountsPage() {
               <AccountCard
                 key={account.account.id}
                 account={account}
+                deleting={deletingAccountId === account.account.id}
+                onDelete={(selectedAccount) => {
+                  setCreationFeedback(null);
+                  setIsCreatingAccount(false);
+                  setAccountToDelete(selectedAccount);
+                }}
               />
             ))}
           </div>
