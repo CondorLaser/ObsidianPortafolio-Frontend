@@ -239,7 +239,7 @@ export function PortfolioTrend() {
       </div>
 
       {/* Contenedor del Gráfico Reactivo (+ caso de error) */}
-      <div className={`h-[380px] w-full transition-opacity duration-200 ${isUpdating ? "opacity-50" : "opacity-100"}`}>
+      <div className={`${trendData[0].value === null ? "h-[680px]": "h-[380px]"} w-full transition-opacity duration-200 ${isUpdating ? "opacity-50" : "opacity-100"}`}>
         {error || trendData.length === 0 ? (
           error ? (
             <div>
@@ -325,7 +325,7 @@ export function PortfolioTrend() {
             </ResponsiveContainer>
 
           ) : (
-            <div className="flex flex-col h-full w-full items-center justify-center text-text-muted gap-4">
+            <div className="flex flex-col h-full w-full items-center justify-center text-text-muted">
             USD
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
