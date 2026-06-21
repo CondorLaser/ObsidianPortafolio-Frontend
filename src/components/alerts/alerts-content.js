@@ -108,10 +108,6 @@ function AlertCard({ alert, onUpdate, updating }) {
 
           <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border border-border-soft bg-panel px-4 py-3">
-              <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-text-muted">Campo</dt>
-              <dd className="mt-1 font-semibold text-white">{alert.trigger_field || "-"}</dd>
-            </div>
-            <div className="rounded-xl border border-border-soft bg-panel px-4 py-3">
               <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-text-muted">Valor</dt>
               <dd className="mt-1 font-semibold text-white">{formatNumber(alert.trigger_value)}</dd>
             </div>
@@ -133,13 +129,6 @@ function AlertCard({ alert, onUpdate, updating }) {
             onClick={() => onUpdate(alert.id, { is_read: !alert.is_read }, "read")}
           >
             {alert.is_read ? "Marcar no leida" : "Marcar leida"}
-          </AlertActionButton>
-          <AlertActionButton
-            icon={alert.is_active ? EyeOff : Eye}
-            loading={updating === "active"}
-            onClick={() => onUpdate(alert.id, { is_active: !alert.is_active }, "active")}
-          >
-            {alert.is_active ? "Desactivar" : "Activar"}
           </AlertActionButton>
         </div>
       </div>
@@ -173,7 +162,7 @@ export function AlertsContent() {
       if (!response.ok) throw new Error("Error al cargar las alertas");
 
       const data = await response.json();
-      setAlerts(Array.isArray(data) ? data : []);
+      setAlerts(Array.isArray(data) ? [...data].sort((a, b) => b.is_active - a.is_active) : []);
     } catch (fetchError) {
       console.error("Fetch Alerts Error:", fetchError);
       setError(true);
