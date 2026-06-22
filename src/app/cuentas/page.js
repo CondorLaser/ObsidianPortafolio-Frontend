@@ -42,7 +42,7 @@ export default function AccountsPage() {
         const data = await fetchAccounts(getToken);
         setAccounts(data);
       } catch (error) {
-        console.error("Fetch Accounts Error:", error);
+        // console.error("Fetch Accounts Error:", error);
         setAccounts(null); // Caso de error v/s [] cuando no hay cuenta
       } finally {
         setLoading(false);
@@ -80,7 +80,8 @@ export default function AccountsPage() {
     const refreshedAccounts = await fetchAccounts(getToken);
     setAccounts(refreshedAccounts);
     setFeedbackTone("success");
-    setCreationFeedback(`Cuenta "${payload.name}" creada correctamente.`);
+    const created_name = payload.name.length > 10 ? payload.name.slice(0,10) + "..." : payload.name
+    setCreationFeedback(`Cuenta "${created_name}" creada correctamente.`);
     setIsCreatingAccount(false);
   }
 

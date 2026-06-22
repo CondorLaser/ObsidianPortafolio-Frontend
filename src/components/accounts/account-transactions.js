@@ -52,7 +52,7 @@ export function AccountTransactions({accountId}) {
         const data = await res.json();
         setTransactions(data);
       } catch (fetchError) {
-        console.error("Fetch Assets Error:", fetchError);
+        // console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);

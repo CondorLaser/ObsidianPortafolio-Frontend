@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Eye, EyeOff, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, Eye, EyeOff, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { FeedbackCard } from "@/src/components/feedback-card";
 import { MetricCard } from "@/src/components/metric-card";
 import { SectionCard } from "@/src/components/section-card";
@@ -73,15 +73,17 @@ function AlertActionButton({ children, icon: Icon, loading, ...props }) {
   );
 }
 
-function EmptyAlerts() {
+function EmptyAlerts({ isActiveTab }) {
   return (
     <div className="flex w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">
       <div className="mb-4 grid h-12 w-12 place-items-center rounded-full border border-accent/20 bg-accent/10 text-accent">
         <Check className="h-6 w-6" />
       </div>
-      <h3 className="text-base font-semibold text-white">No tienes alertas activas</h3>
+      <h3 className="text-base font-semibold text-white">No tienes alertas {isActiveTab ? "activas" : "inactivas"}</h3>
       <p className="mt-2 max-w-sm text-sm leading-[1.6] text-text-muted">
-        Cuando se detecten eventos importantes dentro de tus inversiones, apareceran aqui, vuelve en otro momento.
+        {isActiveTab 
+          ? "Cuando se detecten eventos importantes dentro de tus inversiones, aparecerán aquí." 
+          : "El historial de tus alertas pasadas aparecerá en esta sección."}
       </p>
     </div>
   );
@@ -100,7 +102,7 @@ function AlertCard({ alert, onUpdate, updating }) {
               {alert.is_active ? "Activa" : "Inactiva"}
             </AlertPill>
             <AlertPill tone={alert.is_read ? "muted" : "warning"}>
-              {alert.is_read ? "Leida" : "No leida"}
+              {alert.is_read ? "Leída" : "No leída"}
             </AlertPill>
           </div>
 
@@ -128,7 +130,7 @@ function AlertCard({ alert, onUpdate, updating }) {
             loading={updating === "read"}
             onClick={() => onUpdate(alert.id, { is_read: !alert.is_read }, "read")}
           >
-            {alert.is_read ? "Marcar no leida" : "Marcar leida"}
+            {alert.is_read ? "Marcar no leída" : "Marcar leída"}
           </AlertActionButton>
         </div>
       </div>
@@ -138,20 +140,62 @@ function AlertCard({ alert, onUpdate, updating }) {
 
 export function AlertsContent() {
   const { getToken } = useAppAuth();
+  
   const [alerts, setAlerts] = useState([]);
+  const [metrics, setMetrics] = useState({ total: 0, active: 0, unread: 0, inactive: 0 });
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
   const [updateError, setUpdateError] = useState("");
+  
+  const [isActiveTab, setIsActiveTab] = useState(true);
+  const [page, setPage] = useState(0);
+  const limit = 5;
 
   const baseUrl = process.env.NEXT_PUBLIC_URL_BE || "";
 
+  // Obtener contadores
+  const loadCounters = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`${baseUrl}/warnings/counters`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // TODO: Decidir si agregar aquí un caso / banner de "No se encuentra disponible para Counters o mantener con 0s como defecto"
+        setMetrics({
+          total: data.total || 0,
+          active: data.active || 0,
+          unread: data.unread || 0,
+          inactive: data.inactive || 0,
+        });
+      }
+    } catch (err) {
+      // console.error("Fetch Counters Error:", err);
+    }
+  }, [baseUrl, getToken]);
+
+  // Obtener alertas paginadas
   const loadAlerts = useCallback(async () => {
     try {
       setLoading(true);
       setError(false);
       const token = await getToken();
-      const response = await fetch(`${baseUrl}/warnings`, {
+      
+      const skip = page * limit;
+      const params = new URLSearchParams({
+        is_active: isActiveTab,
+        skip: skip.toString(),
+        limit: limit.toString(),
+      });
+
+      const response = await fetch(`${baseUrl}/warnings?${params.toString()}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -160,33 +204,24 @@ export function AlertsContent() {
       });
 
       if (!response.ok) throw new Error("Error al cargar las alertas");
-
       const data = await response.json();
-      setAlerts(Array.isArray(data) ? [...data].sort((a, b) => b.is_active - a.is_active) : []);
+      setAlerts(Array.isArray(data) ? data : []);
     } catch (fetchError) {
-      console.error("Fetch Alerts Error:", fetchError);
+      // console.error("Fetch Alerts Error:", fetchError);
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, [baseUrl, getToken]);
+  }, [baseUrl, getToken, isActiveTab, page, limit]);
+
+  // Ejecutar carga inicial y al cambiar pestaña/página
+  useEffect(() => {
+    loadCounters();
+  }, [loadCounters]);
 
   useEffect(() => {
     loadAlerts();
   }, [loadAlerts]);
-
-  const metrics = useMemo(() => {
-    const active = alerts.filter((alert) => alert.is_active).length;
-    const unread = alerts.filter((alert) => !alert.is_read).length;
-    const inactive = alerts.length - active;
-
-    return {
-      total: alerts.length,
-      active,
-      unread,
-      inactive,
-    };
-  }, [alerts]);
 
   async function updateAlert(alertId, payload, action) {
     try {
@@ -205,22 +240,36 @@ export function AlertsContent() {
       if (!response.ok) throw new Error("Error al actualizar la alerta");
 
       const updatedAlert = await response.json();
+      
+      // Actualizar la alerta localmente
       setAlerts((currentAlerts) => (
         currentAlerts.map((alert) => (alert.id === alertId ? updatedAlert : alert))
       ));
+      // Recargar los contadores
+      loadCounters();
     } catch (fetchError) {
-      console.error("Update Alert Error:", fetchError);
-      setUpdateError("No se pudo actualizar la alerta. Intenta nuevamente.");
+      //console.error("Update Alert Error:", fetchError);
+      setUpdateError("No se pudo actualizar la alerta, por favor intenta nuevamente.");
     } finally {
       setUpdatingId(null);
     }
   }
 
-  if (loading) {
+  // Cálculos paginación
+  const totalItemsCurrentTab = isActiveTab ? metrics.active : metrics.inactive;
+  const totalPages = Math.max(1, Math.ceil(totalItemsCurrentTab / limit));
+
+  const handleTabChange = (activeStatus) => {
+    if (isActiveTab === activeStatus) return;
+    setIsActiveTab(activeStatus);
+    setPage(0); // Volver a la primera página al cambiar de pestaña
+  };
+
+  if (loading && alerts.length === 0) {
     return <FeedbackCard title="Cargando alertas..." detail="Estamos obteniendo las alertas generadas por la evolución de tu portafolio." />;
   }
 
-  if (error) {
+  if (error && alerts.length === 0) {
     return (
       <FeedbackCard
         title="No se pudieron cargar tus alertas"
@@ -235,34 +284,90 @@ export function AlertsContent() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Total" value={metrics.total} />
         <MetricCard label="Activas" value={metrics.active} />
-        <MetricCard label="No leidas" value={metrics.unread} />
+        <MetricCard label="No leídas" value={metrics.unread} />
         <MetricCard label="Inactivas" value={metrics.inactive} />
       </div>
 
       <div className="mt-6">
-        <SectionCard title="Alertas de tu Portafolio" description="Revisa las alertas sobre el comportamiento de tu portafolio, cuentas y activos dadas por si sus evoluciones cruzan los umbrales definidos en tus Preferencias de Perfil">
-          {updateError ? (
+        <SectionCard 
+          title="Alertas de tu Portafolio" 
+          description="Revisa las alertas sobre el comportamiento de tu portafolio, cuentas y activos dadas por si sus evoluciones cruzan los umbrales definidos en tus Preferencias de Perfil"
+        >
+          {updateError && (
             <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm font-semibold text-red-300">
               {updateError}
             </div>
-          ) : null}
+          )}
 
-          {alerts.length === 0 ? (
-            <EmptyAlerts />
+          {/* Selector de Pestañas (Activas / Inactivas) */}
+          <div className="mb-6 flex gap-2 rounded-lg bg-surface/50 p-1 w-fit border border-border-soft">
+            <button
+              onClick={() => handleTabChange(true)}
+              className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${
+                isActiveTab 
+                  ? "bg-accent text-white" 
+                  : "text-text-muted hover:bg-surface hover:text-white"
+              }`}
+            >
+              Activas ({metrics.active})
+            </button>
+            <button
+              onClick={() => handleTabChange(false)}
+              className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${
+                !isActiveTab 
+                  ? "bg-warning text-white" 
+                  : "text-text-muted hover:bg-surface hover:text-white"
+              }`}
+            >
+              Inactivas ({metrics.inactive})
+            </button>
+          </div>
+
+          {alerts.length === 0 && !loading ? (
+            <EmptyAlerts isActiveTab={isActiveTab} />
           ) : (
             <div className="space-y-4">
-              {alerts.map((alert) => (
-                <AlertCard
-                  key={alert.id}
-                  alert={alert}
-                  updating={
-                    updatingId?.startsWith(`${alert.id}:`)
-                      ? updatingId.split(":").at(-1)
-                      : null
-                  }
-                  onUpdate={updateAlert}
-                />
-              ))}
+              <div className={`space-y-4 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+                {alerts.map((alert) => (
+                  <AlertCard
+                    key={alert.id}
+                    alert={alert}
+                    updating={
+                      updatingId?.startsWith(`${alert.id}:`)
+                        ? updatingId.split(":").at(-1)
+                        : null
+                    }
+                    onUpdate={updateAlert}
+                  />
+                ))}
+              </div>
+
+              {/* Controles de Paginación */}
+              {totalItemsCurrentTab > 0 && (
+                <div className="mt-6 flex items-center justify-between border-t border-border-soft pt-4">
+                  <button
+                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                    disabled={page === 0 || loading}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border-soft bg-surface px-3 py-2 text-sm font-semibold text-white transition hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Anterior
+                  </button>
+                  
+                  <span className="text-sm text-text-muted">
+                    Página <span className="font-semibold text-white">{page + 1}</span> de <span className="font-semibold text-white">{totalPages}</span>
+                  </span>
+
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                    disabled={page >= totalPages - 1 || loading}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border-soft bg-surface px-3 py-2 text-sm font-semibold text-white transition hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Siguiente
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </SectionCard>

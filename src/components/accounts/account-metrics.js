@@ -63,7 +63,7 @@ export function AccountMetrics(account) {
         setMetricsData(data);
         if(data.monthly === null && data.daily === null) setHasMetrics(false)
       } catch (err) {
-        console.error("Fetch Daily Metrics Error:", err);
+        // console.error("Fetch Daily Metrics Error:", err);
         setError(true);
       } finally {
         setLoadingMetrics(false);

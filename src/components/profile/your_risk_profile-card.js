@@ -109,7 +109,7 @@ export function YourRiskProfileCard() {
 
         setSelectedRisk(normalizeRiskProfile(profileData?.risk_profile));
       } catch (error) {
-        console.error("Error fetching risk profile:", error);
+        // console.error("Error fetching risk profile:", error);
 
         if (!isMounted) return;
 
@@ -159,7 +159,7 @@ export function YourRiskProfileCard() {
         text: "Perfil de riesgo actualizado correctamente.",
       });
     } catch (error) {
-      console.error("Error saving risk profile:", error);
+      // console.error("Error saving risk profile:", error);
       setFeedback({
         tone: "error",
         text: "Ocurrió un error al actualizar el perfil de riesgo.",

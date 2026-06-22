@@ -8,6 +8,7 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
   const n_fund_positions = accountData.fund_positions || 0;
   const total_positions = n_stock_positions + n_etf_positions + n_fund_positions;
   const broker = account.broker || "Fintual";
+  const name = account.name.length > 10 ? account.name.slice(0, 10) + "..." : account.name
 
   return (
     <article
@@ -23,7 +24,7 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
             href={`/cuentas/${account.id}`}
             className="mt-2 block text-[26px] leading-[1.1] font-semibold tracking-[-0.02em] text-white transition-colors hover:text-accent"
           >
-            {account.name}
+            {name}
           </Link>
         </div>
         <span className={`rounded-xl px-3 py-1.5 text-m font-bold tracking-wider text-black shadow-md uppercase ${
@@ -76,8 +77,8 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
             type="button"
             onClick={() => onDelete?.(account)}
             disabled={deleting}
-            title={`Eliminar ${account.name}`}
-            aria-label={`Eliminar cuenta ${account.name}`}
+            title={`Eliminar ${name}`}
+            aria-label={`Eliminar cuenta ${name}`}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/25 text-red-300 transition hover:border-red-400/50 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Trash2 size={16} aria-hidden="true" />

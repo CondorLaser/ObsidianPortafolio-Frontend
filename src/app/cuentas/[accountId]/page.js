@@ -46,7 +46,7 @@ export default function AccountDetailPage({ params }) {
         const dataAccount = await resAccount.json();
         setAccount(dataAccount);
       } catch (err) {
-        console.error("Fetch Account Detail Error:", err);
+        // console.error("Fetch Account Detail Error:", err);
         setError(true);
       } finally {
         setLoading(false);
@@ -94,7 +94,7 @@ export default function AccountDetailPage({ params }) {
   }
   return (
     <DashboardShell
-      title={`Cuenta: ${account.name}`}
+      title={`Cuenta: ${account.name.length > 10 ? account.name.slice(0,10)+"..." : account.name}`}
       actions={actions}
     >
       {/* Métricas  */}
