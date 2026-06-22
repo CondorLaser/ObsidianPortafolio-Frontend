@@ -157,7 +157,11 @@ export function UploadSection({ finantial_file_type } = {}) {
                 className="flex w-full items-center justify-between rounded-xl border border-accent/30 bg-panel px-4 py-3 text-left text-white outline-none transition focus:border-accent"
               >
                 <span className={!selectedAccountId ? "text-text-muted" : "text-white"}>
-                  {filteredAccounts.find((acc) => acc.id === selectedAccountId)?.name || "Selecciona una cuenta"}
+                  {(() => {
+                    const acc = filteredAccounts.find((acc) => acc.id === selectedAccountId);
+                    const name = acc?.name || "Selecciona una cuenta";
+                    return name.length > 10 ? name.slice(0, 10) + "..." : name;
+                  })()}
                 </span>
                 <svg
                   className={`h-5 w-5 text-white/50 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
