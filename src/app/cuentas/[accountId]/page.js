@@ -46,7 +46,7 @@ export default function AccountDetailPage({ params }) {
         const dataAccount = await resAccount.json();
         setAccount(dataAccount);
       } catch (err) {
-        console.error("Fetch Account Detail Error:", err);
+        // console.error("Fetch Account Detail Error:", err);
         setError(true);
       } finally {
         setLoading(false);

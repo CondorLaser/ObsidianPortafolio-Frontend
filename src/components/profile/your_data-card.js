@@ -206,7 +206,7 @@ export async function YourDataCard({
 
                 <SectionCard
                     title="Cargar Certificado de Transacciones Fondos Mutuos (PDF)"
-                    description="Sube un archivo CSV con transacciones para importarlas al sistema."
+                    description="Sube un archivo PDF con tus transacciones de Fondos Mutuos para importarlas al sistema."
                 >
                     <UploadSection finantial_file_type="mutual_funds"/>
 

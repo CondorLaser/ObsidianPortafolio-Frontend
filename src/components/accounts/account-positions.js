@@ -56,7 +56,7 @@ export function AccountPositions({accountId}) {
         const data = await res.json();
         setPositions(data);
       } catch (fetchError) {
-        console.error("Fetch Assets Error:", fetchError);
+        // console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);
@@ -84,7 +84,7 @@ export function AccountPositions({accountId}) {
         const data = await res.json();
         setAccounts(data);
       } catch (fetchError) {
-        console.error("Fetch Accounts Error:", fetchError);
+        // console.error("Fetch Accounts Error:", fetchError);
         setAccountsError(true);
       } finally {
         setLoading(false);

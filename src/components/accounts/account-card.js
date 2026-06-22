@@ -8,6 +8,7 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
   const n_fund_positions = accountData.fund_positions || 0;
   const total_positions = n_stock_positions + n_etf_positions + n_fund_positions;
   const broker = account.broker || "Fintual";
+  const name = account.name.length > 10 ? account.name.slice(0, 10) + "..." : account.name
 
   return (
     <article
@@ -23,7 +24,7 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
             href={`/cuentas/${account.id}`}
             className="mt-2 block text-[26px] leading-[1.1] font-semibold tracking-[-0.02em] text-white transition-colors hover:text-accent"
           >
-            {account.name}
+            {name}
           </Link>
         </div>
         <span className={`rounded-xl px-3 py-1.5 text-m font-bold tracking-wider text-black shadow-md uppercase ${

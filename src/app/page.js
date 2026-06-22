@@ -18,7 +18,7 @@ function SignedInHome() {
           headers: { Authorization: `Bearer ${token}` }
         });
       } catch (error) {
-        console.error("[init] accounts check failed", error);
+        // console.error("[init] accounts check failed", error);
       }
     };
 

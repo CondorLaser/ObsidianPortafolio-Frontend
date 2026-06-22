@@ -56,7 +56,7 @@ export function PortfolioPositions({account_distribution}) {
         const data = await res.json();
         setPositionsData(data);
       } catch (err) {
-        console.error("Fetch Positions Error:", err);
+        // console.error("Fetch Positions Error:", err);
         setError(true);
       } finally {
         setLoadingPositions(false);

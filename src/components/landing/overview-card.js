@@ -31,7 +31,7 @@ export function PortfolioOverviewCard() {
         const data = await res.json();
         setSummary(data);
       } catch (fetchError) {
-        console.error("Fetch Assets Error:", fetchError);
+        // console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);
@@ -79,9 +79,15 @@ export function PortfolioOverviewCard() {
         </h3>
         <div className="text-left">
           <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
-            Por favor, accede a la pestaña <b>Perfil</b> y sube tus Certificados de Transacciones para cargar tus información y obtener tus datos
+            Por favor, crea una cuenta en <b>Cuentas</b> con la cual asociar tus datos
+          </li>
+          <li className="mt-2 max-w-sm text-sm text-text-muted leading-[1.6]">
+            Luego, accede a la pestaña <b>Perfil</b> y sube tus Certificados de Transacciones para cargar tus información y obtener tus datos
           </li>
         </div>
+        <Link href="/cuentas" prefetch={false} className="mt-3 rounded-xl border-3 border-border-soft hover:border-teal-600/50 px-5 py-2 font-semibold text-white transition hover:bg-panel-soft">
+          Cuentas
+        </Link>
         
       </div>
     );

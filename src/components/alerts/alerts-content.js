@@ -177,7 +177,7 @@ export function AlertsContent() {
         });
       }
     } catch (err) {
-      console.error("Fetch Counters Error:", err);
+      // console.error("Fetch Counters Error:", err);
     }
   }, [baseUrl, getToken]);
 
@@ -207,7 +207,7 @@ export function AlertsContent() {
       const data = await response.json();
       setAlerts(Array.isArray(data) ? data : []);
     } catch (fetchError) {
-      console.error("Fetch Alerts Error:", fetchError);
+      // console.error("Fetch Alerts Error:", fetchError);
       setError(true);
     } finally {
       setLoading(false);
@@ -248,7 +248,7 @@ export function AlertsContent() {
       // Recargar los contadores
       loadCounters();
     } catch (fetchError) {
-      console.error("Update Alert Error:", fetchError);
+      //console.error("Update Alert Error:", fetchError);
       setUpdateError("No se pudo actualizar la alerta, por favor intenta nuevamente.");
     } finally {
       setUpdatingId(null);

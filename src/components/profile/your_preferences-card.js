@@ -232,7 +232,7 @@ export function YourPreferencesCard() {
         text: "Preferencias guardadas correctamente.",
       });
     } catch (error) {
-      console.error("Error saving preferences:", error);
+      // console.error("Error saving preferences:", error);
       setFeedback({
         tone: "error",
         text: "No se pudieron guardar las preferencias.",
