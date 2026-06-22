@@ -325,18 +325,36 @@ export const handlers = [
     }
   }),
 
+  http.get(`${API_URL}/portfolio/metrics/daily`, () => {
+    return HttpResponse.json({
+      date: "2026-05-18",
+      pnl: { USD: "412.80", CLP: "0" },
+      max_drawdown: { USD: "-0.039", CLP: "0" },
+      volatility: { USD: "0.1212", CLP: "0" }
+    })
+  }),
+
+  http.get(`${API_URL}/portfolio/summary`, () => {
+    return HttpResponse.json({
+      summary: {
+        total_value_by_currency: { USD: "8751.74" },
+        total_invested_by_currency: { USD: "8273.40" },
+        unrealized_pnl_by_currency: { USD: "478.34" },
+        linked_accounts: 2,
+        active_positions: 6,
+        last_snapshot_date: "18 may 2026"
+      },
+      account_distribution: []
+    })
+  }),
+
   // Vista activos
   http.get(`${API_URL}/positions`, () => {
-    if (REQUEST_SUCCESSFUL) {
-      return HttpResponse.json({
-        positions: getPositionsWithAssets()
-      })
-    } else {
-      return HttpResponse.json(
-        { error: "Internal Server Error", code: "ERR_500" },
-        { status: 500 }
-      )
-    }
+    return HttpResponse.json(getPositionsWithAssets())
+  }),
+
+  http.get(`${API_URL}/positions/portfolio`, () => {
+    return HttpResponse.json(getPositionsWithAssets())
   }),
 
   // Vista detalle activo
