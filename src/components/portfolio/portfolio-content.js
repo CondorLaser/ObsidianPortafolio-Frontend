@@ -112,7 +112,6 @@ export function PortfolioContent() {
   }
 
   const { summary, account_distribution } = summaryData;
-  // console.log(account_distribution)
   if (summary.active_positions === 0){
     return (
       <div className="flex  w-full flex-col items-center justify-center rounded-[22px] border border-dashed border-border-soft bg-surface/20 p-8 text-center">

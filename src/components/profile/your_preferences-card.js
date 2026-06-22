@@ -112,7 +112,7 @@ function buildPreferencesPayload(preferences) {
       if (value === undefined) return [key, null];
 
       const numValue = Number(value);
-      return [key, numValue <= 1 ? numValue : Number((numValue / 100).toFixed(4))];
+      return [key, numValue < 1 ? numValue : Number((numValue / 100).toFixed(4))];
     })
   );
 }
@@ -171,7 +171,7 @@ export function YourPreferencesCard() {
         const preferencesData = await response.json();
         setPreferences(normalizePreferences(preferencesData));
       } catch (error) {
-        console.error("Error fetching preferences:", error);
+        //console.error("Error fetching preferences:", error);
         setError(true)
         setFeedback({
           tone: "error",
@@ -210,7 +210,6 @@ export function YourPreferencesCard() {
         });
         return 
       }
-
       const token = await getToken();
       const preferences_to_send = buildPreferencesPayload(preferences)
       const response = await fetch(`${API_BASE_URL}/preferences`, {

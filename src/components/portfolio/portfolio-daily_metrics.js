@@ -59,7 +59,6 @@ export function PortfolioDailyMetrics() {
         if (!res.ok) throw new Error("Error al cargar las métricas diarias");
         const data = await res.json();
         setMetricsData(data);
-        console.log("AAAA", data)
       } catch (err) {
         console.error("Fetch Daily Metrics Error:", err);
         setError(true);

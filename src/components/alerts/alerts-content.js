@@ -81,7 +81,7 @@ function EmptyAlerts() {
       </div>
       <h3 className="text-base font-semibold text-white">No tienes alertas activas</h3>
       <p className="mt-2 max-w-sm text-sm leading-[1.6] text-text-muted">
-        Cuando el backend detecte eventos importantes del portafolio, apareceran aqui.
+        Cuando se detecten eventos importantes dentro de tus inversiones, apareceran aqui, vuelve en otro momento.
       </p>
     </div>
   );
@@ -108,10 +108,6 @@ function AlertCard({ alert, onUpdate, updating }) {
 
           <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border border-border-soft bg-panel px-4 py-3">
-              <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-text-muted">Campo</dt>
-              <dd className="mt-1 font-semibold text-white">{alert.trigger_field || "-"}</dd>
-            </div>
-            <div className="rounded-xl border border-border-soft bg-panel px-4 py-3">
               <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-text-muted">Valor</dt>
               <dd className="mt-1 font-semibold text-white">{formatNumber(alert.trigger_value)}</dd>
             </div>
@@ -133,13 +129,6 @@ function AlertCard({ alert, onUpdate, updating }) {
             onClick={() => onUpdate(alert.id, { is_read: !alert.is_read }, "read")}
           >
             {alert.is_read ? "Marcar no leida" : "Marcar leida"}
-          </AlertActionButton>
-          <AlertActionButton
-            icon={alert.is_active ? EyeOff : Eye}
-            loading={updating === "active"}
-            onClick={() => onUpdate(alert.id, { is_active: !alert.is_active }, "active")}
-          >
-            {alert.is_active ? "Desactivar" : "Activar"}
           </AlertActionButton>
         </div>
       </div>
@@ -173,7 +162,7 @@ export function AlertsContent() {
       if (!response.ok) throw new Error("Error al cargar las alertas");
 
       const data = await response.json();
-      setAlerts(Array.isArray(data) ? data : []);
+      setAlerts(Array.isArray(data) ? [...data].sort((a, b) => b.is_active - a.is_active) : []);
     } catch (fetchError) {
       console.error("Fetch Alerts Error:", fetchError);
       setError(true);
@@ -228,14 +217,14 @@ export function AlertsContent() {
   }
 
   if (loading) {
-    return <FeedbackCard title="Cargando alertas..." detail="Estamos obteniendo los eventos detectados en tu portafolio." />;
+    return <FeedbackCard title="Cargando alertas..." detail="Estamos obteniendo las alertas generadas por la evolución de tu portafolio." />;
   }
 
   if (error) {
     return (
       <FeedbackCard
-        title="No se pudieron cargar las alertas"
-        detail="Revisa que el backend este disponible y que NEXT_PUBLIC_URL_BE apunte a la API correcta."
+        title="No se pudieron cargar tus alertas"
+        detail="Por favor, intenta más tarde o revisa tu conexión"
         tone="error"
       />
     );
@@ -251,7 +240,7 @@ export function AlertsContent() {
       </div>
 
       <div className="mt-6">
-        <SectionCard title="Alertas del sistema" description="Eventos generados por los umbrales y reglas configuradas en el backend.">
+        <SectionCard title="Alertas de tu Portafolio" description="Revisa las alertas sobre el comportamiento de tu portafolio, cuentas y activos dadas por si sus evoluciones cruzan los umbrales definidos en tus Preferencias de Perfil">
           {updateError ? (
             <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm font-semibold text-red-300">
               {updateError}

@@ -17,7 +17,6 @@ function SignedInHome() {
         const res = await fetch(`${baseUrl}/accounts`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log("[init] accounts check", res.status);
       } catch (error) {
         console.error("[init] accounts check failed", error);
       }
