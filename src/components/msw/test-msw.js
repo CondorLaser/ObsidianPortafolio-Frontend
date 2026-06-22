@@ -17,8 +17,6 @@ export function TestMSW() {
 
         const json = await response.json()
 
-        console.log("Respuesta MSW:", json)
-
         setData(json)
       } catch (err) {
         console.error(err)

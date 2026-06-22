@@ -105,8 +105,11 @@ export function UploadSection({ finantial_file_type } = {}) {
       const data = await response.json()
 
       if (!response.ok) {
-        const errorMessage = await response.text()
-        throw new Error(`Error ${response.status}: ${errorMessage || response.statusText}`)
+        throw new Error(
+          data.message ||
+          data.detail ||
+          `Error ${response.status}`
+        )
       }
       alert(data.message)
 

@@ -62,7 +62,6 @@ export function AssetDetailContent({ asset_id }) {
         });
         if (!response.ok) throw new Error("Error al cargar el activo");
         const data = await response.json();
-        // console.log(data)
         setPosition(data);
       } catch (fetchError) {
         console.error("Fetch Asset Detail Error:", fetchError);
@@ -80,7 +79,7 @@ export function AssetDetailContent({ asset_id }) {
     return (
       <DashboardShell
         title="Detalle de activo"
-        description="Vista específica del activo seleccionado, con su evolución de mercado y los datos que tiene el usuario en su cuenta."
+        description="Observa los datos de este activo y tu inversión en él, junto a los datos de su evolución en el mercado."
       >
         <FeedbackCard title="Cargando activo..." detail="Estamos obteniendo el detalle del activo seleccionado." />
       </DashboardShell>
@@ -91,11 +90,11 @@ export function AssetDetailContent({ asset_id }) {
     return (
       <DashboardShell
         title="Detalle de activo"
-        description="Vista específica del activo seleccionado, con su evolución de mercado y los datos que tiene el usuario en su cuenta."
+        description="Observa los datos de este activo y tu inversión en él, junto a los datos de su evolución en el mercado."
       >
         <FeedbackCard
           title="No se pudo cargar el activo"
-          detail="Revisa la conexion con el backend o vuelve al listado para elegir otro activo."
+          detail="Por favor, intentalo en otro momento, revisa tu conexión o vuelve al listado para elegir otro activo."
           tone="error"
         />
       </DashboardShell>
@@ -119,7 +118,7 @@ export function AssetDetailContent({ asset_id }) {
   return (
     <DashboardShell
       title={`${position.asset.symbol} · ${position.asset.name}`}
-      description="Observa los datos y la evolución de este activo específico, junto a sus métricas."
+      description="Observa los datos de este activo y tu inversión en él, junto a los datos de su evolución en el mercado."
       actions={
         <>
         <Link

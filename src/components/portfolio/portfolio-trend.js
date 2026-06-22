@@ -108,11 +108,12 @@ export function PortfolioTrend() {
   useEffect(() => {
     async function loadTrend() {
       try {
-        if (trendData.length === 0 && !isUpdating) setLoadingTrend(true);
+        setLoadingTrend(true);
         setIsUpdating(true);
         setError(false);
         setTrendCLPData([])
         setTrendUSDData([])
+        setTrendData([])
         const token = await getToken();
 
         const { trend_from, trend_to } = getTrendDates(trendRange);
@@ -131,27 +132,24 @@ export function PortfolioTrend() {
         let parsedUSDData = []
         let parsedCLPData = []
 
-        if (data[0].value !== null) {
-          parsedData = data.map(item => ({
-            date: item.date,
-            value: Number(item.value)
-          }));
-        } else {
-          parsedUSDData = data.map(item => ({
-            date: item.date,
-            value: Number(item.values_by_currency.USD)
-          }));
-          
-          parsedCLPData = data.map(item => ({
-            date: item.date,
-            value: Number(item.values_by_currency.CLP)
-          }));
-          parsedData = data;
-        }
+        const hasMultiCurrency = data.some(item => item.value === null || item.value === undefined);
+
+      if (!hasMultiCurrency) {
+        parsedData = data.map(item => ({ date: item.date, value: Number(item.value) }));
+      } else {
+        parsedData = data;
+        parsedUSDData = data
+          .filter(item => item.values_by_currency?.USD != null)
+          .map(item => ({ date: item.date, value: Number(item.values_by_currency.USD) }));
+        parsedCLPData = data
+          .filter(item => item.values_by_currency?.CLP != null)
+          .map(item => ({ date: item.date, value: Number(item.values_by_currency.CLP) }));
+      }
         
         setTrendData(parsedData);
-        setTrendCLPData(parsedCLPData)
-        setTrendUSDData(parsedUSDData)
+        setTrendUSDData(parsedUSDData);
+        setTrendCLPData(parsedCLPData);
+
       } catch (err) {
         console.error("Fetch Trend Error:", err);
         setError(true);
@@ -205,6 +203,8 @@ export function PortfolioTrend() {
     );
   }
 
+  const isMultiCurrency = trendData.length > 0 && trendData.some(item => item.value === null || item.value === undefined);
+
 
   return (
     <section className="rounded-[28px] border border-border-soft bg-panel-soft p-6 relative">
@@ -239,7 +239,7 @@ export function PortfolioTrend() {
       </div>
 
       {/* Contenedor del Gráfico Reactivo (+ caso de error) */}
-      <div className={`${trendData[0].value === null ? "h-[680px]": "h-[380px]"} w-full transition-opacity duration-200 ${isUpdating ? "opacity-50" : "opacity-100"}`}>
+      <div className={`${isMultiCurrency ? "h-[680px]": "h-[380px]"} ...`}>
         {error || trendData.length === 0 ? (
           error ? (
             <div>
@@ -268,7 +268,7 @@ export function PortfolioTrend() {
             </div>
           )
         ) : (
-          trendData[0].value !== null ? (
+          !isMultiCurrency ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={trendData}
