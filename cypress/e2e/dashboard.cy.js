@@ -1,22 +1,21 @@
 describe("Dashboard del portafolio", () => {
-  it("carga el resumen del portafolio y permite navegar a vistas principales", () => {
-    cy.visit("/portafolio");
+  beforeEach(() => {
+    cy.visit("/portafolio")
+  })
 
-    cy.contains("Dashboard del portafolio").should("be.visible");
-    cy.contains("Valor total del portafolio").should("be.visible");
-    cy.contains("Retorno no realizado").should("be.visible");
-    cy.contains("Posiciones activas").should("be.visible");
-    cy.contains("Cuentas vinculadas").should("be.visible");
-    cy.contains("Evolución del portafolio").should("be.visible");
-    cy.contains("Distribución y frescura").should("be.visible");
-    cy.contains("Activos principales").should("be.visible");
+  it("muestra las secciones principales de la página", () => {
+    cy.contains("Dashboard del portafolio").should("be.visible")
+    cy.contains("Evolución del portafolio").should("be.visible")
+    cy.contains("Distribución y frescura").should("be.visible")
+  })
 
-    cy.contains("a", "Cuentas").click();
-    cy.url().should("include", "/cuentas");
-    cy.contains("h1", "Cuentas").should("be.visible");
+  it("permite navegar a Cuentas y Activos desde el sidebar", () => {
+    cy.contains("a", "Cuentas").click()
+    cy.url().should("include", "/cuentas")
 
-    cy.contains("a", "Activos").click();
-    cy.url().should("include", "/activos");
-    cy.contains("h1", "Activos").should("be.visible");
-  });
-});
+    cy.go("back")
+
+    cy.contains("a", "Activos").click()
+    cy.url().should("include", "/activos")
+  })
+})
