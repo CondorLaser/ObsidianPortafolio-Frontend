@@ -95,7 +95,7 @@ export function AssetDailyMetric({ asset_id }) {
         setAssetDailyMetric(dailyData ?? null);
         setAssetMonthlyMetric(monthlyData ?? null);
       } catch (fetchError) {
-        console.error("Fetch Asset Metrics Error:", fetchError);
+        // console.error("Fetch Asset Metrics Error:", fetchError);
         setAssetDailyMetric(null);
         setAssetMonthlyMetric(null);
         setAssetMetricsError(true);

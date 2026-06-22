@@ -52,7 +52,7 @@ export function AccountDividends({accountId}) {
         const data = await res.json();
         setDividens(data);
       } catch (fetchError) {
-        console.error("Fetch Assets Error:", fetchError);
+        // console.error("Fetch Assets Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);

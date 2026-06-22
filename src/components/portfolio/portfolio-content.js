@@ -85,7 +85,7 @@ export function PortfolioContent() {
         const data = await res.json();
         setSummaryData(data);
       } catch (err) {
-        console.error("Fetch Summary Error:", err);
+        // console.error("Fetch Summary Error:", err);
         setError(true);
       } finally {
         setLoading(false);

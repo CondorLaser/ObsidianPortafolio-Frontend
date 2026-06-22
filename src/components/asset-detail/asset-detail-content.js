@@ -64,7 +64,7 @@ export function AssetDetailContent({ asset_id }) {
         const data = await response.json();
         setPosition(data);
       } catch (fetchError) {
-        console.error("Fetch Asset Detail Error:", fetchError);
+        // console.error("Fetch Asset Detail Error:", fetchError);
         setError(true);
       } finally {
         setLoading(false);

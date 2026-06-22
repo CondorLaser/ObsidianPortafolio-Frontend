@@ -98,7 +98,7 @@ export function AssetPositionMetrics({ position_id, currency }) {
         setPositionMetric(data);
         setMetricUnavailable(!data);
       } catch (fetchError) {
-        console.error("Fetch Position Metric Error:", fetchError);
+        // console.error("Fetch Position Metric Error:", fetchError);
         setPositionMetric(null);
         setMetricError(true);
       } finally {
