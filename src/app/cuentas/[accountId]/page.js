@@ -94,7 +94,7 @@ export default function AccountDetailPage({ params }) {
   }
   return (
     <DashboardShell
-      title={`Cuenta: ${account.name}`}
+      title={`Cuenta: ${account.name.length > 10 ? account.name.slice(0,10)+"..." : account.name}`}
       actions={actions}
     >
       {/* Métricas  */}

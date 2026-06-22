@@ -182,7 +182,7 @@ export function UploadSection({ finantial_file_type } = {}) {
                         selectedAccountId === account.id ? "bg-accent/30 font-bold text-accent" : ""
                       }`}
                     >
-                      {account.name} <b>({account.currency})</b>
+                      {account.name.length > 10 ? account.name.slice(0,10) + "..." : account.name} <b>({account.currency})</b>
                     </li>
                   ))}
                 </ul>

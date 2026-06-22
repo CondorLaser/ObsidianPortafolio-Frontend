@@ -77,8 +77,8 @@ export function AccountCard({ account: accountData, onDelete, deleting = false }
             type="button"
             onClick={() => onDelete?.(account)}
             disabled={deleting}
-            title={`Eliminar ${account.name}`}
-            aria-label={`Eliminar cuenta ${account.name}`}
+            title={`Eliminar ${name}`}
+            aria-label={`Eliminar cuenta ${name}`}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/25 text-red-300 transition hover:border-red-400/50 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Trash2 size={16} aria-hidden="true" />
